@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slide - Thuật Toán XGBoost</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background-color: #f8fafc; font-family: 'Inter', sans-serif;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        .slide-container {
+            width: 1920px; height: 1080px;
+            background: linear-gradient(135deg, #fff7ed 0%, #fefcbf 100%);
+            position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            overflow: hidden; transform-origin: top left;
+        }
+
+        .slide-container::before {
+            content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background-image: 
+                linear-gradient(rgba(214, 158, 46, 0.05) 2px, transparent 2px),
+                linear-gradient(90deg, rgba(214, 158, 46, 0.05) 2px, transparent 2px);
+            background-size: 60px 60px; z-index: 1;
+        }
+
+        .header { position: absolute; top: 50px; left: 70px; z-index: 10; }
+        .header h1 {
+            color: #744210; font-size: 52px; margin: 0; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 1px; display: inline-flex; align-items: center; gap: 20px;
+        }
+        .header .badge {
+            background-color: #dd6b20; color: white; padding: 8px 18px;
+            border-radius: 8px; font-size: 24px; font-weight: 700; vertical-align: middle;
+        }
+        .header p { font-size: 26px; color: #9c4221; margin-top: 15px; font-weight: 600; }
+
+        .content-area {
+            position: absolute; top: 220px; left: 70px; right: 70px; bottom: 50px;
+            z-index: 10; display: flex; flex-direction: column; align-items: center;
+        }
+
+        /* Flowchart Container */
+        .flowchart {
+            display: flex; align-items: center; justify-content: center; gap: 40px; margin-top: 30px;
+            width: 100%;
+        }
+
+        /* Khối xử lý (Nodes) */
+        .f-node {
+            background: white; border: 4px solid #dd6b20; border-radius: 16px;
+            padding: 30px 20px; width: 320px; text-align: center; position: relative;
+            box-shadow: 0 15px 30px rgba(221, 107, 32, 0.15); display: flex; flex-direction: column; align-items: center;
+        }
+
+        .f-node.cyl { border-radius: 40px; } /* Khối tròn trịa báo Input/Output */
+        .f-node.diam { transform: rotate(45deg); width: 220px; height: 220px; justify-content: center; border-color: #3182ce; padding: 0;}
+        .f-node.diam > div { transform: rotate(-45deg); }
+
+        .f-icon { font-size: 50px; color: #dd6b20; margin-bottom: 15px; }
+        .f-node.diam .f-icon { color: #3182ce; margin-bottom: 5px; font-size: 40px;}
+
+        .f-title { font-size: 24px; font-weight: 800; color: #2d3748; margin-bottom: 10px; }
+        .f-desc { font-size: 16px; color: #4a5568; line-height: 1.4; }
+
+        /* Khối XGBoost Đặc biệt (Tree Ensemble) */
+        .xgb-core {
+            border: 4px solid #38a169; background: #f0fff4; display: flex; flex-direction: column; gap: 15px; width: 450px;
+            box-shadow: 0 15px 30px rgba(56, 161, 105, 0.15);
+        }
+
+        .xgb-core .f-title { color: #276749; }
+        .tree-cascade { display: flex; align-items: center; justify-content: space-between; position: relative; }
+        
+        .c-tree { background: white; border: 2px solid #68d391; padding: 10px; border-radius: 8px; font-weight: bold; color: #2f855a; z-index: 2;}
+        .tree-line { flex: 1; height: 3px; background: #68d391; position: relative; z-index: 1;}
+        .tree-line::after { content:""; position:absolute; right:0; top:-4px; border-top: 5px solid transparent; border-bottom: 5px solid transparent; border-left: 8px solid #68d391; }
+        
+        /* Mũi tên SVG */
+        .fl-arrow { width: 60px; height: 100px; display: flex; justify-content: center; align-items: center;}
+        .fl-arrow path { fill: none; stroke: #a0aec0; stroke-width: 6; }
+        .fl-arrow polygon { fill: #a0aec0; }
+
+        /* Bảng giải thích chi tiết ở dưới */
+        .explanation-panel {
+            background: white; border-radius: 20px; padding: 30px; margin-top: 60px; width: 100%; box-shadow: 0 10px 25px rgba(0,0,0,0.05); display: flex; gap: 30px;
+        }
+        .ex-item { flex: 1; border-left: 4px solid #dd6b20; padding-left: 20px; }
+        .ex-item h4 { margin: 0 0 10px 0; font-size: 22px; color: #2b6cb0; }
+        .ex-item p { margin: 0; font-size: 18px; color: #4a5568; line-height: 1.5; }
+
+    </style>
+</head>
+<body>
+<script>
+    function resizeSlide() {
+        const slide = document.getElementById('slide');
+        const scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080) * 0.95;
+        slide.style.transform = `scale(${scale})`;
+    }
+    window.addEventListener('resize', resizeSlide);
+    window.onload = resizeSlide;
+</script>
+
+<div class="slide-container" id="slide">
+    <div class="header">
+        <h1><i class="fa-solid fa-chart-line"></i> THUẬT TOÁN AI: EXTREME GRADIENT BOOSTING</h1>
+        <span class="badge">XGBoost Algorithm</span>
+        <p>Lưu đồ giải thuật mô hình dự báo tiến độ sinh trưởng dựa trên dữ liệu môi trường (Dạng chuỗi số)</p>
+    </div>
+
+    <div class="content-area">
+        
+        <!-- Lưu đồ Flowchart ngang -->
+        <div class="flowchart">
+            
+            <!-- Input Data -->
+            <div class="f-node cyl">
+                <i class="fa-solid fa-database f-icon"></i>
+                <div class="f-title">Thu Thập Dữ Liệu</div>
+                <div class="f-desc">Lấy dữ liệu cảm biến (Nhiệt độ, pH, TDS, Ánh Sáng) từ <strong>InfluxDB</strong> qua mỗi chu kỳ (ví dụ 1 giờ).</div>
+            </div>
+
+            <svg class="fl-arrow"><path d="M 0 50 L 50 50"/><polygon points="50,45 60,50 50,55" /></svg>
+
+            <!-- Preprocessing -->
+            <div class="f-node diam">
+                <div>
+                    <i class="fa-solid fa-filter f-icon"></i>
+                    <div class="f-title" style="font-size: 20px;">Tiền Xử Lý<br>(Feature Eng.)</div>
+                </div>
+            </div>
+
+            <svg class="fl-arrow"><path d="M 0 50 L 40 50"/><polygon points="40,45 50,50 40,55" /></svg>
+
+            <!-- XGBoost Core -->
+            <div class="f-node xgb-core">
+                <div class="f-title">XGBoost (Gradient Boosting)</div>
+                <div class="f-desc" style="margin-bottom: 10px;">Huấn luyện chuỗi cây quyết định (Decision Trees), cây sau sửa sai cho cây trước để tối ưu sai số.</div>
+                
+                <div class="tree-cascade">
+                    <div class="c-tree">Tree 1<br><small style="font-weight:normal;color:#4a5568">Lỗi D₁</small></div>
+                    <div class="tree-line"></div>
+                    <div class="c-tree">Tree 2<br><small style="font-weight:normal;color:#4a5568">Học từ D₁</small></div>
+                    <div class="tree-line"></div>
+                    <div class="c-tree">Tree N<br><small style="font-weight:normal;color:#4a5568">Optimal</small></div>
+                </div>
+            </div>
+
+            <svg class="fl-arrow"><path d="M 0 50 L 50 50"/><polygon points="50,45 60,50 50,55" /></svg>
+
+            <!-- Output -->
+            <div class="f-node cyl" style="border-color: #3182ce;">
+                <i class="fa-solid fa-seedling f-icon" style="color: #3182ce;"></i>
+                <div class="f-title" style="color: #2b6cb0;">Kết Quả Dự Báo</div>
+                <div class="f-desc" style="font-size: 18px; font-weight: bold; color: #c53030;">1. % Sinh Trưởng (VD: 85%)<br>2. Số ngày đến thu hoạch</div>
+            </div>
+
+        </div>
+
+        <!-- Bảng giải thích chi tiết -->
+        <div class="explanation-panel">
+            <div class="ex-item">
+                <h4 style="color:#dd6b20;">1. Bản chất thuật toán (Boosting)</h4>
+                <p>Khác với Deep Learning (chuyên hình ảnh), XGBoost là thuật toán Machine Learning dạng bảng số cực kỳ mạnh mẽ. Nó tạo ra hàng loạt cây quyết định nhỏ. Cây số 2 sẽ tập trung phân tích những dữ liệu mà cây số 1 đã đoán sai, cứ thế lặp lại để tạo ra kết quả chính xác nhất (Tối ưu Gradient).</p>
+            </div>
+            <div class="ex-item">
+                <h4>2. Dữ liệu đầu vào (Features)</h4>
+                <p>Nó không dùng ảnh. Đầu vào là chuỗi trung bình thông số: <em>Nhiệt độ không khí, Độ ẩm, Cường độ sáng tích lũy, TDS, pH</em>. Máy sẽ hiểu rằng nếu TDS ổn định và Ánh sáng đủ 12h/ngày, cây sẽ lớn nhanh hơn.</p>
+            </div>
+            <div class="ex-item">
+                <h4 style="color:#38a169;">3. Đầu ra (Labels) - Regression</h4>
+                <p>Đây là bài toán Regression (Hồi quy) thay vì Phân loại (Classification). Model xuất ra 1 con số biến thiên liên tục đại diện cho mức độ trưởng thành của cây (0% - 100%) và đếm ngược số ngày dự kiến đạt kích thước thu hoạch.</p>
+            </div>
+        </div>
+
+    </div>
+</div>
+</body>
+</html>

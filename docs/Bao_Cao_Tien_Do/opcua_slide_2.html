@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slide - Tích Hợp OPC UA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background-color: #1a202c; font-family: 'Inter', sans-serif;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        .slide-container {
+            width: 1920px; height: 1080px;
+            background: radial-gradient(circle at 80% 50%, #2d3748 0%, #1a202c 100%);
+            position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            overflow: hidden; transform-origin: top left;
+        }
+
+        .slide-container::before {
+            content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background-image: linear-gradient(rgba(221, 107, 32, 0.05) 2px, transparent 2px), linear-gradient(90deg, rgba(221, 107, 32, 0.05) 2px, transparent 2px);
+            background-size: 60px 60px; z-index: 1;
+        }
+
+        .header { position: absolute; top: 50px; left: 70px; z-index: 10; }
+        .header h1 {
+            color: #fbd38d; font-size: 52px; margin: 0; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 1px; display: inline-flex; align-items: center; gap: 20px;
+        }
+        .header .badge {
+            background-color: #dd6b20; color: white; padding: 8px 18px;
+            border-radius: 8px; font-size: 24px; font-weight: 700; vertical-align: middle;
+        }
+        .header p { font-size: 26px; color: #a0aec0; margin-top: 15px; font-weight: 500; border-left: 4px solid #dd6b20; padding-left: 15px;}
+
+        .content-area {
+            position: absolute; top: 220px; left: 70px;
+            width: calc(100% - 140px); height: calc(100% - 270px);
+            z-index: 10; display: flex; flex-direction: column; gap: 40px;
+        }
+
+        /* 3 Cột chính cho luồng tích hợp */
+        .integration-flow {
+            display: flex; flex: 1; align-items: center; justify-content: space-between; position: relative;
+        }
+
+        /* Các khối hệ thống */
+        .sys-block {
+            background: rgba(45, 55, 72, 0.8); backdrop-filter: blur(10px);
+            border: 2px solid rgba(160, 174, 192, 0.3); border-radius: 20px;
+            padding: 30px; width: 450px; display: flex; flex-direction: column; align-items: center; text-align: center;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3); position: relative; z-index: 15;
+        }
+
+        .sys-header { font-size: 28px; font-weight: 800; margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; gap: 15px; }
+        .sys-header i { font-size: 60px; }
+
+        .sys-block.fastapi { border-color: #319795; }
+        .sys-block.fastapi .sys-header { color: #81e6d9; }
+        
+        .sys-block.opcua { border-color: #dd6b20; width: 500px; transform: scale(1.05); background: rgba(221, 107, 32, 0.1); }
+        .sys-block.opcua .sys-header { color: #fbd38d; }
+
+        .sys-block.nx { border-color: #805ad5; }
+        .sys-block.nx .sys-header { color: #d6bcfa; }
+
+        .sys-desc { color: #e2e8f0; font-size: 18px; line-height: 1.6; text-align: left; background: rgba(0,0,0,0.2); padding: 20px; border-radius: 12px; width: 100%;}
+        .sys-desc ul { margin: 0; padding-left: 20px; }
+        .sys-desc li { margin-bottom: 10px; }
+
+        /* The Nodes List inside OPC UA Server */
+        .opc-nodes {
+            background: #1a202c; border: 1px solid #7b341e; border-radius: 10px; width: 100%; padding: 15px; margin-top: 15px;
+        }
+        .opc-nodes h4 { margin: 0 0 10px 0; color: #dd6b20; font-size: 20px; }
+        .node-row { display: flex; justify-content: space-between; color: #cbd5e0; font-family: monospace; font-size: 16px; margin-bottom: 5px; border-bottom: 1px dashed #4a5568; padding-bottom: 5px;}
+        .node-row span:last-child { color: #48bb78; font-weight: bold; }
+
+        /* Vectors/Arrows */
+        .flow-lines {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5;
+        }
+        .flow-lines path {
+            fill: none; stroke-width: 6; animation: dash 2s linear infinite;
+        }
+        /* Mũi tên xanh lá chỉ từ trái qua */
+        .p-write { stroke: #38a169; stroke-dasharray: 15 10; }
+        /* Mũi tên đỏ chỉ từ phải qua */
+        .p-read { stroke: #e53e3e; stroke-dasharray: 10 10; animation-direction: reverse;}
+
+        @keyframes dash { to { stroke-dashoffset: -100; } }
+
+        /* Chú thích luồng */
+        .flow-label {
+            position: absolute; background: white; color: #1a202c; font-weight: bold; padding: 5px 15px; border-radius: 20px; font-size: 18px; z-index: 20; box-shadow: 0 5px 15px rgba(0,0,0,0.2); border: 2px solid;
+        }
+
+    </style>
+</head>
+<body>
+
+<script>
+    function resizeSlide() {
+        const slide = document.getElementById('slide');
+        const scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080) * 0.95;
+        slide.style.transform = `scale(${scale})`;
+    }
+    window.addEventListener('resize', resizeSlide);
+    window.onload = resizeSlide;
+</script>
+
+<div class="slide-container" id="slide">
+    <div class="header">
+        <h1><i class="fa-solid fa-cogs"></i> TÍCH HỢP OPC UA TRONG HỆ THỐNG</h1>
+        <span class="badge">Digital Twin Bridge</span>
+        <p>Biến OPC UA thành "Cầu Nối" & "Bộ Nhớ Chung" giữa Trái đất (Phần cứng) và Vũ trụ ảo (Siemens NX)</p>
+    </div>
+
+    <div class="content-area">
+        
+        <div class="integration-flow">
+            
+            <svg class="flow-lines">
+                <defs>
+                    <marker id="ar-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                        <path d="M 0 1 L 10 5 L 0 9 z" fill="#38a169" />
+                    </marker>
+                    <marker id="ar-red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                        <path d="M 0 1 L 10 5 L 0 9 z" fill="#e53e3e" />
+                    </marker>
+                </defs>
+
+                <!-- FastAPI to OPC (Right) -->
+                <path d="M 450 300 L 610 300" class="p-write" marker-end="url(#ar-green)"/>
+                <path d="M 610 400 L 450 400" class="p-read" marker-end="url(#ar-red)"/>
+
+                <!-- NX to OPC (Left) -->
+                <path d="M 1330 300 L 1170 300" class="p-read" marker-end="url(#ar-red)"/>
+                <path d="M 1170 400 L 1330 400" class="p-write" marker-end="url(#ar-green)"/>
+            </svg>
+
+            <!-- Các Flow Labels -->
+            <div class="flow-label" style="top: 260px; left: 470px; border-color: #38a169; color: #276749;">Cập nhật (Write)</div>
+            <div class="flow-label" style="top: 420px; left: 470px; border-color: #e53e3e; color: #c53030;">Lắng nghe (Read)</div>
+            
+            <div class="flow-label" style="top: 260px; right: 470px; border-color: #e53e3e; color: #c53030;">Đồng bộ (Read)</div>
+            <div class="flow-label" style="top: 420px; right: 450px; border-color: #38a169; color: #276749;">Báo va chạm (Write)</div>
+
+
+            <!-- KHỐI 1: FASTAPI -->
+            <div class="sys-block fastapi">
+                <div class="sys-header"><i class="fa-solid fa-code"></i> FastAPI (Client 1)</div>
+                <div class="sys-desc">
+                    <ul>
+                        <li>Chạy trên Raspberry Pi.</li>
+                        <li>Kết nối thư viện <strong>opcua-asyncio</strong>.</li>
+                        <li>Nhận dữ liệu từ ESP32 (MQTT) và <strong>Ghi / Cập nhật liên tục</strong> vào các Node trên Server.</li>
+                        <li>Giúp bản sao số 3D biết rõ tình trạng phần cứng hiện tại.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- KHỐI 2: OPC UA SERVER -->
+            <div class="sys-block opcua">
+                <div class="sys-header"><i class="fa-solid fa-server"></i> OPC UA Server</div>
+                <div class="sys-desc" style="text-align: center;">
+                    Chạy độc lập. Chỉ cung cấp không gian bộ nhớ thời gian thực, quản lý quyền Đọc/Ghi. Không tự tính toán vật lý.
+                </div>
+                <!-- Nodes -->
+                <div class="opc-nodes">
+                    <h4><i class="fa-solid fa-folder-tree"></i> Address Space (Root/Objects)</h4>
+                    <div class="node-row"><span>Node_FanSpeed</span> <span>150 rpm</span></div>
+                    <div class="node-row"><span>Node_PumpState</span> <span>True</span></div>
+                    <div class="node-row"><span>Node_WaterLevel</span> <span>0.85 m</span></div>
+                    <div class="node-row"><span>Node_GrowthPercent</span> <span>45 %</span></div>
+                </div>
+            </div>
+
+            <!-- KHỐI 3: SIEMENS NX -->
+            <div class="sys-block nx">
+                <div class="sys-header"><i class="fa-solid fa-cube"></i> Siemens NX (Client 2)</div>
+                <div class="sys-desc">
+                    <ul>
+                        <li>Kết nối trực tiếp qua IP TCP.</li>
+                        <li><strong>Đọc dũ liệu:</strong> Thấy biến <code>PumpState = True</code>, nó sẽ tạo hiệu ứng nước ảo chảy ra từ ống 3D.</li>
+                        <li><strong>Ghi dữ liệu:</strong> Khi phao ảo trong MCT bị nước dâng chạm vào, nó sẽ đẩy cờ <code>[Va chạm] = True</code> ngược lại Server để Backend xử lý.</li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+</body>
+</html>

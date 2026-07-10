@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slide - Cách Tích Hợp CNN Thực Tế</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background-color: #f0f4f8; font-family: 'Inter', sans-serif;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        .slide-container {
+            width: 1920px; height: 1080px;
+            background: linear-gradient(135deg, #ebf8ff 0%, #e2e8f0 100%);
+            position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            overflow: hidden; transform-origin: top left;
+        }
+
+        .slide-container::before {
+            content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background-image: linear-gradient(rgba(49, 130, 206, 0.05) 2px, transparent 2px), linear-gradient(90deg, rgba(49, 130, 206, 0.05) 2px, transparent 2px);
+            background-size: 60px 60px; z-index: 1;
+        }
+
+        .header { position: absolute; top: 50px; left: 70px; z-index: 10; }
+        .header h1 {
+            color: #2b6cb0; font-size: 52px; margin: 0; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 1px; display: inline-flex; align-items: center; gap: 20px;
+        }
+        .header .badge {
+            background-color: #3182ce; color: white; padding: 8px 18px;
+            border-radius: 8px; font-size: 24px; font-weight: 700; vertical-align: middle;
+        }
+        .header p { font-size: 26px; color: #4a5568; margin-top: 15px; font-weight: 600; border-left: 4px solid #3182ce; padding-left:15px;}
+
+        .content-area {
+            position: absolute; top: 220px; left: 70px;
+            width: calc(100% - 140px); height: calc(100% - 270px);
+            z-index: 10; display: flex; flex-direction: column; justify-content: center;
+        }
+
+        /* Vòng Đời / Quy trình (Steps) */
+        .process-pipeline {
+            display: flex; align-items: stretch; justify-content: space-between; gap: 20px; position: relative;
+        }
+
+        /* Ống nối ngầm */
+        .back-pipe {
+            position: absolute; top: 50%; left: 100px; right: 100px; height: 10px;
+            background: #cbd5e0; transform: translateY(-50%); z-index: 1; border-radius: 5px;
+        }
+        .active-pipe {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(90deg, #3182ce, #63b3ed, #3182ce);
+            background-size: 200% 100%; animation: flow 2s linear infinite; border-radius: 5px;
+        }
+        @keyframes flow { 100% { background-position: -200% 0; } }
+
+        /* Step Card */
+        .step-card {
+            background: white; border: 3px solid #63b3ed; border-radius: 20px;
+            width: 380px; display: flex; flex-direction: column; align-items: center; padding: 30px 20px;
+            box-shadow: 0 15px 30px rgba(49, 130, 206, 0.1); position: relative; z-index: 10;
+            transition: transform 0.3s;
+        }
+        .step-card:hover { transform: translateY(-10px); border-color: #2b6cb0; box-shadow: 0 20px 40px rgba(49, 130, 206, 0.2); }
+
+        .step-num {
+            position: absolute; top: -25px; left: 50%; transform: translateX(-50%);
+            width: 50px; height: 50px; background: #2b6cb0; color: white; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center; font-size: 24px; font-weight: 800; border: 4px solid white;
+        }
+
+        .step-icon {
+            font-size: 65px; margin-bottom: 20px; margin-top: 15px; color: #3182ce;
+        }
+
+        .step-card h3 { margin: 0 0 15px 0; font-size: 26px; color: #2d3748; text-align: center;}
+        
+        .code-box {
+            background: #1a202c; color: #a0aec0; font-family: monospace; font-size: 16px;
+            padding: 15px; border-radius: 8px; width: 100%; text-align: left; margin-top: auto;
+            border-left: 4px solid #48bb78;
+        }
+        .code-box span.hl { color: #fbd38d; }
+        .code-box span.str { color: #9ae6b4; }
+
+        .step-desc {
+            font-size: 19px; color: #4a5568; line-height: 1.5; text-align: justify; margin-bottom: 20px;
+        }
+
+        /* Các khối mầu chỉ định */
+        .st-1 { border-color: #38bdf8; } .st-1 .step-num { background: #0284c7; } .st-1 .step-icon { color: #0284c7; }
+        .st-2 { border-color: #8b5cf6; } .st-2 .step-num { background: #6d28d9; } .st-2 .step-icon { color: #7c3aed; }
+        .st-3 { border-color: #10b981; } .st-3 .step-num { background: #059669; } .st-3 .step-icon { color: #059669; }
+        .st-4 { border-color: #f59e0b; } .st-4 .step-num { background: #d97706; } .st-4 .step-icon { color: #d97706; }
+
+    </style>
+</head>
+<body>
+<script>
+    function resizeSlide() {
+        const slide = document.getElementById('slide');
+        const scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080) * 0.95;
+        slide.style.transform = `scale(${scale})`;
+    }
+    window.addEventListener('resize', resizeSlide);
+    window.onload = resizeSlide;
+</script>
+
+<div class="slide-container" id="slide">
+    <div class="header">
+        <h1><i class="fa-solid fa-code-merge"></i> CÁCH THỨC TÍCH HỢP AI VÀO HỆ THỐNG</h1>
+        <span class="badge">Machine Learning Pipeline</span>
+        <p>Quy trình 4 bước chuyển mô hình AI cứng nhắc thành Dịch vụ API thời gian thực</p>
+    </div>
+
+    <div class="content-area">
+        
+        <div class="process-pipeline">
+            <div class="back-pipe"><div class="active-pipe"></div></div>
+            
+            <!-- Bước 1 -->
+            <div class="step-card st-1">
+                <div class="step-num">1</div>
+                <div class="step-icon"><i class="fa-solid fa-laptop-file"></i></div>
+                <h3>Huấn Luyện (Môi trường ngoài)</h3>
+                <div class="step-desc">Sử dụng Google Colab (với GPU T4) đắm mình vào hàng ngàn ảnh lá xà lách. Huấn luyện ra mô hình keras cân định sẵn hệ số.</div>
+                <div class="code-box">
+                    model.fit(train_dataset)<br>
+                    model.save(<span class="str">'leaf_disease.h5'</span>)
+                </div>
+            </div>
+
+            <!-- Bước 2 -->
+            <div class="step-card st-2">
+                <div class="step-num">2</div>
+                <div class="step-icon"><i class="fa-solid fa-file-zipper"></i></div>
+                <h3>Tối ưu & Ép Kiểu (TFLite)</h3>
+                <div class="step-desc">File <code>.h5</code> thường rất năng (50MB+), ép nó về ranh giới <strong>TensorFlow Lite (.tflite)</strong> chỉ còn vài MB, nhẹ tâng khi nhúng vào Raspberry Pi.</div>
+                <div class="code-box">
+                    converter = tf.lite.TFLiteConverter...<br>
+                    <span class="hl">tflite_model</span> = converter.convert()
+                </div>
+            </div>
+
+            <!-- Bước 3 -->
+            <div class="step-card st-3">
+                <div class="step-num">3</div>
+                <div class="step-icon"><i class="fa-solid fa-server"></i></div>
+                <h3>Hosting bằng FastAPI</h3>
+                <div class="step-desc">Đưa file <code>.tflite</code> chạy thường trực thông qua tflite-runtime. FastAPI khai báo Endpoint đón dữ liệu ảnh để gọi mô hình phân tích.</div>
+                <div class="code-box">
+                    @app.post(<span class="str">"/api/disease"</span>)<br>
+                    async def detect(<span class="hl">file: UploadFile</span>):<br>
+                    &nbsp;&nbsp;return inference(file)
+                </div>
+            </div>
+
+            <!-- Bước 4 -->
+            <div class="step-card st-4">
+                <div class="step-num">4</div>
+                <div class="step-icon"><i class="fa-solid fa-mobile-screen-button"></i></div>
+                <h3>Tương tác End-User (Web UI)</h3>
+                <div class="step-desc">Trình duyệt điện thoại kích hoạt Camera HTML5, user chỉ bóp cò. Ảnh gửi dạng form-data lên server và hứng về JSON %.</div>
+                <div class="code-box">
+                    &lt;input type=<span class="str">"file"</span><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;capture=<span class="str">"camera"</span>&gt;<br>
+                    &rarr; { <span class="hl">"disease"</span>: <span class="str">"Thối rễ"</span> }
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+</body>
+</html>

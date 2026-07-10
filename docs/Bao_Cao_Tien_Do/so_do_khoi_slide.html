@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sơ Đồ Khối Hệ Thống</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #f4f7f6;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .slide-container {
+            width: 1920px;
+            height: 1080px;
+            background: linear-gradient(135deg, #e6fbdd 0%, #f4f9f4 100%);
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            overflow: hidden;
+            transform-origin: top left;
+        }
+
+        /* Lưới nền dạng kỹ thuật mờ */
+        .slide-container::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: linear-gradient(#bbf7d0 1px, transparent 1px), linear-gradient(90deg, #bbf7d0 1px, transparent 1px);
+            background-size: 40px 40px;
+            opacity: 0.3;
+            z-index: 1;
+        }
+
+        .header {
+            position: absolute;
+            top: 40px;
+            left: 60px;
+            z-index: 10;
+        }
+
+        .header h1 {
+            color: #1c4532;
+            font-size: 50px;
+            margin: 0;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: inline-block;
+        }
+        
+        .header .badge {
+            background-color: #38a169;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 24px;
+            font-weight: 700;
+            margin-left: 15px;
+            vertical-align: middle;
+        }
+
+        .header p {
+            font-size: 26px;
+            color: #276749;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        /* SVG Connectors */
+        .connectors {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        path {
+            fill: none;
+            stroke-width: 4;
+            /* Đã bỏ stroke-dasharray và animation để thành slide tĩnh hoàn toàn */
+        }
+
+        .path-sensor { stroke: #38a169; }
+        .path-control { stroke: #dd6b20; }
+        .path-network { stroke: #3182ce; }
+        .path-opc { stroke: #805ad5; }
+
+        /* Node components */
+        .node {
+            position: absolute;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(39, 103, 73, 0.1);
+            border: 2px solid #9ae6b4;
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            z-index: 10;
+        }
+
+        .node-icon {
+            font-size: 32px;
+            color: #2f855a;
+            margin-right: 15px;
+            background: #f0fff4;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .node-info h4 {
+            margin: 0 0 5px 0;
+            color: #1a202c;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .node-info p {
+            margin: 0;
+            color: #4a5568;
+            font-size: 14px;
+            font-weight: 500;
+            line-height: 1.3;
+        }
+
+        /* Group Titles */
+        .group-title {
+            position: absolute;
+            color: #276749;
+            font-weight: 800;
+            font-size: 18px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            z-index: 5;
+            border-left: 4px solid #38a169;
+            padding-left: 10px;
+        }
+
+        /* Specific Sizes */
+        .sensor { width: 260px; height: auto; padding: 12px; }
+        .sensor .node-icon { width: 50px; height: 50px; font-size: 26px; }
+        .actuator { width: 220px; flex-direction: column; text-align: center; padding: 15px 10px; }
+        .actuator .node-icon { margin-right: 0; margin-bottom: 10px; font-size: 28px; width: 50px; height: 50px; }
+        .actuator.small { width: 140px; }
+
+        /* ESP32 Main Box */
+        .esp32-box {
+            flex-direction: column;
+            width: 320px;
+            border-width: 3px;
+            border-color: #38a169;
+            align-items: flex-start;
+        }
+        .esp32-box .node-header {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+        .esp32-tags {
+            display: flex;
+            gap: 10px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .esp32-tags span {
+            background: #c6f6d5;
+            color: #22543d;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        /* RPi Box */
+        .rpi-box {
+            flex-direction: column;
+            width: 340px;
+            border-width: 3px;
+            border-color: #c53030;
+            align-items: flex-start;
+        }
+
+        .service-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        .service-item {
+            background: #f7fafc;
+            border-left: 3px solid #e53e3e;
+            padding: 8px 12px;
+            border-radius: 0 6px 6px 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+        }
+        .service-item i { width: 20px; color: #c53030; margin-right: 8px; }
+
+        /* Coordinate Positioning Mapping */
+        .g-sensor { top: 160px; left: 60px; }
+        #s1 { top: 200px; left: 60px; }
+        #s2 { top: 310px; left: 60px; }
+        #s3 { top: 420px; left: 60px; }
+        #s4 { top: 530px; left: 60px; }
+        #s5 { top: 640px; left: 60px; }
+        #s6 { top: 750px; left: 60px; }
+
+        .g-esp { top: 390px; left: 550px; }
+        #esp { top: 430px; left: 550px; }
+
+        .g-drive { top: 680px; left: 550px; }
+        #pwm { top: 720px; left: 450px; }
+        #relay { top: 720px; left: 1000px; }
+
+        .g-act { top: 880px; left: 480px; }
+        /* PWM's actuators */
+        #a1 { top: 920px; left: 200px; } /* Bơm DD */
+        #a2 { top: 920px; left: 390px; } /* Bơm Chìm PWM */
+        #a3 { top: 920px; left: 580px; } /* Quạt */
+        /* Relay's actuators (Thêm a6) */
+        #a6 { top: 920px; left: 850px; } /* Bơm Chìm 220V */
+        #a4 { top: 920px; left: 1040px; } /* Máy Sục */
+        #a5 { top: 920px; left: 1230px; } /* Đèn LED */
+
+        #mqtt { top: 470px; left: 1000px; width: 220px; border-color: #3182ce; }
+        #mqtt .node-icon { color: #3182ce; background: #ebf8ff; }
+
+        #rpi { top: 380px; left: 1300px; }
+        #rpi .node-icon { color: #e53e3e; background: #fff5f5; }
+
+        #nx { top: 470px; left: 1710px; width: 180px; border-color: #805ad5; height: auto;}
+        #nx .node-icon { color: #805ad5; background: #faf5ff; }
+
+    </style>
+</head>
+<body>
+
+<script>
+    function resizeSlide() {
+        const slide = document.getElementById('slide');
+        const scaleX = window.innerWidth / 1920;
+        const scaleY = window.innerHeight / 1080;
+        const scale = Math.min(scaleX, scaleY) * 0.95;
+        slide.style.transform = `scale(${scale})`;
+    }
+    window.addEventListener('resize', resizeSlide);
+    window.onload = resizeSlide;
+</script>
+
+<div class="slide-container" id="slide">
+    
+    <div class="header">
+        <h1>Sơ Đồ Khối Hệ Thống</h1><span class="badge">AIoT Thủy Canh NFT</span>
+        <p>Smart Agriculture Phong Cách Trực Quan</p>
+    </div>
+
+    <!-- Tầng Cảm Biến -->
+    <div class="group-title g-sensor">TẦNG CẢM BIẾN</div>
+    
+    <div class="node sensor" id="s1">
+        <div class="node-icon"><i class="fa-solid fa-temperature-half"></i></div>
+        <div class="node-info"><h4>SHT31</h4><p>Nhiệt độ & ẩm KK (I2C)</p></div>
+    </div>
+    <div class="node sensor" id="s2">
+        <div class="node-icon"><i class="fa-solid fa-thermometer"></i></div>
+        <div class="node-info"><h4>DS18B20</h4><p>Nhiệt độ nước (1-Wire)</p></div>
+    </div>
+    <div class="node sensor" id="s3">
+        <div class="node-icon"><i class="fa-solid fa-vial-circle-check"></i></div>
+        <div class="node-info"><h4>DFRobot TDS</h4><p>Độ dinh dưỡng (Analog)</p></div>
+    </div>
+    <div class="node sensor" id="s4">
+        <div class="node-icon"><i class="fa-solid fa-flask-vial"></i></div>
+        <div class="node-info"><h4>DFRobot pH V2</h4><p>Độ acid/kiềm (Analog)</p></div>
+    </div>
+    <div class="node sensor" id="s5">
+        <div class="node-icon"><i class="fa-solid fa-sun"></i></div>
+        <div class="node-info"><h4>BH1750</h4><p>Cường độ sáng (I2C)</p></div>
+    </div>
+    <div class="node sensor" id="s6">
+        <div class="node-icon"><i class="fa-solid fa-water"></i></div>
+        <div class="node-info"><h4>Y26 PNP x4</h4><p>Mực nước (Digital)</p></div>
+    </div>
+
+    <!-- Bộ xử lý trung tâm ESP32 -->
+    <div class="group-title g-esp">TRUNG TÂM THU THẬP & ĐIỀU KHIỂN</div>
+    <div class="node esp32-box" id="esp">
+        <div class="node-header">
+            <div class="node-icon"><i class="fa-solid fa-microchip"></i></div>
+            <div class="node-info"><h4>Mạch PCB ESP32-S3</h4><p>ESP32-S3-WROOM-1</p></div>
+        </div>
+        <div class="esp32-tags">
+            <span><i class="fa-solid fa-plug"></i> UART</span>
+            <span><i class="fa-solid fa-bolt"></i> LM2596</span>
+            <span><i class="fa-solid fa-bolt"></i> AMS1117</span>
+        </div>
+    </div>
+
+    <!-- Giao tiếp điều khiển -->
+    <div class="group-title g-drive">GIAO TIẾP ĐIỀU KHIỂN</div>
+    <div class="node actuator" id="pwm">
+        <div class="node-icon"><i class="fa-solid fa-wave-square"></i></div>
+        <div class="node-info"><h4>PWM MOSFET</h4><p>8 Kênh IRLZ44N</p></div>
+    </div>
+    <div class="node actuator" id="relay">
+        <div class="node-icon"><i class="fa-solid fa-toggle-on"></i></div>
+        <div class="node-info"><h4>Relay SRD-12V</h4><p>6 Kênh Bơm/Đèn 220V</p></div>
+    </div>
+
+    <!-- Thiết bị chấp hành -->
+    <div class="group-title g-act">THIẾT BỊ CHẤP HÀNH</div>
+    <div class="node actuator small" id="a1">
+        <div class="node-icon" style="background:#fffaf0; color:#dd6b20;"><i class="fa-solid fa-pump-medical"></i></div>
+        <div class="node-info"><h4>3 Bơm DD</h4><p>A+B+pH (12V)</p></div>
+    </div>
+    <div class="node actuator small" id="a2">
+        <div class="node-icon" style="background:#fffaf0; color:#dd6b20;"><i class="fa-solid fa-water-ladder"></i></div>
+        <div class="node-info"><h4>Bơm Chìm</h4><p>12V PWM</p></div>
+    </div>
+    <div class="node actuator small" id="a3">
+        <div class="node-icon" style="background:#fffaf0; color:#dd6b20;"><i class="fa-solid fa-fan"></i></div>
+        <div class="node-info"><h4>4 Quạt</h4><p>12V PWM</p></div>
+    </div>
+    
+    <!-- (Thêm mới) Bơm chìm 220V -->
+    <div class="node actuator small" id="a6">
+        <div class="node-icon" style="background:#fffaf0; color:#dd6b20;"><i class="fa-solid fa-water-ladder"></i></div>
+        <div class="node-info"><h4>Bơm Chìm</h4><p>220V AC (Relay)</p></div>
+    </div>
+    
+    <div class="node actuator small" id="a4">
+        <div class="node-icon" style="background:#fffaf0; color:#dd6b20;"><i class="fa-solid fa-wind"></i></div>
+        <div class="node-info"><h4>Máy Sục</h4><p>220V AC (Relay)</p></div>
+    </div>
+    <div class="node actuator small" id="a5">
+        <div class="node-icon" style="background:#fffaf0; color:#dd6b20;"><i class="fa-solid fa-lightbulb"></i></div>
+        <div class="node-info"><h4>4 Đèn LED</h4><p>Grow 12V (Relay)</p></div>
+    </div>
+
+    <!-- Broker -->
+    <div class="node actuator" id="mqtt">
+        <div class="node-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+        <div class="node-info"><h4>MQTT Broker</h4><p>WiFi Mosquitto</p></div>
+    </div>
+
+    <!-- Raspberry Pi -->
+    <div class="node rpi-box" id="rpi">
+        <div class="node-header" style="margin-bottom: 5px;">
+            <div class="node-icon"><i class="fa-brands fa-raspberry-pi"></i></div>
+            <div class="node-info"><h4>Raspberry Pi 4</h4><p>Máy Chủ Trung Tâm (8GB)</p></div>
+        </div>
+        <div class="service-list">
+            <div class="service-item" style="border-color: #3182ce;"><i class="fa-solid fa-bolt"></i> FastAPI Backend</div>
+            <div class="service-item" style="border-color: #805ad5;"><i class="fa-solid fa-database"></i> InfluxDB Time-Series</div>
+            <div class="service-item" style="border-color: #38a169;"><i class="fa-solid fa-desktop"></i> Web UI & 2D Twin</div>
+            <div class="service-item" style="border-color: #dd6b20;"><i class="fa-solid fa-network-wired"></i> OPC UA Server</div>
+            <div class="service-item" style="border-color: #e53e3e;"><i class="fa-solid fa-camera"></i> CNN Disease Model</div>
+            <div class="service-item" style="border-color: #e53e3e;"><i class="fa-solid fa-chart-line"></i> XGBoost Growth Model</div>
+        </div>
+    </div>
+
+    <!-- NX -->
+    <div class="node actuator" id="nx">
+        <div class="node-icon"><i class="fa-solid fa-cube"></i></div>
+        <div class="node-info"><h4>Siemens NX</h4><p>Digital Twin 3D</p></div>
+    </div>
+
+    <!-- Vẽ các đường kết nối SVG Tĩnh Hoàn Toàn -->
+    <svg class="connectors">
+        <defs>
+            <marker id="arr-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#38a169" />
+            </marker>
+            <marker id="arr-orange" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#dd6b20" />
+            </marker>
+            <marker id="arr-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#3182ce" />
+            </marker>
+            <marker id="arr-purple" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#805ad5" />
+            </marker>
+        </defs>
+
+        <!-- SENSORS -> ESP32 (Green curves) -->
+        <path d="M 356 245 C 450 245, 450 460, 550 460" class="path-sensor" marker-end="url(#arr-green)" />
+        <path d="M 356 355 C 450 355, 450 480, 550 480" class="path-sensor" marker-end="url(#arr-green)" />
+        <path d="M 356 465 C 450 465, 450 500, 550 500" class="path-sensor" marker-end="url(#arr-green)" />
+        <path d="M 356 575 C 450 575, 450 520, 550 520" class="path-sensor" marker-end="url(#arr-green)" />
+        <path d="M 356 685 C 450 685, 450 540, 550 540" class="path-sensor" marker-end="url(#arr-green)" />
+        <path d="M 356 795 C 450 795, 450 560, 550 560" class="path-sensor" marker-end="url(#arr-green)" />
+
+        <!-- ESP32 -> DRIVERS (Orange curves) -->
+        <path d="M 650 580 C 650 650, 560 650, 560 720" class="path-control" marker-end="url(#arr-orange)" />
+        <path d="M 810 580 C 810 650, 1110 650, 1110 720" class="path-control" marker-end="url(#arr-orange)" />
+
+        <!-- DRIVERS -> ACTUATORS (Orange curves) -->
+        <!-- PWM (Center 560, Bottom 815) -->
+        <path d="M 540 815 C 540 860, 290 860, 290 920" class="path-control" marker-end="url(#arr-orange)" />
+        <path d="M 560 815 C 560 860, 480 860, 480 920" class="path-control" marker-end="url(#arr-orange)" />
+        <path d="M 580 815 C 580 860, 670 860, 670 920" class="path-control" marker-end="url(#arr-orange)" />
+        
+        <!-- RELAY (Center 1110, Bottom 815) -->
+        <path d="M 1090 815 C 1090 860, 940 860, 940 920" class="path-control" marker-end="url(#arr-orange)" />
+        <path d="M 1110 815 C 1110 860, 1130 860, 1130 920" class="path-control" marker-end="url(#arr-orange)" />
+        <path d="M 1130 815 C 1130 860, 1320 860, 1320 920" class="path-control" marker-end="url(#arr-orange)" />
+
+        <!-- ESP32 <-> MQTT (Blue straight lines) -->
+        <path d="M 910 490 L 1000 490" class="path-network" marker-end="url(#arr-blue)" />
+        <path d="M 1000 520 L 910 520" class="path-network" marker-end="url(#arr-blue)" />
+
+        <!-- MQTT -> RPi (Blue straight line) -->
+        <path d="M 1220 515 L 1300 515" class="path-network" marker-end="url(#arr-blue)" />
+
+        <!-- RPi <-> NX (Purple straight lines) -->
+        <path d="M 1660 495 L 1710 495" class="path-opc" marker-end="url(#arr-purple)" />
+        <path d="M 1710 525 L 1660 525" class="path-opc" marker-end="url(#arr-purple)" />
+
+    </svg>
+
+</div>
+
+</body>
+</html>

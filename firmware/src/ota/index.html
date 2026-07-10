@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DATN_AIOT_LETTUCE - ESP32 Control Center</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="logo">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 3.5 1 9.8a7 7 0 0 1-9 8.2Z"></path>
+                        <path d="M9 22v-4H5v-4"></path>
+                    </svg>
+                </div>
+                <span class="brand-name">DATN_AIOT_LETTUCE</span>
+            </div>
+            
+            <nav class="menu">
+                <button class="menu-item active" data-tab="overview">
+                    <span class="icon">📊</span> Tổng Quan
+                </button>
+                <button class="menu-item" data-tab="wifi">
+                    <span class="icon">📶</span> Cấu Hình WiFi
+                </button>
+                <button class="menu-item" data-tab="ota">
+                    <span class="icon">⚙️</span> Cập Nhật OTA
+                </button>
+            </nav>
+            
+            <div class="user-profile">
+                <div class="avatar">AD</div>
+                <div class="user-info">
+                    <div class="user-name">Admin</div>
+                    <div class="user-status">Trực tuyến</div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Sidebar Resizer Splitter -->
+        <div class="resizer" id="sidebar-resizer"></div>
+
+        <!-- Main Content Area -->
+        <main class="content">
+            <header class="content-header">
+                <div>
+                    <h1 id="page-title">Tổng Quan Hệ Thống</h1>
+                    <p class="subtitle" id="system-time">Thiết bị đang chạy ổn định</p>
+                </div>
+                <div class="status-badge connected" id="connection-status">
+                    <span class="status-dot"></span> <span id="status-text">Đã Kết Nối</span>
+                </div>
+            </header>
+
+            <!-- TAB: OVERVIEW -->
+            <section class="tab-content active" id="tab-overview">
+                <div class="grid">
+                    <div class="card stat-card">
+                        <div class="card-body">
+                            <div class="stat-icon info">ℹ️</div>
+                            <div>
+                                <div class="stat-label">Phiên Bản Firmware</div>
+                                <div class="stat-value" id="info-version">v1.0.0</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="card-body">
+                            <div class="stat-icon wifi">📶</div>
+                            <div>
+                                <div class="stat-label">WiFi Đang Kết Nối</div>
+                                <div class="stat-value" id="info-ssid">-</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="card-body">
+                            <div class="stat-icon ip">🔗</div>
+                            <div>
+                                <div class="stat-label">Địa Chỉ IP</div>
+                                <div class="stat-value" id="info-ip">0.0.0.0</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="card-body">
+                            <div class="stat-icon ram">💾</div>
+                            <div>
+                                <div class="stat-label">Bộ Nhớ Heap Trống</div>
+                                <div class="stat-value" id="info-heap">-</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mt-6">
+                    <div class="card-header">
+                        <h2>Thông Tin Chi Tiết Hệ Thống</h2>
+                    </div>
+                    <div class="card-body">
+                        <table class="info-table">
+                            <tr>
+                                <td>Thời gian hoạt động (Uptime)</td>
+                                <td id="info-uptime">-</td>
+                            </tr>
+                            <tr>
+                                <td>Chế độ WiFi hiện tại</td>
+                                <td id="info-wifimode">-</td>
+                            </tr>
+                            <tr>
+                                <td>Độ mạnh tín hiệu RSSI</td>
+                                <td id="info-rssi">-</td>
+                            </tr>
+                            <tr>
+                                <td>Tổng dung lượng bộ nhớ Flash</td>
+                                <td id="info-flash-size">-</td>
+                            </tr>
+                            <tr>
+                                <td>Kích thước chương trình (Sketch)</td>
+                                <td id="info-sketch-size">-</td>
+                            </tr>
+                            <tr>
+                                <td>Khoảng trống phân vùng nạp</td>
+                                <td id="info-free-sketch">-</td>
+                            </tr>
+                            <tr>
+                                <td>Phân vùng Flash đang chạy</td>
+                                <td id="info-partition">-</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB: WIFI CONFIG -->
+            <section class="tab-content" id="tab-wifi">
+                <div class="grid grid-2">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Kết Nối WiFi Mới</h2>
+                        </div>
+                        <div class="card-body">
+                            <form id="wifi-form">
+                                <div class="form-group">
+                                    <label for="wifi-ssid">Tên WiFi (SSID)</label>
+                                    <div class="input-with-button">
+                                        <input type="text" id="wifi-ssid" name="ssid" placeholder="Nhập hoặc chọn WiFi..." required>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="wifi-pass">Mật Khẩu WiFi</label>
+                                    <input type="password" id="wifi-pass" name="pass" placeholder="Nhập mật khẩu..." required>
+                                </div>
+                                <div class="button-group">
+                                    <button type="submit" class="btn btn-primary" id="btn-save-wifi">Lưu và Kết Nối</button>
+                                    <button type="button" class="btn btn-danger" id="btn-forget-wifi">Quên WiFi & Reset</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header flex-header">
+                            <h2>Danh Sách Mạng WiFi Lân Cận</h2>
+                            <button class="btn btn-secondary btn-sm" id="btn-scan">Quét WiFi</button>
+                        </div>
+                        <div class="card-body">
+                            <div id="scan-loading" class="loading" style="display:none;">Đang quét mạng WiFi...</div>
+                            <ul class="wifi-list" id="wifi-list">
+                                <li class="empty-list">Bấm "Quét WiFi" để tìm các mạng xung quanh</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB: OTA UPDATE -->
+            <section class="tab-content" id="tab-ota">
+                <div class="card max-w-600">
+                    <div class="card-header">
+                        <h2>Nạp Firmware Không Dây (OTA)</h2>
+                    </div>
+                    <div class="card-body text-center">
+                        <p class="description mb-6">Tải lên file firmware dạng <strong>.bin</strong> đã được biên dịch để cập nhật chương trình cho chip ESP32-S3.</p>
+                        
+                        <div class="upload-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+                            <div class="upload-icon">📁</div>
+                            <p>Kéo & thả file <strong>.bin</strong> vào đây hoặc click để chọn file</p>
+                            <span class="file-name" id="selected-file-name"></span>
+                        </div>
+                        
+                        <input type="file" id="file-input" accept=".bin" style="display:none;">
+                        
+                        <button class="btn btn-primary mt-6 w-full" id="btn-upload" disabled>Bắt đầu cập nhật</button>
+                        
+                        <div class="progress-container mt-6" id="progress-container" style="display:none;">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progress-fill"></div>
+                            </div>
+                            <div class="progress-text" id="progress-text">Đang tải lên... 0%</div>
+                        </div>
+
+                        <div class="alert mt-6" id="ota-alert" style="display:none;"></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="/script.js"></script>
+</body>
+</html>

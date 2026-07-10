@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kế Hoạch Đồ Án - AIOT Thủy Canh NFT</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-seedling"></i>
+                <span>AIOT NFT</span>
+            </div>
+            <button class="sidebar-toggle" id="sidebarToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        <ul class="nav-list">
+            <li><a href="#overview" class="nav-link active"><i class="fas fa-home"></i><span>Tổng quan</span></a></li>
+            <li><a href="#checklist" class="nav-link"><i class="fas fa-tasks"></i><span>Checklist</span></a></li>
+            <li><a href="#mechanical" class="nav-link"><i class="fas fa-cogs"></i><span>Cơ khí</span></a></li>
+            <li><a href="#electronics" class="nav-link"><i class="fas fa-microchip"></i><span>Điện tử & PCB</span></a></li>
+            <li><a href="#software" class="nav-link"><i class="fas fa-code"></i><span>Phần mềm</span></a></li>
+            <li><a href="#ai" class="nav-link"><i class="fas fa-brain"></i><span>AI Models</span></a></li>
+            <li><a href="#digitaltwin" class="nav-link"><i class="fas fa-cubes"></i><span>Digital Twin</span></a></li>
+            <li><a href="#autorestart" class="nav-link"><i class="fas fa-redo"></i><span>Auto-restart</span></a></li>
+            <li><a href="#timeline" class="nav-link"><i class="fas fa-calendar-alt"></i><span>Timeline</span></a></li>
+            <li><a href="#budget" class="nav-link"><i class="fas fa-wallet"></i><span>Kinh phí</span></a></li>
+            <li><a href="#feasibility" class="nav-link"><i class="fas fa-check-circle"></i><span>Khả thi</span></a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <div class="progress-ring">
+                <span id="progressPercent">0%</span>
+            </div>
+            <span class="progress-label">Tiến độ</span>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent">
+        <!-- Hero Section -->
+        <section id="overview" class="section hero-section">
+            <div class="hero-bg"></div>
+            <div class="hero-content">
+                <h1><i class="fas fa-leaf"></i> Ứng Dụng AIOT Trồng Xà Lách Thủy Canh NFT</h1>
+                <p class="subtitle">Đồ án tốt nghiệp — Kế hoạch chi tiết từng bước</p>
+                <div class="hero-stats">
+                    <div class="stat-card">
+                        <i class="fas fa-microchip"></i>
+                        <div class="stat-info">
+                            <span class="stat-value">ESP32 + Pi 4</span>
+                            <span class="stat-label">Hardware</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-wifi"></i>
+                        <div class="stat-info">
+                            <span class="stat-value">MQTT + WebSocket</span>
+                            <span class="stat-label">Giao tiếp</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-brain"></i>
+                        <div class="stat-info">
+                            <span class="stat-value">CNN + XGBoost</span>
+                            <span class="stat-label">AI Models</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-wallet"></i>
+                        <div class="stat-info">
+                            <span class="stat-value">~5.6 / 10 triệu</span>
+                            <span class="stat-label">Kinh phí</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Architecture Diagram -->
+            <div class="arch-diagram">
+                <h3><i class="fas fa-project-diagram"></i> Kiến Trúc Hệ Thống</h3>
+                <div class="arch-flow">
+                    <div class="arch-layer sensor-layer">
+                        <div class="layer-title">Tầng Cảm Biến (ESP32)</div>
+                        <div class="arch-items">
+                            <div class="arch-item"><i class="fas fa-thermometer-half"></i> SHT31</div>
+                            <div class="arch-item"><i class="fas fa-water"></i> DS18B20</div>
+                            <div class="arch-item"><i class="fas fa-flask"></i> TDS</div>
+                            <div class="arch-item"><i class="fas fa-vial"></i> pH</div>
+                            <div class="arch-item"><i class="fas fa-sun"></i> BH1750</div>
+                            <div class="arch-item"><i class="fas fa-ruler-vertical"></i> Y26 PNP ×4</div>
+                        </div>
+                    </div>
+                    <div class="arch-arrow"><i class="fas fa-arrow-down"></i> MQTT (WiFi)</div>
+                    <div class="arch-layer control-layer">
+                        <div class="layer-title">Tầng Điều Khiển</div>
+                        <div class="arch-items">
+                            <div class="arch-item"><i class="fas fa-tint"></i> Bơm nước</div>
+                            <div class="arch-item"><i class="fas fa-eye-dropper"></i> Bơm DD</div>
+                            <div class="arch-item"><i class="fas fa-fan"></i> Quạt</div>
+                            <div class="arch-item"><i class="fas fa-lightbulb"></i> Đèn LED</div>
+                        </div>
+                    </div>
+                    <div class="arch-arrow"><i class="fas fa-arrow-down"></i> WebSocket</div>
+                    <div class="arch-layer central-layer">
+                        <div class="layer-title">Trung Tâm (Raspberry Pi 4 - 8GB)</div>
+                        <div class="arch-items">
+                            <div class="arch-item"><i class="fas fa-server"></i> FastAPI</div>
+                            <div class="arch-item"><i class="fas fa-database"></i> InfluxDB</div>
+                            <div class="arch-item"><i class="fas fa-globe"></i> Web App</div>
+                            <div class="arch-item"><i class="fas fa-cubes"></i> Digital Twin 2D</div>
+                            <div class="arch-item"><i class="fas fa-brain"></i> CNN</div>
+                            <div class="arch-item"><i class="fas fa-chart-line"></i> XGBoost</div>
+                            <div class="arch-item"><i class="fas fa-camera"></i> Camera</div>
+                            <div class="arch-item"><i class="fas fa-network-wired"></i> OPC UA Server</div>
+                        </div>
+                    </div>
+                    <div class="arch-arrow"><i class="fas fa-arrow-down"></i> OPC UA (TCP)</div>
+                    <div class="arch-layer" style="background: rgba(167,139,250,0.06); border: 1px solid rgba(167,139,250,0.2);">
+                        <div class="layer-title">Digital Twin 3D (Siemens NX MCD — trên PC)</div>
+                        <div class="arch-items">
+                            <div class="arch-item"><i class="fas fa-cube"></i> Mô hình 3D 1:1</div>
+                            <div class="arch-item"><i class="fas fa-cogs"></i> MCD Simulation</div>
+                            <div class="arch-item"><i class="fas fa-exchange-alt"></i> Signal Mapping</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Checklist Section -->
+        <section id="checklist" class="section">
+            <div class="section-header">
+                <h2><i class="fas fa-tasks"></i> Checklist Tiến Độ</h2>
+                <div class="checklist-stats">
+                    <span id="checklistProgress">0/0 hoàn thành</span>
+                    <button class="btn-save" id="saveChecklist"><i class="fas fa-save"></i> Lưu</button>
+                </div>
+            </div>
+            <div class="checklist-grid">
+                <!-- Phase 1 -->
+                <div class="checklist-card">
+                    <div class="checklist-card-header phase-1">
+                        <i class="fas fa-cogs"></i>
+                        <h3>Phase 1: Cơ khí & Vật tư</h3>
+                    </div>
+                    <ul class="checklist">
+                        <li><label><input type="checkbox" data-task="m1"> Mua khung sắt V lỗ</label></li>
+                        <li><label><input type="checkbox" data-task="m2"> Mua máng PVC 60×40mm × 6</label></li>
+                        <li><label><input type="checkbox" data-task="m3"> Mua bể chứa 80L</label></li>
+                        <li><label><input type="checkbox" data-task="m4"> Mua rọ trồng + mút xốp/rockwool</label></li>
+                        <li><label><input type="checkbox" data-task="m5"> Dựng khung 2 tầng</label></li>
+                        <li><label><input type="checkbox" data-task="m6"> Đục lỗ máng Ø50mm, lắp máng</label></li>
+                        <li><label><input type="checkbox" data-task="m7"> Lắp hệ thống ống nước + van</label></li>
+                        <li><label><input type="checkbox" data-task="m8"> Mua & lắp bơm chìm 25W</label></li>
+                        <li><label><input type="checkbox" data-task="m9"> Mua & lắp bơm peristaltic × 2</label></li>
+                        <li><label><input type="checkbox" data-task="m10"> Mua & lắp quạt 12V × 2</label></li>
+                        <li><label><input type="checkbox" data-task="m11"> Mua & lắp đèn LED Grow × 2</label></li>
+                        <li><label><input type="checkbox" data-task="m12"> Test bơm nước chảy qua máng OK</label></li>
+                    </ul>
+                </div>
+                <!-- Phase 2 -->
+                <div class="checklist-card">
+                    <div class="checklist-card-header phase-2">
+                        <i class="fas fa-microchip"></i>
+                        <h3>Phase 2: Điện tử & Sensor</h3>
+                    </div>
+                    <ul class="checklist">
+                        <li><label><input type="checkbox" data-task="e1"> Mua ESP32 DevKit</label></li>
+                        <li><label><input type="checkbox" data-task="e2"> Mua SHT31</label></li>
+                        <li><label><input type="checkbox" data-task="e3"> Mua DS18B20 chống nước</label></li>
+                        <li><label><input type="checkbox" data-task="e4"> Mua Gravity TDS Meter (DFRobot)</label></li>
+                        <li><label><input type="checkbox" data-task="e5"> Mua Gravity pH Meter v2 (DFRobot)</label></li>
+                        <li><label><input type="checkbox" data-task="e6"> Mua BH1750</label></li>
+                        <li><label><input type="checkbox" data-task="e7"> Mua JSN-SR04T</label></li>
+                        <li><label><input type="checkbox" data-task="e8"> Mua Relay 4CH × 2</label></li>
+                        <li><label><input type="checkbox" data-task="e9"> Mua nguồn 12V 5A + LM2596</label></li>
+                        <li><label><input type="checkbox" data-task="e10"> Mua Mini UPS 12V</label></li>
+                        <li><label><input type="checkbox" data-task="e11"> Mua Logitech C270</label></li>
+                        <li><label><input type="checkbox" data-task="e12"> Test từng sensor trên breadboard</label></li>
+                        <li><label><input type="checkbox" data-task="e13"> Thiết kế PCB (EasyEDA)</label></li>
+                        <li><label><input type="checkbox" data-task="e14"> Đặt PCB (JLCPCB)</label></li>
+                        <li><label><input type="checkbox" data-task="e15"> Hàn PCB + test</label></li>
+                    </ul>
+                </div>
+                <!-- Phase 3 -->
+                <div class="checklist-card">
+                    <div class="checklist-card-header phase-3">
+                        <i class="fas fa-code"></i>
+                        <h3>Phase 3: ESP32 Firmware</h3>
+                    </div>
+                    <ul class="checklist">
+                        <li><label><input type="checkbox" data-task="f1"> Code đọc SHT31 (I2C)</label></li>
+                        <li><label><input type="checkbox" data-task="f2"> Code đọc DS18B20 (OneWire)</label></li>
+                        <li><label><input type="checkbox" data-task="f3"> Code đọc TDS (Analog)</label></li>
+                        <li><label><input type="checkbox" data-task="f4"> Code đọc pH (Analog + calibrate)</label></li>
+                        <li><label><input type="checkbox" data-task="f5"> Code đọc BH1750 (I2C)</label></li>
+                        <li><label><input type="checkbox" data-task="f6"> Code đọc JSN-SR04T</label></li>
+                        <li><label><input type="checkbox" data-task="f7"> Kết nối WiFi + MQTT (PubSubClient)</label></li>
+                        <li><label><input type="checkbox" data-task="f8"> Publish sensor data JSON mỗi 30s</label></li>
+                        <li><label><input type="checkbox" data-task="f9"> Subscribe relay control topic</label></li>
+                        <li><label><input type="checkbox" data-task="f10"> Auto-reconnect WiFi/MQTT</label></li>
+                        <li><label><input type="checkbox" data-task="f11"> Failsafe mode (mất kết nối)</label></li>
+                    </ul>
+                </div>
+                <!-- Phase 4 -->
+                <div class="checklist-card">
+                    <div class="checklist-card-header phase-4">
+                        <i class="fas fa-server"></i>
+                        <h3>Phase 4: Backend (Pi 4)</h3>
+                    </div>
+                    <ul class="checklist">
+                        <li><label><input type="checkbox" data-task="b1"> Cài Raspberry Pi OS</label></li>
+                        <li><label><input type="checkbox" data-task="b2"> Cài Mosquitto MQTT Broker</label></li>
+                        <li><label><input type="checkbox" data-task="b3"> Cài InfluxDB 1.8</label></li>
+                        <li><label><input type="checkbox" data-task="b4"> Setup Python venv + FastAPI</label></li>
+                        <li><label><input type="checkbox" data-task="b5"> Code MQTT service (subscribe)</label></li>
+                        <li><label><input type="checkbox" data-task="b6"> Code InfluxDB service (lưu data)</label></li>
+                        <li><label><input type="checkbox" data-task="b7"> Code WebSocket service (push)</label></li>
+                        <li><label><input type="checkbox" data-task="b8"> Code REST API endpoints</label></li>
+                        <li><label><input type="checkbox" data-task="b9"> Code control service (relay)</label></li>
+                        <li><label><input type="checkbox" data-task="b10"> Setup systemd auto-start</label></li>
+                        <li><label><input type="checkbox" data-task="b11"> Setup health check cron</label></li>
+                    </ul>
+                </div>
+                <!-- Phase 5 -->
+                <div class="checklist-card">
+                    <div class="checklist-card-header phase-5">
+                        <i class="fas fa-paint-brush"></i>
+                        <h3>Phase 5: Frontend Web App</h3>
+                    </div>
+                    <ul class="checklist">
+                        <li><label><input type="checkbox" data-task="w1"> Thiết kế layout + sidebar nav</label></li>
+                        <li><label><input type="checkbox" data-task="w2"> Dashboard: hiển thị sensor cards</label></li>
+                        <li><label><input type="checkbox" data-task="w3"> Dashboard: biểu đồ Chart.js 24h</label></li>
+                        <li><label><input type="checkbox" data-task="w4"> WebSocket: nhận data realtime</label></li>
+                        <li><label><input type="checkbox" data-task="w5"> Trang Điều khiển: bật/tắt relay</label></li>
+                        <li><label><input type="checkbox" data-task="w6"> Trang Điều khiển: đặt ngưỡng tự động</label></li>
+                        <li><label><input type="checkbox" data-task="w7"> Trang Lịch sử: bảng + biểu đồ</label></li>
+                        <li><label><input type="checkbox" data-task="w8"> Trang AI Bệnh cây: upload ảnh</label></li>
+                        <li><label><input type="checkbox" data-task="w9"> Trang AI Sinh trưởng: dự đoán</label></li>
+                        <li><label><input type="checkbox" data-task="w10"> Digital Twin 2D Canvas/SVG</label></li>
+                        <li><label><input type="checkbox" data-task="w11"> Responsive + dark mode</label></li>
+                    </ul>
+                </div>
+                <!-- Phase 6 -->
+                <div class="checklist-card">
+                    <div class="checklist-card-header phase-6">
+                        <i class="fas fa-brain"></i>
+                        <h3>Phase 6: AI & Deploy</h3>
+                    </div>
+                    <ul class="checklist">
+                        <li><label><input type="checkbox" data-task="a1"> Tải PlantVillage dataset</label></li>
+                        <li><label><input type="checkbox" data-task="a2"> Train MobileNetV2 trên Colab</label></li>
+                        <li><label><input type="checkbox" data-task="a3"> Export .tflite + test accuracy</label></li>
+                        <li><label><input type="checkbox" data-task="a4"> Deploy CNN lên Pi (tflite_runtime)</label></li>
+                        <li><label><input type="checkbox" data-task="a5"> Thu thập/tạo data sinh trưởng</label></li>
+                        <li><label><input type="checkbox" data-task="a6"> Train XGBoost trên Colab</label></li>
+                        <li><label><input type="checkbox" data-task="a7"> Export .pkl + deploy lên Pi</label></li>
+                        <li><label><input type="checkbox" data-task="a8"> Test AI trên hệ thống thật</label></li>
+                    </ul>
+                </div>
+                <!-- Phase 7 -->
+                <div class="checklist-card">
+                    <div class="checklist-card-header phase-7">
+                        <i class="fas fa-check-double"></i>
+                        <h3>Phase 7: Tích hợp & Báo cáo</h3>
+                    </div>
+                    <ul class="checklist">
+                        <li><label><input type="checkbox" data-task="t1"> Lắp ráp toàn bộ hệ thống</label></li>
+                        <li><label><input type="checkbox" data-task="t2"> Ươm hạt xà lách đợt 1</label></li>
+                        <li><label><input type="checkbox" data-task="t3"> Chuyển cây vào máng NFT</label></li>
+                        <li><label><input type="checkbox" data-task="t4"> Test mất điện → auto restart</label></li>
+                        <li><label><input type="checkbox" data-task="t5"> Thu thập data 2-3 tuần</label></li>
+                        <li><label><input type="checkbox" data-task="t6"> Fix bug + tối ưu</label></li>
+                        <li><label><input type="checkbox" data-task="t7"> Thu hoạch đợt đầu tiên</label></li>
+                        <li><label><input type="checkbox" data-task="t8"> Viết báo cáo đồ án</label></li>
+                        <li><label><input type="checkbox" data-task="t9"> Làm poster / slide</label></li>
+                        <li><label><input type="checkbox" data-task="t10"> Bảo vệ đồ án</label></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Mechanical Section -->
+        <section id="mechanical" class="section">
+            <div class="section-header"><h2><i class="fas fa-cogs"></i> Phần 1: Cơ Khí & Ngoại Vi</h2></div>
+            <div class="content-grid">
+                <div class="info-card">
+                    <h3><i class="fas fa-cube"></i> Khung & Máng Trồng</h3>
+                    <table>
+                        <tr><th>Hạng mục</th><th>Thông số</th><th>Ghi chú</th></tr>
+                        <tr><td>Khung</td><td>Sắt V lỗ 30×30mm, cao ~1.5m</td><td>2 tầng, mỗi tầng 3 máng</td></tr>
+                        <tr><td>Máng NFT</td><td>PVC vuông 60×40mm, dài 1m</td><td>6 máng, lỗ Ø50mm cách 15cm</td></tr>
+                        <tr><td>Rọ trồng</td><td>Rọ nhựa Ø50mm</td><td>~6 cây/máng × 6 = 36 cây</td></tr>
+                        <tr><td>Giá thể</td><td>Mút xốp / Rockwool</td><td>Giữ cây trong rọ</td></tr>
+                        <tr><td>Bể chứa</td><td>Thùng nhựa 80L</td><td>Chứa dung dịch dinh dưỡng</td></tr>
+                        <tr><td>Độ dốc máng</td><td>1-2% (1cm/1m)</td><td>Đảm bảo nước chảy về bể</td></tr>
+                    </table>
+                </div>
+                <div class="info-card">
+                    <h3><i class="fas fa-plug"></i> Thiết Bị Ngoại Vi</h3>
+                    <table>
+                        <tr><th>Thiết bị</th><th>Điện áp</th><th>SL</th><th>Điều khiển</th><th>Mục đích</th></tr>
+                        <tr><td>Bơm dinh dưỡng</td><td>12V DC</td><td>3</td><td>PWM MOSFET</td><td>Bơm 3 loại DD vào bồn</td></tr>
+                        <tr><td>Bơm nước chính</td><td>220V AC</td><td>1</td><td>Relay</td><td>Bơm nước lên máng</td></tr>
+                        <tr><td>Bơm sục khí</td><td>12V DC</td><td>1</td><td>PWM MOSFET</td><td>Sục oxy trong bồn</td></tr>
+                        <tr><td>Quạt thông gió</td><td>12V DC</td><td>4</td><td>PWM MOSFET</td><td>Giảm nhiệt/ẩm</td></tr>
+                        <tr><td>Đèn LED Grow</td><td>12V DC</td><td>4</td><td>Relay</td><td>Bổ sung ánh sáng</td></tr>
+                        <tr><td>Camera</td><td>USB</td><td>1</td><td>-</td><td>AI nhận diện bệnh</td></tr>
+                    </table>
+                </div>
+                <div class="info-card">
+                    <h3><i class="fas fa-flask"></i> Dung Dịch & Quy Trình</h3>
+                    <div class="info-list">
+                        <div class="info-item"><span class="label">EC mục tiêu:</span> 1.0–1.6 mS/cm (TDS 500–800 ppm)</div>
+                        <div class="info-item"><span class="label">pH mục tiêu:</span> 5.5 – 6.5</div>
+                        <div class="info-item"><span class="label">Thay DD:</span> Mỗi 7–14 ngày</div>
+                    </div>
+                    <div class="process-steps">
+                        <div class="step"><span class="step-num">1</span> Ươm hạt (5-7 ngày)</div>
+                        <div class="step"><span class="step-num">2</span> Chuyển rọ (3-4 lá thật)</div>
+                        <div class="step"><span class="step-num">3</span> Vận hành NFT</div>
+                        <div class="step"><span class="step-num">4</span> Thu hoạch (25-35 ngày)</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Electronics Section -->
+        <section id="electronics" class="section">
+            <div class="section-header"><h2><i class="fas fa-microchip"></i> Phần 2: Điện Tử & PCB</h2></div>
+            <div class="content-grid">
+                <div class="info-card full-width">
+                    <h3><i class="fas fa-list"></i> Danh Sách Cảm Biến (Header cắm ra ngoài)</h3>
+                    <table class="component-table">
+                        <tr><th>#</th><th>Cảm biến</th><th>Model</th><th>Giao tiếp</th><th>Header PCB</th></tr>
+                        <tr><td>1</td><td>Nhiệt độ + Độ ẩm KK</td><td class="highlight">SHT31</td><td>I2C</td><td>4P (VCC,GND,SDA,SCL)</td></tr>
+                        <tr><td>2</td><td>Nhiệt độ nước</td><td>DS18B20</td><td>OneWire</td><td>3P (VCC,GND,DATA)</td></tr>
+                        <tr><td>3</td><td>TDS (dinh dưỡng)</td><td class="highlight">DFRobot Gravity TDS</td><td>Analog</td><td>3P (VCC,GND,SIG)</td></tr>
+                        <tr><td>4</td><td>pH</td><td class="highlight">DFRobot Gravity pH V2</td><td>Analog</td><td>3P (VCC,GND,SIG)</td></tr>
+                        <tr><td>5</td><td>Ánh sáng</td><td>BH1750</td><td>I2C</td><td>Chung header I2C</td></tr>
+                        <tr><td>6</td><td>Mực nước ×4</td><td class="highlight">Y26 PNP</td><td>Digital</td><td>3P ×4 (VCC,GND,OUT)</td></tr>
+                    </table>
+                </div>
+                <div class="info-card">
+                    <h3><i class="fas fa-sitemap"></i> ESP32-N16R8 GPIO Map</h3>
+                    <div class="gpio-map">
+                        <div class="gpio-row"><span class="gpio-pin">GPIO 21</span><span class="gpio-dir">←</span><span class="gpio-desc">I2C SDA (SHT31 + BH1750)</span></div>
+                        <div class="gpio-row"><span class="gpio-pin">GPIO 22</span><span class="gpio-dir">←</span><span class="gpio-desc">I2C SCL</span></div>
+                        <div class="gpio-row"><span class="gpio-pin">GPIO 5</span><span class="gpio-dir">←</span><span class="gpio-desc">DS18B20 (OneWire)</span></div>
+                        <div class="gpio-row"><span class="gpio-pin">GPIO 34</span><span class="gpio-dir">←</span><span class="gpio-desc">TDS Analog (qua LM358)</span></div>
+                        <div class="gpio-row"><span class="gpio-pin">GPIO 35</span><span class="gpio-dir">←</span><span class="gpio-desc">pH Analog (qua LM358)</span></div>
+                        <div class="gpio-row"><span class="gpio-pin">GPIO 36,39,32,33</span><span class="gpio-dir">←</span><span class="gpio-desc">Y26 Mực nước ×4 (chia áp)</span></div>
+                        <div class="gpio-row relay"><span class="gpio-pin">GPIO 25,26,27</span><span class="gpio-dir">→</span><span class="gpio-desc">PWM MOSFET → Bơm DD ×3</span></div>
+                        <div class="gpio-row relay"><span class="gpio-pin">GPIO 14</span><span class="gpio-dir">→</span><span class="gpio-desc">PWM MOSFET → Bơm sục</span></div>
+                        <div class="gpio-row relay"><span class="gpio-pin">GPIO 12,13,15,2</span><span class="gpio-dir">→</span><span class="gpio-desc">PWM MOSFET → Quạt ×4</span></div>
+                        <div class="gpio-row relay"><span class="gpio-pin">GPIO 16</span><span class="gpio-dir">→</span><span class="gpio-desc">Opto → Relay → Bơm 220V</span></div>
+                        <div class="gpio-row relay"><span class="gpio-pin">GPIO 17,18,19,23</span><span class="gpio-dir">→</span><span class="gpio-desc">Opto → Relay → Đèn ×4</span></div>
+                        <div class="gpio-row"><span class="gpio-pin">GPIO 4</span><span class="gpio-dir">→</span><span class="gpio-desc">Buzzer (qua S8050)</span></div>
+                    </div>
+                </div>
+                <div class="info-card">
+                    <h3><i class="fas fa-exchange-alt"></i> MQTT Topics</h3>
+                    <table>
+                        <tr><th>Topic</th><th>Hướng</th><th>Mô tả</th></tr>
+                        <tr><td><code>hydro/sensor/data</code></td><td>ESP32 → Pi</td><td>Data sensor (JSON/30s)</td></tr>
+                        <tr><td><code>hydro/sensor/status</code></td><td>ESP32 → Pi</td><td>Online/offline</td></tr>
+                        <tr><td><code>hydro/control/pwm</code></td><td>Pi → ESP32</td><td>Điều khiển PWM (duty cycle)</td></tr>
+                        <tr><td><code>hydro/control/relay</code></td><td>Pi → ESP32</td><td>Bật/tắt relay</td></tr>
+                        <tr><td><code>hydro/control/config</code></td><td>Pi → ESP32</td><td>Cập nhật ngưỡng tự động</td></tr>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Software Section -->
+        <section id="software" class="section">
+            <div class="section-header"><h2><i class="fas fa-code"></i> Phần 3: Phần Mềm</h2></div>
+            <div class="content-grid">
+                <div class="info-card">
+                    <h3><i class="fas fa-folder-tree"></i> Cấu Trúc Dự Án</h3>
+                    <pre class="code-block"><code>DATN_YEN/
+├── esp32_firmware/
+│   └── main.ino
+├── pi4_server/
+│   ├── main.py
+│   ├── api/
+│   │   ├── routes.py
+│   │   └── models.py
+│   ├── services/
+│   │   ├── mqtt_service.py
+│   │   ├── websocket_service.py
+│   │   ├── influx_service.py
+│   │   ├── control_service.py
+│   │   └── ai_service.py
+│   ├── ai_models/
+│   │   ├── disease_model.tflite
+│   │   └── growth_model.pkl
+│   └── static/
+│       ├── index.html
+│       ├── css/style.css
+│       ├── js/app.js
+│       └── js/digital_twin.js
+├── scripts/
+│   ├── auto_start.sh
+│   ├── health_check.sh
+│   └── setup_pi.sh
+└── ai_training/
+    ├── disease_detection.ipynb
+    └── growth_prediction.ipynb</code></pre>
+                </div>
+                <div class="info-card">
+                    <h3><i class="fas fa-route"></i> API Endpoints</h3>
+                    <table>
+                        <tr><th>Method</th><th>Endpoint</th><th>Mô tả</th></tr>
+                        <tr><td><span class="badge mqtt">MQTT</span></td><td><code>hydro/sensor/data</code></td><td>Nhận data tự động</td></tr>
+                        <tr><td><span class="badge get">GET</span></td><td><code>/api/sensor-data/latest</code></td><td>Data mới nhất</td></tr>
+                        <tr><td><span class="badge get">GET</span></td><td><code>/api/sensor-data/history</code></td><td>Lịch sử</td></tr>
+                        <tr><td><span class="badge post">POST</span></td><td><code>/api/control/relay</code></td><td>Điều khiển relay</td></tr>
+                        <tr><td><span class="badge post">POST</span></td><td><code>/api/ai/disease-detect</code></td><td>Dự đoán bệnh</td></tr>
+                        <tr><td><span class="badge get">GET</span></td><td><code>/api/ai/growth-predict</code></td><td>Dự đoán sinh trưởng</td></tr>
+                    </table>
+                </div>
+                <div class="info-card">
+                    <h3><i class="fas fa-stream"></i> Luồng Dữ Liệu</h3>
+                    <div class="data-flow">
+                        <div class="flow-step"><i class="fas fa-microchip"></i> ESP32</div>
+                        <div class="flow-arrow">MQTT →</div>
+                        <div class="flow-step"><i class="fas fa-envelope"></i> Mosquitto</div>
+                        <div class="flow-arrow">subscribe →</div>
+                        <div class="flow-step"><i class="fas fa-server"></i> FastAPI</div>
+                        <div class="flow-arrow">WebSocket →</div>
+                        <div class="flow-step"><i class="fas fa-globe"></i> Browser</div>
+                        <div class="flow-arrow"> | OPC UA →</div>
+                        <div class="flow-step"><i class="fas fa-cube"></i> NX MCD</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- AI Section -->
+        <section id="ai" class="section">
+            <div class="section-header"><h2><i class="fas fa-brain"></i> AI Models</h2></div>
+            <div class="content-grid two-col">
+                <div class="info-card ai-card">
+                    <div class="ai-badge cnn">CNN</div>
+                    <h3>Dự Đoán Bệnh Cây</h3>
+                    <div class="ai-details">
+                        <div class="ai-row"><span class="label">Model:</span> MobileNetV2 (Transfer Learning)</div>
+                        <div class="ai-row"><span class="label">Input:</span> Ảnh lá 224×224×3</div>
+                        <div class="ai-row"><span class="label">Output:</span> Healthy / Bacterial / Fungal / Nutrient Deficiency</div>
+                        <div class="ai-row"><span class="label">Export:</span> .tflite (~10MB)</div>
+                        <div class="ai-row"><span class="label">Runtime:</span> tflite_runtime trên Pi 4</div>
+                        <div class="ai-row"><span class="label">Dataset:</span> PlantVillage + rau ăn lá</div>
+                    </div>
+                </div>
+                <div class="info-card ai-card">
+                    <div class="ai-badge xgb">XGBoost</div>
+                    <h3>Dự Đoán Sinh Trưởng</h3>
+                    <div class="ai-details">
+                        <div class="ai-row"><span class="label">Model:</span> XGBoost (Boosted Tree)</div>
+                        <div class="ai-row"><span class="label">Features:</span> Nhiệt độ, Độ ẩm, TDS, pH, Ánh sáng, Ngày trồng</div>
+                        <div class="ai-row"><span class="label">Output:</span> Số ngày còn lại đến thu hoạch</div>
+                        <div class="ai-row"><span class="label">Export:</span> .pkl (joblib)</div>
+                        <div class="ai-row"><span class="label">Runtime:</span> xgboost + joblib trên Pi 4</div>
+                        <div class="ai-row"><span class="label">Data:</span> Sensor data + thực tế trồng</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Digital Twin Section -->
+        <section id="digitaltwin" class="section">
+            <div class="section-header"><h2><i class="fas fa-cubes"></i> Digital Twin 3D — Siemens NX MCD</h2></div>
+            <div class="content-grid">
+                <div class="info-card">
+                    <h3><i class="fas fa-cube"></i> Mô Hình 3D (NX CAD)</h3>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check"></i> Vẽ 1:1 khung sắt V 2 tầng, 6 máng PVC, bể chứa</li>
+                        <li><i class="fas fa-check"></i> Đặt chính xác vị trí cảm biến (SHT31, DS18B20, TDS, pH, BH1750, Y26)</li>
+                        <li><i class="fas fa-check"></i> Đặt vị trí thiết bị chấp hành (bơm, quạt, đèn)</li>
+                        <li><i class="fas fa-check"></i> Hệ thống ống dẫn nước, van, đường điện</li>
+                    </ul>
+                </div>
+                <div class="info-card">
+                    <h3><i class="fas fa-cogs"></i> Mô Phỏng Cơ điện tử (NX MCD)</h3>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-sync-alt"></i> Bơm: PWM duty → quay nhanh/chậm theo tốc độ thật</li>
+                        <li><i class="fas fa-fan"></i> Quạt: PWM duty → cánh quạt quay realtime</li>
+                        <li><i class="fas fa-lightbulb"></i> Đèn: ON/OFF → sáng/tắt trên mô hình</li>
+                        <li><i class="fas fa-water"></i> Mực nước: Y26 → 4 mức hiển thị</li>
+                        <li><i class="fas fa-thermometer-half"></i> Sensor: hiển thị giá trị realtime trên 3D</li>
+                    </ul>
+                </div>
+                <div class="info-card full-width">
+                    <h3><i class="fas fa-network-wired"></i> Kết Nối OPC UA (Thuần phần mềm — 0đ phần cứng)</h3>
+                    <div class="data-flow" style="margin-bottom: 16px;">
+                        <div class="flow-step"><i class="fas fa-microchip"></i> ESP32</div>
+                        <div class="flow-arrow">MQTT →</div>
+                        <div class="flow-step"><i class="fas fa-server"></i> Raspberry Pi</div>
+                        <div class="flow-arrow">asyncua →</div>
+                        <div class="flow-step" style="border-color: var(--accent-purple);"><i class="fas fa-network-wired" style="color: var(--accent-purple);"></i> OPC UA Server</div>
+                        <div class="flow-arrow">TCP :4840 →</div>
+                        <div class="flow-step" style="border-color: var(--accent-purple);"><i class="fas fa-cube" style="color: var(--accent-purple);"></i> NX MCD</div>
+                    </div>
+                    <table>
+                        <tr><th>Thành phần</th><th>Chi tiết</th></tr>
+                        <tr><td>Pi (Server)</td><td>Python <code>asyncua</code> — OPC UA Server tại <code>opc.tcp://[IP]:4840</code></td></tr>
+                        <tr><td>NX MCD (Client)</td><td>External Signal Configuration → OPC UA → nhập endpoint URL</td></tr>
+                        <tr><td>Signal Mapping</td><td>Map OPC UA nodes → Signal Adapter trên mô hình 3D</td></tr>
+                        <tr><td>Dữ liệu</td><td>Sensor values + PWM duties + Relay states (realtime)</td></tr>
+                    </table>
+                </div>
+                <div class="info-card">
+                    <h3><i class="fas fa-tags"></i> OPC UA Nodes</h3>
+                    <table>
+                        <tr><th>Node ID</th><th>Kiểu</th><th>Mô tả</th></tr>
+                        <tr><td><code>ns=2;s=sensor.temp</code></td><td>Float</td><td>Nhiệt độ KK</td></tr>
+                        <tr><td><code>ns=2;s=sensor.humidity</code></td><td>Float</td><td>Độ ẩm KK</td></tr>
+                        <tr><td><code>ns=2;s=sensor.tds</code></td><td>Float</td><td>TDS (ppm)</td></tr>
+                        <tr><td><code>ns=2;s=sensor.ph</code></td><td>Float</td><td>pH</td></tr>
+                        <tr><td><code>ns=2;s=actuator.pump_dd_1..3</code></td><td>Int</td><td>PWM bơm DD</td></tr>
+                        <tr><td><code>ns=2;s=actuator.fan_1..4</code></td><td>Int</td><td>PWM quạt</td></tr>
+                        <tr><td><code>ns=2;s=actuator.light_1..4</code></td><td>Bool</td><td>Relay đèn</td></tr>
+                    </table>
+                </div>
+                <div class="info-card">
+                    <h3><i class="fas fa-download"></i> Phần Mềm Cần Cài</h3>
+                    <table>
+                        <tr><th>Phần mềm</th><th>Mục đích</th><th>Chi phí</th></tr>
+                        <tr><td>Siemens NX (Student)</td><td>Vẽ mô hình 3D CAD</td><td class="highlight">Miễn phí (SV)</td></tr>
+                        <tr><td>NX MCD module</td><td>Mô phỏng cơ điện tử</td><td>Kiểm tra license</td></tr>
+                        <tr><td>Python <code>asyncua</code></td><td>OPC UA Server trên Pi</td><td class="highlight">Miễn phí</td></tr>
+                        <tr><td>UaExpert</td><td>Test/debug OPC UA</td><td class="highlight">Miễn phí</td></tr>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Auto-restart Section -->
+        <section id="autorestart" class="section">
+            <div class="section-header"><h2><i class="fas fa-redo"></i> Auto-restart Khi Mất Điện</h2></div>
+            <div class="content-grid">
+                <div class="info-card">
+                    <h3><i class="fab fa-raspberry-pi"></i> Raspberry Pi 4 (systemd)</h3>
+                    <pre class="code-block"><code># /etc/systemd/system/hydroponic.service
+[Unit]
+Description=Hydroponic AIOT System
+After=network.target mosquitto.service influxdb.service
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/DATN_YEN/pi4_server
+ExecStartPre=/bin/sleep 10
+ExecStart=/usr/bin/python3 main.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target</code></pre>
+                </div>
+                <div class="info-card">
+                    <h3><i class="fas fa-heartbeat"></i> Health Check (cron 5 phút)</h3>
+                    <pre class="code-block"><code>#!/bin/bash
+for svc in mosquitto influxdb hydroponic; do
+    if ! systemctl is-active --quiet $svc; then
+        echo "$(date): $svc down, restarting..."
+        sudo systemctl restart $svc
+    fi
+done</code></pre>
+                </div>
+                <div class="info-card">
+                    <h3><i class="fas fa-microchip"></i> ESP32 Failsafe</h3>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-wifi"></i> Auto-reconnect WiFi</li>
+                        <li><i class="fas fa-plug"></i> Auto-reconnect MQTT broker</li>
+                        <li><i class="fas fa-shield-alt"></i> Mất MQTT > 5 phút → bơm 15p/tắt 15p tự động</li>
+                    </ul>
+                    <div class="alert-box">
+                        <i class="fas fa-car-battery"></i>
+                        <div><strong>Mini UPS 12V 2A</strong> — giữ hệ thống 10-15 phút, đủ để Pi shutdown an toàn</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Timeline Section -->
+        <section id="timeline" class="section">
+            <div class="section-header"><h2><i class="fas fa-calendar-alt"></i> Timeline (14-16 tuần)</h2></div>
+            <div class="timeline-container">
+                <div class="timeline-item"><div class="timeline-marker" style="--color: #4CAF50"></div><div class="timeline-content"><h4>Tuần 1-2</h4><p>Mua linh kiện, dựng khung, lắp máng NFT</p></div></div>
+                <div class="timeline-item"><div class="timeline-marker" style="--color: #FF9800"></div><div class="timeline-content"><h4>Tuần 3</h4><p>Đấu nối sensor + relay trên breadboard, test từng sensor</p></div></div>
+                <div class="timeline-item"><div class="timeline-marker" style="--color: #FF9800"></div><div class="timeline-content"><h4>Tuần 4</h4><p>Thiết kế PCB (EasyEDA) → đặt hàng JLCPCB</p></div></div>
+                <div class="timeline-item"><div class="timeline-marker" style="--color: #2196F3"></div><div class="timeline-content"><h4>Tuần 5</h4><p>Code ESP32 firmware, test MQTT publish</p></div></div>
+                <div class="timeline-item"><div class="timeline-marker" style="--color: #2196F3"></div><div class="timeline-content"><h4>Tuần 6</h4><p>Setup Pi: Mosquitto + InfluxDB + FastAPI + systemd</p></div></div>
+                <div class="timeline-item"><div class="timeline-marker" style="--color: #9C27B0"></div><div class="timeline-content"><h4>Tuần 7-8</h4><p>Web App frontend: Dashboard + Digital Twin + WebSocket</p></div></div>
+                <div class="timeline-item"><div class="timeline-marker" style="--color: #E91E63"></div><div class="timeline-content"><h4>Tuần 9</h4><p>Train CNN (MobileNetV2) trên Colab → deploy lên Pi</p></div></div>
+                <div class="timeline-item"><div class="timeline-marker" style="--color: #E91E63"></div><div class="timeline-content"><h4>Tuần 10</h4><p>Train XGBoost + tích hợp web</p></div></div>
+                <div class="timeline-item"><div class="timeline-marker" style="--color: #4CAF50"></div><div class="timeline-content"><h4>Tuần 11</h4><p>Hàn PCB, lắp ráp hoàn chỉnh, ươm cây</p></div></div>
+                <div class="timeline-item"><div class="timeline-marker" style="--color: #607D8B"></div><div class="timeline-content"><h4>Tuần 12-14</h4><p>Test toàn bộ, thu thập data, fix bug, test mất điện</p></div></div>
+                <div class="timeline-item"><div class="timeline-marker" style="--color: #795548"></div><div class="timeline-content"><h4>Tuần 15-16</h4><p>Viết báo cáo, chuẩn bị bảo vệ đồ án</p></div></div>
+            </div>
+        </section>
+
+        <!-- Budget Section -->
+        <section id="budget" class="section">
+            <div class="section-header"><h2><i class="fas fa-wallet"></i> Kinh Phí (~10 triệu VNĐ)</h2></div>
+            <div class="content-grid two-col">
+                <div class="info-card">
+                    <h3><i class="fas fa-microchip"></i> Điện tử & Sensor — ~2.135k</h3>
+                    <div class="budget-bar"><div class="budget-fill" style="width: 38%">2.135k</div></div>
+                    <table class="budget-table">
+                        <tr><td>ESP32 DevKit</td><td>90k</td></tr>
+                        <tr><td>SHT31</td><td>85k</td></tr>
+                        <tr><td>DS18B20</td><td>35k</td></tr>
+                        <tr><td>Gravity TDS v1.0</td><td>180k</td></tr>
+                        <tr><td>Gravity pH v2</td><td>450k</td></tr>
+                        <tr><td>BH1750 + JSN-SR04T</td><td>100k</td></tr>
+                        <tr><td>Relay 4CH × 2</td><td>70k</td></tr>
+                        <tr><td>Nguồn + LM2596</td><td>75k</td></tr>
+                        <tr><td>Mini UPS 12V</td><td>350k</td></tr>
+                        <tr><td>Camera Logitech C270</td><td>350k</td></tr>
+                        <tr><td>PCB JLCPCB + ship</td><td>150k</td></tr>
+                        <tr><td>Linh kiện lẻ</td><td>200k</td></tr>
+                    </table>
+                </div>
+                <div class="info-card">
+                    <h3><i class="fas fa-cogs"></i> Cơ khí & Ngoại vi — ~2.130k</h3>
+                    <div class="budget-bar"><div class="budget-fill cokhi" style="width: 38%">2.130k</div></div>
+                    <table class="budget-table">
+                        <tr><td>Khung sắt V lỗ</td><td>400k</td></tr>
+                        <tr><td>Máng PVC × 6</td><td>400k</td></tr>
+                        <tr><td>Bể chứa 80L</td><td>200k</td></tr>
+                        <tr><td>Ống nước + van</td><td>200k</td></tr>
+                        <tr><td>Rọ + mút xốp</td><td>100k</td></tr>
+                        <tr><td>Bơm chìm 25W</td><td>150k</td></tr>
+                        <tr><td>Bơm peristaltic × 2</td><td>200k</td></tr>
+                        <tr><td>Quạt 12V × 2</td><td>80k</td></tr>
+                        <tr><td>Đèn LED Grow × 2</td><td>400k</td></tr>
+                    </table>
+                </div>
+            </div>
+            <div class="budget-summary">
+                <div class="budget-total">
+                    <span>Tổng ước tính:</span>
+                    <span class="total-value">~5.615.000 VNĐ</span>
+                </div>
+                <div class="budget-remain">
+                    <span>Dư cho dự phòng:</span>
+                    <span class="remain-value">~4.385.000 VNĐ</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Feasibility Section -->
+        <section id="feasibility" class="section">
+            <div class="section-header"><h2><i class="fas fa-check-circle"></i> Đánh Giá Tính Khả Thi</h2></div>
+            <div class="feasibility-grid">
+                <div class="feasibility-item ok"><i class="fas fa-check-circle"></i><span>Phần cứng</span><small>Linh kiện phổ biến tại VN</small></div>
+                <div class="feasibility-item ok"><i class="fas fa-check-circle"></i><span>ESP32 + MQTT</span><small>Thư viện sẵn, tài liệu nhiều</small></div>
+                <div class="feasibility-item ok"><i class="fas fa-check-circle"></i><span>FastAPI + InfluxDB</span><small>Chạy tốt trên Pi 4 8GB</small></div>
+                <div class="feasibility-item ok"><i class="fas fa-check-circle"></i><span>WebSocket</span><small>FastAPI hỗ trợ native</small></div>
+                <div class="feasibility-item warn"><i class="fas fa-exclamation-triangle"></i><span>CNN bệnh cây</span><small>Dataset xà lách ít</small></div>
+                <div class="feasibility-item warn"><i class="fas fa-exclamation-triangle"></i><span>XGBoost</span><small>Cần data thực tế</small></div>
+                <div class="feasibility-item ok"><i class="fas fa-check-circle"></i><span>Digital Twin 2D</span><small>HTML5 Canvas/SVG trên Web</small></div>
+                <div class="feasibility-item warn"><i class="fas fa-exclamation-triangle"></i><span>Digital Twin 3D (NX MCD)</span><small>Cần license NX + MCD</small></div>
+                <div class="feasibility-item ok"><i class="fas fa-check-circle"></i><span>Auto-restart</span><small>systemd + cron chuẩn Linux</small></div>
+                <div class="feasibility-item ok"><i class="fas fa-check-circle"></i><span>Kinh phí</span><small>~5.6tr / 10tr budget</small></div>
+            </div>
+            <div class="warning-box">
+                <h4><i class="fas fa-exclamation-triangle"></i> Rủi Ro Cần Lưu Ý</h4>
+                <ul>
+                    <li>Đầu dò pH cần <strong>calibrate thường xuyên</strong> (1-2 tuần/lần)</li>
+                    <li>Dataset bệnh xà lách trên PlantVillage ít → train trên rau ăn lá nói chung</li>
+                    <li>SD card Pi dễ corrupt nếu mất điện → <strong>UPS là bắt buộc</strong></li>
+                </ul>
+            </div>
+        </section>
+
+        <footer>
+            <p>ĐATN — Ứng Dụng AIOT Trồng Xà Lách Thủy Canh NFT &copy; 2026</p>
+        </footer>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>

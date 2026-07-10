@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slide - Vai Trò Của FastAPI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #f4f7f6;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .slide-container {
+            width: 1920px;
+            height: 1080px;
+            background: linear-gradient(135deg, #f0fbff 0%, #f4f9f4 100%);
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            overflow: hidden;
+            transform-origin: top left;
+        }
+
+        /* Lưới nền kỹ thuật */
+        .slide-container::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: linear-gradient(#bee3f8 1px, transparent 1px), linear-gradient(90deg, #bee3f8 1px, transparent 1px);
+            background-size: 40px 40px;
+            opacity: 0.4;
+            z-index: 1;
+        }
+
+        .header {
+            position: absolute;
+            top: 50px;
+            left: 70px;
+            z-index: 10;
+        }
+
+        .header h1 {
+            color: #054a5c; /* Xanh FastAPI đậm */
+            font-size: 52px;
+            margin: 0;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .header h1 i { color: #009688; } /* FastAPI color */
+
+        .header .badge {
+            background-color: #009688;
+            color: white;
+            padding: 8px 18px;
+            border-radius: 8px;
+            font-size: 24px;
+            font-weight: 700;
+            vertical-align: middle;
+        }
+
+        .header p {
+            font-size: 28px;
+            color: #2c5282;
+            margin-top: 15px;
+            font-weight: 600;
+        }
+
+        .content-area {
+            position: absolute;
+            top: 200px;
+            left: 70px;
+            width: calc(100% - 140px);
+            height: calc(100% - 250px);
+            z-index: 10;
+            display: flex;
+            gap: 50px;
+        }
+
+        /* Cột bên trái: Lý do chọn FastAPI */
+        .left-panel {
+            flex: 0 0 550px;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .info-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-left: 6px solid #009688;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 8px 20px rgba(0, 150, 136, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .info-card:hover { transform: translateY(-5px); }
+
+        .info-card h3 {
+            margin: 0 0 15px 0;
+            font-size: 26px;
+            color: #1a202c;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .info-card h3 i {
+            color: #319795;
+            font-size: 32px;
+        }
+
+        .info-card p {
+            margin: 0;
+            font-size: 21px;
+            color: #4a5568;
+            line-height: 1.5;
+        }
+
+        /* Cột bên phải: 5 Nhiệm vụ cốt lõi (Mạng nhện) */
+        .right-panel {
+            flex: 1;
+            position: relative;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05);
+            border: 2px solid #e2e8f0;
+            /* Flex layout form center out */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .right-panel h2 {
+            position: absolute;
+            top: 30px;
+            left: 40px;
+            font-size: 32px;
+            color: #2b6cb0;
+            margin: 0;
+            font-weight: 800;
+        }
+
+        /* Node Trung tâm */
+        .hub-node {
+            position: absolute;
+            background: #e6fffa;
+            border: 4px solid #319795;
+            width: 240px;
+            height: 240px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            box-shadow: 0 0 40px rgba(49, 151, 149, 0.3);
+            z-index: 20;
+        }
+        
+        .hub-node i {
+            font-size: 60px;
+            color: #009688;
+            margin-bottom: 10px;
+        }
+
+        .hub-node h4 {
+            margin: 0;
+            font-size: 26px;
+            color: #234e52;
+            font-weight: 800;
+        }
+
+        /* Node Vệ Tinh */
+        .task-node {
+            position: absolute;
+            background: white;
+            padding: 20px 25px;
+            border-radius: 16px;
+            border: 2px solid #cbd5e0;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.06);
+            width: 320px;
+            z-index: 15;
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            transition: all 0.3s;
+        }
+
+        .task-node:hover {
+            border-color: #319795;
+            transform: scale(1.05);
+        }
+
+        .task-icon {
+            font-size: 36px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 70px;
+            height: 70px;
+            background: #edf2f7;
+            border-radius: 12px;
+            flex-shrink: 0;
+        }
+
+        .task-text h5 {
+            margin: 0 0 8px 0;
+            font-size: 22px;
+            color: #2d3748;
+            font-weight: 700;
+        }
+
+        .task-text p {
+            margin: 0;
+            font-size: 18px;
+            color: #718096;
+            line-height: 1.4;
+        }
+
+        /* SVG Lines for Spider Web */
+        .spider-lines {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .spider-lines path {
+            fill: none;
+            stroke: #a0aec0;
+            stroke-width: 4;
+            stroke-dasharray: 8 6;
+            animation: flow 10s linear infinite;
+        }
+        
+        @keyframes flow { to { stroke-dashoffset: -200; } }
+
+        /* Vị trí các Node Vệ Tinh */
+        /* Center Hub is calculated by CSS later, assumed at Center (565, 415) relative to right panel (1160x830) */
+
+        .pos-1 { top: 90px; left: 100px; }
+        .pos-2 { top: 90px; right: 100px; }
+        .pos-3 { top: 350px; right: 40px; }
+        .pos-4 { bottom: 100px; right: 150px; }
+        .pos-5 { bottom: 100px; left: 150px; }
+        .pos-6 { top: 350px; left: 40px; }
+
+    </style>
+</head>
+<body>
+
+<script>
+    function resizeSlide() {
+        const slide = document.getElementById('slide');
+        const scaleX = window.innerWidth / 1920;
+        const scaleY = window.innerHeight / 1080;
+        const scale = Math.min(scaleX, scaleY) * 0.95;
+        slide.style.transform = `scale(${scale})`;
+    }
+    window.addEventListener('resize', resizeSlide);
+    window.onload = resizeSlide;
+</script>
+
+<div class="slide-container" id="slide">
+    
+    <div class="header">
+        <h1><i class="fa-solid fa-bolt-lightning"></i> VAI TRÒ CỦA FASTAPI TẠI BACKEND</h1>
+        <span class="badge">Trái tim hệ thống</span>
+        <p>Kiến hình mạng nhện trực quan cho "bộ não" điều phối tín hiệu và dữ liệu</p>
+    </div>
+
+    <div class="content-area">
+        
+        <!-- Cột Giải Thích -->
+        <div class="left-panel">
+            <div class="info-card">
+                <h3><i class="fa-solid fa-rocket"></i> Hiệu Năng Tốc Độ Cao</h3>
+                <p>Nhanh ngang ngửa NodeJS và Go nhờ hỗ trợ lập trình bất đồng bộ (async/await), giúp không bị nghẽn khi hàng loạt cảm biến gửi dữ liệu về cùng lúc.</p>
+            </div>
+            <div class="info-card">
+                <h3><i class="fa-solid fa-shield-halved"></i> Kiểm Soát Chặt Chẽ</h3>
+                <p>Sử dụng <strong>Pydantic</strong> để bắt rào lỗi dữ liệu đầu vào. MQTT hay Web gửi sai định dạng (ví dụ: nhiệt độ là chữ thay vì số) sẽ bị lọc và từ chối liền.</p>
+            </div>
+            <div class="info-card">
+                <h3><i class="fa-solid fa-file-code"></i> Tự Tạo Tài Liệu API</h3>
+                <p>Tự sản sinh ra giao diện Swagger UI kiểm thử API chuyên nghiệp tự động, giúp việc ghép nối web/thiết bị dễ dàng hơn.</p>
+            </div>
+        </div>
+
+        <!-- Mạng Nhện Nhiệm Vụ -->
+        <div class="right-panel">
+            <h2>5 Trụ Cột Điều Phối</h2>
+            
+            <svg class="spider-lines">
+                <!-- Center is roughly X: 580, Y: 415 -->
+                <!-- Vẽ từ tâm ra các node vệ tinh -->
+                <path d="M 580 415 L 260 160" /> <!-- To Pos 1 -->
+                <path d="M 580 415 L 900 160" /> <!-- To Pos 2 -->
+                <path d="M 580 415 L 920 400" /> <!-- To Pos 3 -->
+                <path d="M 580 415 L 820 680" /> <!-- To Pos 4 -->
+                <path d="M 580 415 L 340 680" /> <!-- To Pos 5 -->
+                <path d="M 580 415 L 240 400" /> <!-- To Pos 6 -->
+            </svg>
+
+            <!-- Trái Tim -->
+            <div class="hub-node" style="left: calc(50% - 120px); top: calc(50% - 120px);">
+                <i class="fa-solid fa-bolt"></i>
+                <h4 style="margin-bottom: 5px;">FASTAPI</h4>
+                <div style="font-size: 16px; color:#4a5568; font-weight: 600;">Main Backend Core</div>
+            </div>
+
+            <!-- Nhiệm vụ 1: MQTT -->
+            <div class="task-node pos-1">
+                <div class="task-icon"><i class="fa-solid fa-network-wired" style="color: #2b6cb0;"></i></div>
+                <div class="task-text">
+                    <h5>Giao Tiếp Thiết Bị</h5>
+                    <p>Lắng nghe, bóc tách chuỗi JSON từ MQTT Broker gởi về, đồng thời gửi lệnh PWM khiển quạt, máy bơm.</p>
+                </div>
+            </div>
+
+            <!-- Nhiệm vụ 2: InfluxDB -->
+            <div class="task-node pos-2">
+                <div class="task-icon"><i class="fa-solid fa-database" style="color: #805ad5;"></i></div>
+                <div class="task-text">
+                    <h5>Lưu Trữ Lịch Sử</h5>
+                    <p>Chuyển đổi dữ liệu thô sang Time-Series format, ghi bất đồng bộ vào <strong>InfluxDB</strong> siêu tốc.</p>
+                </div>
+            </div>
+
+            <!-- Nhiệm vụ 3: OPC UA-->
+            <div class="task-node pos-3">
+                <div class="task-icon"><i class="fa-solid fa-cube" style="color: #dd6b20;"></i></div>
+                <div class="task-text">
+                    <h5>Cầu Nối OPC UA</h5>
+                    <p>Đẩy thông số thật vào các Node Tags, cho điểm tựa để Siemens NX MCD dựng phỏng hình 3D Digital Twin.</p>
+                </div>
+            </div>
+
+            <!-- Nhiệm vụ 4: AI -->
+            <div class="task-node pos-4">
+                <div class="task-icon"><i class="fa-solid fa-brain" style="color: #e53e3e;"></i></div>
+                <div class="task-text">
+                    <h5>Điều Phối AI</h5>
+                    <p>Chạy Inference AI: Nhận ảnh web gửi lên -> Đẩy vào CNN TFLite. Cấp dữ liệu log -> XGBoost dự báo vụ mùa.</p>
+                </div>
+            </div>
+
+            <!-- Nhiệm vụ 5: WebSocket -->
+            <div class="task-node pos-5">
+                <div class="task-icon"><i class="fa-solid fa-display" style="color: #38a169;"></i></div>
+                <div class="task-text">
+                    <h5>Thời Gian Thực Web</h5>
+                    <p>Lập tunnel <strong>WebSocket</strong> bắn dữ liệu ra Dashboard WebApp < 0.1s. Không cần làm mới trang.</p>
+                </div>
+            </div>
+            
+            <!-- Nhiệm vụ 6: REST API-->
+            <div class="task-node pos-6">
+                <div class="task-icon"><i class="fa-solid fa-code" style="color: #009688;"></i></div>
+                <div class="task-text">
+                    <h5>Điều Dưỡng RESTful</h5>
+                    <p>Cấp Endpoint JSON bài bản <code>/api/...</code> cho Chart.JS vẽ đồ thị và nút bấm bật tắt Relay từ giao diện GUI.</p>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

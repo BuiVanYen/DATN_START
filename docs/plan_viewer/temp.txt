@@ -1,0 +1,10 @@
+P18: Dung dịch dinh dưỡng được bơm liên tục vào các
+P25: điều khiển các bơm châm các chất dinh
+P31: vào mạch xử lý để điều khiển các máy bơm,điều chỉnh lượng
+P31: dung dịch bơm vào phù hợp với các thông số đã được cài đặt,
+P34: và lắp động cơ.
+P37: Stt Phần điện_Tên sản phẩm Giá
+P37: 5 Bơm lưu lượng 160,000 4 640,000
+P37: 10 Quạt 12V_DC 120mm 65,000 3 65,000
+P37: 11 Động cơ bơm chìm 12v 165,000 1 165,000
+P37: 17 máy sủi khí Resun 340,000 1 340,000

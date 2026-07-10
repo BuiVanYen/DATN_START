@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slide - Quy Trình Thực Hiện XGBoost</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background-color: #f8fafc; font-family: 'Inter', sans-serif;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        .slide-container {
+            width: 1920px; height: 1080px;
+            background: linear-gradient(135deg, #fff7ed 0%, #fefcbf 100%);
+            position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            overflow: hidden; transform-origin: top left;
+        }
+
+        .slide-container::before {
+            content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background-image:
+                linear-gradient(rgba(214, 158, 46, 0.06) 2px, transparent 2px),
+                linear-gradient(90deg, rgba(214, 158, 46, 0.06) 2px, transparent 2px);
+            background-size: 60px 60px; z-index: 1;
+        }
+
+        .header { position: absolute; top: 48px; left: 70px; z-index: 10; }
+        .header h1 {
+            color: #744210; font-size: 50px; margin: 0; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 1px; display: inline-flex; align-items: center; gap: 18px;
+        }
+        .header .badge {
+            background-color: #dd6b20; color: white; padding: 8px 18px;
+            border-radius: 8px; font-size: 23px; font-weight: 700; vertical-align: middle;
+        }
+        .header p {
+            font-size: 25px; color: #9c4221; margin-top: 13px; font-weight: 600;
+            border-left: 5px solid #dd6b20; padding-left: 15px;
+        }
+
+        .content-area {
+            position: absolute; top: 210px; left: 70px;
+            width: calc(100% - 140px); height: calc(100% - 260px);
+            z-index: 10; display: grid; grid-template-columns: 1fr 430px; gap: 34px;
+        }
+
+        .main-panel {
+            background: white; border-radius: 24px; border: 2px solid #fbd38d;
+            padding: 34px; box-shadow: 0 15px 35px rgba(0,0,0,0.06);
+            display: flex; flex-direction: column;
+        }
+
+        .main-panel h2 {
+            margin: 0 0 28px 0; color: #2f855a; font-size: 32px; text-align: center;
+        }
+
+        .steps-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+            flex: 1;
+        }
+
+        .step-card {
+            border-radius: 18px; padding: 24px 22px; position: relative;
+            border: 3px solid transparent; box-shadow: 0 12px 26px rgba(0,0,0,0.08);
+            display: flex; flex-direction: column;
+        }
+
+        .step-num {
+            position: absolute; top: -22px; left: 24px;
+            width: 46px; height: 46px; border-radius: 50%; color: white;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 22px; border: 4px solid white;
+        }
+
+        .step-icon { font-size: 42px; margin: 16px 0 14px; }
+        .step-card h3 { margin: 0 0 12px 0; font-size: 24px; color: #2d3748; }
+        .step-card p { margin: 0; font-size: 17px; color: #4a5568; line-height: 1.45; text-align: justify; }
+
+        .code-line {
+            margin-top: auto; background: rgba(26, 32, 44, 0.08); color: #744210;
+            border-left: 4px solid #dd6b20; padding: 10px 12px; border-radius: 8px;
+            font-size: 15px; font-weight: 700; font-family: monospace;
+        }
+
+        .s1 { background: #ebf8ff; border-color: #3182ce; }
+        .s1 .step-num { background: #3182ce; } .s1 .step-icon { color: #3182ce; }
+        .s2 { background: #faf5ff; border-color: #805ad5; }
+        .s2 .step-num { background: #805ad5; } .s2 .step-icon { color: #805ad5; }
+        .s3 { background: #f0fff4; border-color: #38a169; }
+        .s3 .step-num { background: #38a169; } .s3 .step-icon { color: #38a169; }
+        .s4 { background: #fffaf0; border-color: #dd6b20; }
+        .s4 .step-num { background: #dd6b20; } .s4 .step-icon { color: #dd6b20; }
+        .s5 { background: #fff5f5; border-color: #e53e3e; }
+        .s5 .step-num { background: #e53e3e; } .s5 .step-icon { color: #e53e3e; }
+        .s6 { background: #f7fafc; border-color: #4a5568; }
+        .s6 .step-num { background: #4a5568; } .s6 .step-icon { color: #4a5568; }
+
+        .side-panel {
+            display: flex; flex-direction: column; gap: 24px;
+        }
+
+        .note-card {
+            background: white; border-radius: 20px; padding: 28px;
+            border-left: 7px solid #38a169;
+            box-shadow: 0 12px 28px rgba(0,0,0,0.08);
+        }
+
+        .note-card h3 {
+            margin: 0 0 16px 0; color: #276749; font-size: 26px;
+            display: flex; align-items: center; gap: 13px;
+        }
+        .note-card p { margin: 0; color: #4a5568; font-size: 19px; line-height: 1.55; text-align: justify; }
+
+        .deliver-card {
+            background: #1a202c; color: white; border-radius: 20px; padding: 28px;
+            box-shadow: 0 12px 28px rgba(0,0,0,0.16); flex: 1;
+        }
+        .deliver-card h3 {
+            margin: 0 0 18px 0; color: #fbd38d; font-size: 25px;
+            display: flex; align-items: center; gap: 12px;
+        }
+        .deliver-item {
+            display: flex; align-items: flex-start; gap: 12px; margin-bottom: 18px;
+            color: #e2e8f0; font-size: 18px; line-height: 1.4;
+        }
+        .deliver-item i { color: #68d391; margin-top: 3px; }
+
+        .formula-card {
+            background: #fffaf0; border: 3px dashed #dd6b20; border-radius: 18px;
+            padding: 24px; text-align: center;
+        }
+        .formula-card h4 { margin: 0 0 12px 0; color: #744210; font-size: 22px; }
+        .formula-card p { margin: 0; color: #9c4221; font-size: 20px; font-weight: 800; line-height: 1.5; }
+
+        code { background: rgba(45,55,72,0.1); padding: 2px 6px; border-radius: 5px; color: #c05621; font-weight: 700; }
+    </style>
+</head>
+<body>
+<script>
+    function resizeSlide() {
+        const slide = document.getElementById('slide');
+        const scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080) * 0.95;
+        slide.style.transform = `scale(${scale})`;
+    }
+    window.addEventListener('resize', resizeSlide);
+    window.onload = resizeSlide;
+</script>
+
+<div class="slide-container" id="slide">
+    <div class="header">
+        <h1><i class="fa-solid fa-list-check"></i> NẾU LÀM CHI TIẾT XGBOOST CẦN CÁC BƯỚC GÌ?</h1>
+        <span class="badge">Implementation Plan</span>
+        <p>Quy trình biến dữ liệu cảm biến thủy canh thành mô hình dự báo sinh trưởng chạy được trên Raspberry Pi</p>
+    </div>
+
+    <div class="content-area">
+        <div class="main-panel">
+            <h2>6 bước triển khai từ dữ liệu thật đến Web UI</h2>
+            <div class="steps-grid">
+                <div class="step-card s1">
+                    <div class="step-num">1</div>
+                    <i class="fa-solid fa-database step-icon"></i>
+                    <h3>Thu thập dữ liệu</h3>
+                    <p>ESP32-S3 gửi thông số môi trường qua MQTT. FastAPI nhận dữ liệu và ghi liên tục vào InfluxDB để tạo lịch sử theo thời gian.</p>
+                    <div class="code-line">sensor_data → InfluxDB</div>
+                </div>
+
+                <div class="step-card s2">
+                    <div class="step-num">2</div>
+                    <i class="fa-solid fa-broom step-icon"></i>
+                    <h3>Làm sạch dữ liệu</h3>
+                    <p>Loại bỏ giá trị lỗi, thiếu, nhiễu bất thường. Ví dụ pH ngoài ngưỡng thực tế hoặc TDS bị nhảy đột ngột do cảm biến chưa ổn định.</p>
+                    <div class="code-line">remove null / outlier</div>
+                </div>
+
+                <div class="step-card s3">
+                    <div class="step-num">3</div>
+                    <i class="fa-solid fa-wand-magic-sparkles step-icon"></i>
+                    <h3>Tạo đặc trưng</h3>
+                    <p>Tổng hợp dữ liệu theo giờ/ngày: nhiệt độ trung bình, ánh sáng tích lũy, pH/TDS trung bình, độ dao động môi trường và tuổi cây.</p>
+                    <div class="code-line">feature engineering</div>
+                </div>
+
+                <div class="step-card s4">
+                    <div class="step-num">4</div>
+                    <i class="fa-solid fa-tags step-icon"></i>
+                    <h3>Tạo nhãn mục tiêu</h3>
+                    <p>Gán nhãn sinh trưởng dựa trên ngày trồng, ngày thu hoạch dự kiến hoặc số liệu đo thực tế như chiều cao, số lá, khối lượng cây.</p>
+                    <div class="code-line">growth_percent, days_remaining</div>
+                </div>
+
+                <div class="step-card s5">
+                    <div class="step-num">5</div>
+                    <i class="fa-solid fa-brain step-icon"></i>
+                    <h3>Huấn luyện model</h3>
+                    <p>Dùng XGBoost Regression để học quan hệ giữa môi trường và tốc độ lớn của cây. Sau đó đánh giá sai số bằng MAE/RMSE.</p>
+                    <div class="code-line">XGBRegressor.fit()</div>
+                </div>
+
+                <div class="step-card s6">
+                    <div class="step-num">6</div>
+                    <i class="fa-solid fa-server step-icon"></i>
+                    <h3>Triển khai lên hệ thống</h3>
+                    <p>Lưu model thành file, đưa vào FastAPI, tạo endpoint dự báo. Web UI gọi API để hiển thị phần trăm sinh trưởng và ngày còn lại.</p>
+                    <div class="code-line">/api/ai/growth-predict</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="side-panel">
+            <div class="note-card">
+                <h3><i class="fa-solid fa-lightbulb"></i> Ý chính khi báo cáo</h3>
+                <p>Phần XGBoost không phải điều khiển bơm/quạt trực tiếp, mà là tầng dự báo thông minh. Nó giúp người dùng biết cây đang phát triển tốt hay chậm so với điều kiện môi trường đã ghi nhận.</p>
+            </div>
+
+            <div class="formula-card">
+                <h4>Công thức hiểu đơn giản</h4>
+                <p>Dữ liệu môi trường + Tuổi cây<br>→ XGBoost<br>→ % sinh trưởng + ngày còn lại</p>
+            </div>
+
+            <div class="deliver-card">
+                <h3><i class="fa-solid fa-box-open"></i> Sản phẩm cuối cần có</h3>
+                <div class="deliver-item"><i class="fa-solid fa-check"></i><span>Bộ dữ liệu đã xử lý từ InfluxDB hoặc file CSV.</span></div>
+                <div class="deliver-item"><i class="fa-solid fa-check"></i><span>File mô hình đã huấn luyện, ví dụ <code>growth_xgboost.pkl</code>.</span></div>
+                <div class="deliver-item"><i class="fa-solid fa-check"></i><span>Endpoint FastAPI trả JSON gồm <code>growth_percent</code> và <code>days_remaining</code>.</span></div>
+                <div class="deliver-item"><i class="fa-solid fa-check"></i><span>Web UI hiển thị thanh tiến độ sinh trưởng và dự kiến ngày thu hoạch.</span></div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slide - Digital Twin Trong Đồ Án</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; }
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background-color: #0f172a; font-family: 'Inter', sans-serif;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .slide-container {
+            width: 1920px; height: 1080px;
+            background: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 100%);
+            position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            overflow: hidden; transform-origin: top left;
+        }
+        .slide-container::before {
+            content: ""; position: absolute; inset: 0;
+            background-image:
+                linear-gradient(rgba(56, 189, 248, 0.06) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(56, 189, 248, 0.06) 1px, transparent 1px);
+            background-size: 60px 60px; z-index: 1;
+        }
+        .header { position: absolute; top: 45px; left: 70px; right: 70px; z-index: 10; }
+        .header h1 {
+            color: #f8fafc; font-size: 48px; margin: 0; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 1px; display: inline-flex; align-items: center; gap: 18px;
+        }
+        .header h1 i { color: #38bdf8; }
+        .badge {
+            background-color: #0284c7; color: white; border: 1px solid #38bdf8;
+            padding: 8px 18px; border-radius: 8px; font-size: 23px; font-weight: 700;
+            margin-left: 18px; box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+        }
+        .header p {
+            font-size: 24px; color: #94a3b8; margin: 12px 0 0 0; font-weight: 500;
+            border-left: 4px solid #38bdf8; padding-left: 15px;
+        }
+        .content-area {
+            position: absolute; top: 190px; left: 70px; right: 70px; bottom: 55px;
+            z-index: 10; display: grid; grid-template-rows: 245px 1fr; gap: 28px;
+        }
+        .top-row {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px;
+        }
+        .info-card, .main-panel, .action-panel {
+            background: rgba(30, 41, 59, 0.76); border: 1px solid rgba(148, 163, 184, 0.22);
+            backdrop-filter: blur(10px); border-radius: 22px; box-shadow: 0 18px 36px rgba(0,0,0,0.25);
+        }
+        .info-card {
+            padding: 26px 28px; border-left: 7px solid #38bdf8;
+        }
+        .info-card h3 {
+            margin: 0 0 14px 0; color: #f8fafc; font-size: 25px; display: flex; align-items: center; gap: 14px;
+        }
+        .info-card h3 i { color: #38bdf8; font-size: 30px; }
+        .info-card p { margin: 0; color: #cbd5e1; font-size: 19px; line-height: 1.45; }
+        .info-card strong { color: #7dd3fc; }
+
+        .bottom-row {
+            display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 28px; min-height: 0;
+        }
+        .main-panel { padding: 28px; display: grid; grid-template-rows: auto 1fr auto; min-height: 0; }
+        .panel-title {
+            margin: 0 0 20px 0; color: #e2e8f0; font-size: 30px; font-weight: 800;
+            display: flex; align-items: center; gap: 14px; border-bottom: 2px solid rgba(56,189,248,.3); padding-bottom: 13px;
+        }
+        .panel-title i { color: #38bdf8; }
+        .twin-stage {
+            background: #0f172a; border-radius: 18px; border: 2px dashed #475569;
+            position: relative; overflow: hidden; min-height: 0;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .twin-stage::before {
+            content: ""; position: absolute; inset: 0;
+            background: radial-gradient(circle at 50% 48%, rgba(56,189,248,0.15), transparent 45%);
+        }
+        .rack {
+            width: 70%; height: 170px; border: 8px solid #cbd5e1; border-top: none;
+            border-radius: 22px; position: relative; margin-top: 110px;
+            box-shadow: 0 0 25px rgba(56,189,248,0.15);
+        }
+        .water {
+            position: absolute; left: 0; bottom: 0; width: 100%; height: 58%;
+            background: linear-gradient(90deg, #0284c7, #38bdf8, #0ea5e9, #38bdf8);
+            background-size: 240% 100%; animation: waterFlow 3s linear infinite;
+            border-radius: 0 0 12px 12px; opacity: .82;
+        }
+        @keyframes waterFlow { 100% { background-position: -240% 0; } }
+        .plants {
+            position: absolute; top: -100px; left: 0; right: 0; display: flex;
+            justify-content: space-around; padding: 0 55px;
+        }
+        .plant { font-size: 68px; animation: plantMove 3.5s ease-in-out infinite alternate; }
+        @keyframes plantMove { from { transform: scale(.95) rotate(-2deg); } to { transform: scale(1.08) rotate(2deg); } }
+        .fan { position: absolute; top: -135px; left: -42px; font-size: 56px; color: #94a3b8; animation: spin 1s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .lamp { position: absolute; top: -150px; right: 18%; font-size: 62px; color: #fbbf24; filter: drop-shadow(0 0 22px rgba(251,191,36,.9)); }
+        .sensor-badge {
+            position: absolute; background: rgba(15,23,42,0.9); color: #e2e8f0;
+            border: 1px solid #38bdf8; border-radius: 999px; padding: 9px 14px;
+            font-size: 16px; font-weight: 700; z-index: 3;
+        }
+        .b1 { left: 55px; top: 48px; } .b2 { right: 55px; top: 48px; }
+        .b3 { left: 55px; bottom: 48px; } .b4 { right: 55px; bottom: 48px; }
+        .sensor-badge i { color: #38bdf8; margin-right: 6px; }
+        .caption {
+            margin: 18px 0 0 0; color: #cbd5e1; font-size: 18px; line-height: 1.45; text-align: center;
+        }
+        .caption strong { color: #38bdf8; }
+
+        .action-panel { padding: 28px; display: flex; flex-direction: column; min-height: 0; }
+        .actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .action-item {
+            background: rgba(15, 23, 42, 0.68); border: 1px solid rgba(51, 65, 85, 0.9);
+            border-radius: 16px; padding: 18px; min-height: 135px;
+        }
+        .action-head { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+        .action-icon {
+            width: 46px; height: 46px; border-radius: 12px; display: flex; justify-content: center; align-items: center;
+            flex-shrink: 0; font-size: 22px;
+        }
+        .ic-blue { background: rgba(56,189,248,.15); color: #38bdf8; }
+        .ic-green { background: rgba(16,185,129,.15); color: #10b981; }
+        .ic-yellow { background: rgba(251,191,36,.15); color: #fbbf24; }
+        .ic-purple { background: rgba(139,92,246,.15); color: #8b5cf6; }
+        .ic-red { background: rgba(248,113,113,.15); color: #f87171; }
+        .action-item h4 { margin: 0; color: #f8fafc; font-size: 19px; }
+        .action-item p { margin: 0; color: #94a3b8; font-size: 15.5px; line-height: 1.36; }
+        .summary {
+            margin-top: auto; background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56,189,248,.35);
+            border-radius: 16px; padding: 18px; color: #e0f2fe; font-size: 17px; line-height: 1.4;
+        }
+        .summary strong { color: #7dd3fc; }
+    </style>
+</head>
+<body>
+<script>
+    function resizeSlide() {
+        const slide = document.getElementById('slide');
+        const scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080) * 0.95;
+        slide.style.transform = `scale(${scale})`;
+    }
+    window.addEventListener('resize', resizeSlide);
+    window.onload = resizeSlide;
+</script>
+
+<div class="slide-container" id="slide">
+    <div class="header">
+        <h1><i class="fa-solid fa-cubes"></i> DIGITAL TWIN TRONG ĐỒ ÁN LÀM ĐƯỢC GÌ?</h1>
+        <span class="badge">2D Web + 3D Siemens NX</span>
+        <p>Bản sao số giúp nhìn thấy trạng thái thật của hệ thống thủy canh trên giao diện mô phỏng</p>
+    </div>
+
+    <div class="content-area">
+        <div class="top-row">
+            <div class="info-card">
+                <h3><i class="fa-solid fa-clone"></i> Digital Twin là gì?</h3>
+                <p>Là <strong>bản sao số</strong> của mô hình thủy canh. Khi bơm, quạt, đèn, cảm biến ngoài đời thay đổi thì mô hình số cũng thay đổi theo.</p>
+            </div>
+            <div class="info-card">
+                <h3><i class="fa-solid fa-route"></i> Dữ liệu đi như thế nào?</h3>
+                <p>ESP32-S3 gửi dữ liệu qua MQTT về FastAPI. Web UI nhận bằng WebSocket, còn Siemens NX đồng bộ qua OPC UA.</p>
+            </div>
+            <div class="info-card">
+                <h3><i class="fa-solid fa-bullseye"></i> Mục tiêu đồ án</h3>
+                <p>Biến dữ liệu cảm biến thành hình ảnh dễ hiểu: nước chảy, quạt quay, đèn sáng, cây tăng trưởng và cảnh báo lỗi.</p>
+            </div>
+        </div>
+
+        <div class="bottom-row">
+            <div class="main-panel">
+                <h2 class="panel-title"><i class="fa-solid fa-desktop"></i> Mô phỏng trực quan trên Web UI</h2>
+                <div class="twin-stage">
+                    <div class="sensor-badge b1"><i class="fa-solid fa-temperature-half"></i> 28.5°C</div>
+                    <div class="sensor-badge b2"><i class="fa-solid fa-vial"></i> pH 6.2</div>
+                    <div class="sensor-badge b3"><i class="fa-solid fa-droplet"></i> TDS 850 ppm</div>
+                    <div class="sensor-badge b4"><i class="fa-solid fa-sun"></i> LED ON</div>
+                    <div class="rack">
+                        <i class="fa-solid fa-fan fan"></i>
+                        <i class="fa-solid fa-lightbulb lamp"></i>
+                        <div class="plants"><span class="plant">🥬</span><span class="plant">🪴</span><span class="plant">🥬</span></div>
+                        <div class="water"></div>
+                    </div>
+                </div>
+                <p class="caption">Bật bơm → <strong>nước ảo chảy</strong>, bật quạt → <strong>quạt quay</strong>, bật đèn → <strong>mô hình phát sáng</strong>.</p>
+            </div>
+
+            <div class="action-panel">
+                <h2 class="panel-title"><i class="fa-solid fa-list-check"></i> Có thể làm gì?</h2>
+                <div class="actions-grid">
+                    <div class="action-item">
+                        <div class="action-head"><div class="action-icon ic-blue"><i class="fa-solid fa-eye"></i></div><h4>Giám sát</h4></div>
+                        <p>Xem nhiệt độ, pH, TDS, ánh sáng, mực nước theo thời gian thực.</p>
+                    </div>
+                    <div class="action-item">
+                        <div class="action-head"><div class="action-icon ic-green"><i class="fa-solid fa-toggle-on"></i></div><h4>Đồng bộ</h4></div>
+                        <p>Trạng thái bơm, quạt, đèn ngoài đời được phản ánh trên mô hình số.</p>
+                    </div>
+                    <div class="action-item">
+                        <div class="action-head"><div class="action-icon ic-yellow"><i class="fa-solid fa-triangle-exclamation"></i></div><h4>Cảnh báo</h4></div>
+                        <p>Thông số vượt ngưỡng thì đổi màu, hiện cảnh báo để xử lý.</p>
+                    </div>
+                    <div class="action-item">
+                        <div class="action-head"><div class="action-icon ic-purple"><i class="fa-solid fa-cube"></i></div><h4>NX 3D</h4></div>
+                        <p>OPC UA truyền tag sang Siemens NX MCD để mô hình 3D phản ứng.</p>
+                    </div>
+                    <div class="action-item">
+                        <div class="action-head"><div class="action-icon ic-red"><i class="fa-solid fa-brain"></i></div><h4>Hiển thị AI</h4></div>
+                        <p>CNN báo bệnh, XGBoost báo % sinh trưởng trên mô hình cây.</p>
+                    </div>
+                    <div class="action-item">
+                        <div class="action-head"><div class="action-icon ic-blue"><i class="fa-solid fa-chart-line"></i></div><h4>Theo dõi</h4></div>
+                        <p>Lưu lịch sử để so sánh trạng thái hiện tại với dữ liệu trước đó.</p>
+                    </div>
+                </div>
+                <div class="summary"><strong>Kết luận:</strong> Digital Twin là lớp trình diễn trực quan, giúp nhìn thấy toàn bộ trạng thái IoT, điều khiển và AI của hệ thủy canh.</div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

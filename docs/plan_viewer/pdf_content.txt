@@ -1,0 +1,362 @@
+--- PAGE 1 ---
+
+--- PAGE 2 ---
+I. Giới thiệu đề tài
+a. Tóm tắt đề tài
+b. Tổng quan tình hình nguyên cứu
+--- PAGE 3 ---
+a. Tóm tắt đề 
+tài
+- Vấn đề thực phẩm sạch
+
+--- PAGE 4 ---
+- Nhu cầu 
+trồng rau tại 
+nhà của các 
+hộ gia đình
+
+--- PAGE 5 ---
+b. Tổng 
+quan tình 
+hình 
+nghiên cứu 
+và tính cấp 
+thiết
+Tình hình thế giới
+Tình hình trong nước
+Đánh giá kết quả
+--- PAGE 6 ---
+Tình hình thế giới
+• Trong đó:
+• + Nhật Bản chiếm 55,43%
+• + Hàn Quốc chiếm 21,96%
+• + Mỹ chiếm 1,98%
+• + Còn 20,63% ở những nước Australia, 
+Canada, Đức, Anh, Trung Quốc, Nga, 
+Israel.
+
+--- PAGE 7 ---
+- Các sản phẩm tiêu 
+biểu:
+• + Hệ thống thủy canh của sinh viên trường 
+Miramar International College, ở Kenya.
+--- PAGE 8 ---
+- Phương pháp thủy
+canh sử dụng chất
+liệu polyme trong
+suốt của Yuichi 
+Mori ở nhật
+--- PAGE 9 ---
+- Phương pháp thủy canh sử
+dụng công nghệ cao của Park 
+Hong Hee ở Hàn Quốc
+--- PAGE 10 ---
+Tình hình trong
+nước
+• + Các sự kiện về
+nông nghiệp
+• + Những hội chợ và
+triển lãm về nông
+nghiệp
+
+--- PAGE 11 ---
+- Các sản phẩm tiêu biểu:
++ Hệ thống trồng rau thủy canh của nhóm HACHI: sử dụng phương
+pháp IoT để giám sát các loại cảm biến, tự động theo dõi qua 
+smartphone.
+
+--- PAGE 12 ---
++ Gia đình chị Nguyễn Thị Hòa ở xã Vũ Hòa, huyện Đức
+Linh với phương pháp thủy canh với mô hình dạng bấc
+
+--- PAGE 13 ---
+Anh Nguyễn Việt Lâm, xã Kháng Nhật, huyện Sơn Dương, tỉnh Tuyên Quang dùng
+phương pháp thủy canh với mô hình khí canh
+--- PAGE 14 ---
+• Đánh giá kết
+quả
+- Ưu điểm:
++ Không phải làm đất không có
+cỏ dại.
++Trồng được nhiều vụ, có thể
+trái vụ, không cần tưới.
++Không phải sử dụng thuốc trừ
+sâu bệnh, trừ cỏ dại.. 
++Năng suất cao hơn từ 25% đến
+50%.
++Sản phẩm hoàn toàn sạch đồng
+nhất.
++Người gìa yếu trẻ em có thể
+tham gia có hiệu quả.4
++Không tích lũy chất độc, không
+gây ô nhiễm môi trường.
+--- PAGE 15 ---
+Khuyết:
++ chỉ có thể trồng một số
+loại cây nhất định (phụ
+thuộc vào nhiệt độ môi
+trường bên ngoài.
++ Chi phí lắp đặt lớn.
+--- PAGE 16 ---
+Những tồn tại:
++ Cần phải tạo điều
+kiện tốt để cây quang
+hợp.
++ Thường xuyên phải
+kiểm tra nồng độ PH để
+đảm bảo dinh dưỡng
+cho cây.
++ Liên tục cung cấp
+nước sạch cho cây vào
+trời nóng.
+--- PAGE 17 ---
+Hệ thống thủy canh NFT
+Hydropc systeonim
+
+--- PAGE 18 ---
+Kỹ thuật màng mỏng dinh dưỡng ( Nutrient film 
+technique ) hay còn được gọi tắt là NFT.
+Khái niệm1
+Đây là một hệ thống thủy canh mang tính linh hoạt cao
+và sử dụng khá phổ biến hiện nay.
+Tính phổ biến2
+Dung dịch dinh dưỡng được bơm liên tục vào các 
+ống thủy canh chuyên dụng và chảy qua rễ của cây, 
+sau đó chúng chảy về bồn chứa để tái sử dụng.
+Nguyên lý hoạt động3
+Giải pháp thủy canh là giải pháp hoàn hảo nhất để bạn 
+có được nguồn cung thực phẩm an toàn và tiết 
+kiệm.Có thể tái sử dụng hệ thống,thân thiện với môi
+trường.
+Tính an toàn4
+Tổng quan về hệ thống thủy
+canh NFT
+--- PAGE 19 ---
+Iot trên hệ thống thủy canh NFT
+Áp dụng trên nền tảng liên kết với
+internet.Nên việc sử dụng ,điều khiển phù
+hợp với nhiều độ tuổi.
+Tính năng sử dụng phù hợp
+Hoạt động trên nền tảng iot,nên quá chăm
+sóc được điều chỉnh,giám sát tự động.
+Giảm thời gian chăm sóc
+Sử dụng nguồn tài nguyên sạch cho hệ thống.
+Tích trữ năng lượng cho hệ thống bằng pin năng lượng
+Tùy vào loại cây trồng mà chế độ dinh
+dưỡng của các cây khác nhau.
+Pha trộn điều chỉnh chất dinh dưỡng
+Giám sát, theo dõi hệ thống trên nền tảng
+web sever.
+Giám sát hệ thống
+
+--- PAGE 20 ---
+Mục tiêu cụ thể
+• Chế tạo mô hình trồng rau thủy canh theo phương 
+pháp NFT, có các chức năng:
+• - Hệ thống có thể tự động giám sát nhiệt độ và độ ẩm 
+từ đó điều chỉnh môi trường tốt nhất cho cây phát triển.
+• - Hệ thống tự động pha trộn các chất dinh dưỡng theo 
+tỉ lệ hợp lý tùy thuộc vào công thức dinh dưỡng của từng 
+loại cây trồng khác nhau.
+
+--- PAGE 21 ---
+Hệ thống có webserver cho phép người trồng có thể giám sát và điều khiển qua điện
+thoại di động, máy tính, lưu trữ thông số đo lên đám mây, xây dựng đồ thị và làm
+báo cáo.
+
+--- PAGE 22 ---
+
+--- PAGE 23 ---
+- Tạo ra nguồn thực phẩm xanh-sạch, 
+để đáp ứng nhu cầu thực phẩm sạch
+của người tiêu dung.
+- Giúp tăng năng suất cây trồng.
+--- PAGE 24 ---
+c. Phương pháp nghiên cứu, 
+kỹ thuật sử dụng:
+Phương pháp nghiên cứu, kỹ thuật
+sử dụng: 
+• - Sử dụng kỹ thuật cảm biến để đo
+lường các thông số môi trường và
+điều chỉnh môi trường cho phù hợp
+để cây trồng phát triển.
+--- PAGE 25 ---
+- Sử dụng cảm biến để đo nồng độ của 
+các chất dinh dưỡng, thiết kế hệ thống 
+điều khiển để hệ thống có thể tự động 
+điều khiển các bơm châm các chất dinh 
+dưỡng theo tỉ lệ phù hợp với từng loại 
+cây trồng
+
+--- PAGE 26 ---
+- Thiết kế hệ thống
+webserver cho phép
+hiển thị trạng thái các
+thông số trên giao diện
+người dùng, lưu trữ dự
+liệu trên đám mây, cho
+phép vẽ đồ thị và làm
+báo cáo.
+
+--- PAGE 27 ---
+- Truy cập từ xa
+giám sát và điều
+khiển từ
+smartphone hay từ
+máy tính.
+
+--- PAGE 28 ---
+- Khung cơ khí
++ Thu thập dữ 
+liệu, phân tích và 
+nghiên cứu kỹ 
+thuật trồng rau 
+thủy canh hồi 
+lưu
++ Thiết kế và 
+tính toán cho hệ 
+thống cơ khí của 
+mô hình thủy 
+canh hồi lưu
+
+--- PAGE 29 ---
+Mô hình cơ khí 
+tham khảo
+
+--- PAGE 30 ---
+Mô hình cơ
+khí được
+thiết kế
+
+--- PAGE 31 ---
+Điện tử
+• Nguyên lý:
+Sử dụng cảm biến PH và cảm biến TDS để phân tích nồng độ
+PH và chất dinh dưỡng trong dung dịch sau đó đưa dữ liệu
+vào mạch xử lý để điều khiển các máy bơm,điều chỉnh lượng
+dung dịch bơm vào phù hợp với các thông số đã được cài đặt, 
+kết hợp với cảm biến nhiệt độ để điều chỉnh quạt thông gió
+để cân bằng nhiệt độ, dữ liệu được đưa lên web để người vận
+hành có thể thuận tiện theo dõi và trực tiếp điều kiển hệ
+thống.
+--- PAGE 32 ---
+Sơ đồ
+nguyên lý
+--- PAGE 33 ---
+Giao diện web
+--- PAGE 34 ---
+IV. Kế hoạch 
+triển khai
+Nội 
+dung Công việc thực hiện Kết quả phải đạt    
+Thời gian 
+(bắt đầu, 
+kết thúc)
+Cá nhân chủ 
+trì
+1 Tìm hiểu và thu thập tài
+liệu.
+Thu thập đầy đủ thông tin 
+cần thiết để nghiên cứu .
+2 tuần Nguyễn 
+Thành
+2 Thiết kế cơ khí. Hoàn thành bản vẽ 3D. 4 tuần Bùi Tấn 
+Phong
+3 Thực hiện gia công sản 
+phẩm mẫu .
+Ra được sản phẩm mẫu, 
+đáp ứng được yêu cầu khi 
+thiết kế.
+4 tuần Bùi Tấn 
+Phong
+4 Thiết kế mạch và lắp tụ
+điện, đi dây ống nước
+và lắp động cơ.
+Hệ thống điện phải ổn
+định, đáp ứng được nhu
+cầu của người dùng.
+4 tuần Phạm Quang 
+Đạt
+5 Lập trình và chạy thử 
+nghiệm sản phẩm.
+Sản phẩm chạy được đáp 
+ứng được những yêu cầu, 
+sản phẩm phải chạy ộn 
+định.
+6 tuần Huỳnh Huy 
+Hoàng
+6 Ghi chép và thu thập số 
+liệu trong quá trình hoàn 
+thiện sản phẩm.
+Thu thập đầy đủ 
+hình ảnh và thông tin
+20 tuần Trần Công
+Khải
+.....
+--- PAGE 35 ---
+GIÁ THÀNH KHUNG 
+CƠ KHÍ VÀ THIẾT BỊ 
+ĐIỆN
+--- PAGE 36 ---
+Khung cơ khí 
+TT Nội dung Đơn vị đo Số lượng Đơn giá Thành tiền
+1
+Ống Nhựa Lục Giác Chuyên Dụng Trồng Rau Thủy Canh m 12 m 55 000 đồng 660 000 đồng
+2
+Nắp Bít Trước Ống Lục Giác 24 cái 10 000 đồng 240 000 đồng
+3 Nhôm định hình m 16 m 80 000 đồng 1 280 000 đồng
+4 Ke vuông nhôm định hình 40 cái 3 000 đồng 120 000 đồng
+5
+Bulong chữ T M5-10mm 162 cái 1 500 đồng 243 000 đồng
+6 Ốc vuông M5 cho nhôm định hình 20x20 162 cái 2 000 đồng 260 000 đồng
+7 Bản lề dùng cho nhôm định hình 40x40 6 cái 20 000 đồng 324 000 đồng
+8 Mica Trắng sữa 2mm 1 tấm (1.2x2.4) 3 tấm 710 000 đồng 2 130 000 đồng
+9 Chi phí cắt laser mica 100 000 đồng
+10 Gá đỡ 3D 48 15 000 đồng 720 000 đồng
+11
+Thùng Nhựa Chữ Nhật 50 Lít 1 cái 200 000 đồng 200 000 đồng
+12 Đầu nối ống nhựa chữ T 20 6 000 đồng 120 000 đồng
+13 Ống xilanh phi 8 m 15 m 8 000 đồng 120 000 đồng
+14 bu long inox M5 200 cái 500 đồng 100 000 đồng
+15 Tán inox 304 M5 200 cái 400 đồng 80 000 đồng
+16 Chai Nhựa HDPE Trắn 1000ml Loại dày 3 cái 15 000 đồng 45 000 đồng
+Cộng 6 742 000 đồng
+--- PAGE 37 ---
+Stt Phần điện_Tên sản phẩm Giá
+(VND)
+Số Lượng Thành tiền
+(VND)
+1 Cảm biến đo pH 1,550,000 1 1,550,00
+2 Cảm biến TDS 470,000 1 470,000
+3 Cảm biến lưu lượng nước 145,000 1 145,000
+4 Cảm biến mức chất lỏng 135,000 5 675,000
+5 Bơm lưu lượng 160,000 4 640,000
+6 Mạch  ESP32S NodeMCU LuaNode32 CH340C 190,000 1 190,000
+7 Đế Ra Chân Nano IO Shield 30,000 1 30,000
+8 Bộ Raspberry Pi 3 (Model B+)+vỏ case+ nguồn,+thẻ SD+cáp 1,725,000 1 1,725,000
+9 Màn Hình Cảm Ứng 7 Inch Raspberry Pi 1.752.000 1 1,752,000
+10 Quạt 12V_DC 120mm 65,000 3 65,000
+11 Động cơ bơm chìm 12v 165,000 1 165,000
+12 Tủ điện nhựa 300x400 mm 370,000 1 370,000
+13 siết cáp dây điện chống nước 2000 10 20,000
+14 Cos nối dây(bich 100 cái) 80,000 1 80,000
+15 Dây điện 0.5mm(đỏ+đen) 5000 10 50,000
+16 Dây điện 0.3mm(nhiều màu) 3000 10 30,000
+17 máy sủi khí Resun 340,000 1 340,000
+18 Cảm biến nhiệt độ và độ ẩm SHT30 315,000 1 315,000
+19 Module Thu Phát RF CC1101 + Antenna 72,000 1 72,000
+20 Nguồn tổ ong 12-20A vỏ nhựa 360,000 1 360,000
+21 Adapter 5v-10A 135,000 1 135,000
+22 Củ sạc điện thoại 120,000 1 120,000
+23 Tấm pin năng lượng mặt trời 100w 1,200,000 1 1,200,000
+24 Bộ sạc pin năng lượng mặt trời SCF-20A 200,000 1 200,000
+25 Bình Ắc quy Delkor 50D20L/R 1450,000 1 1450,000
+26 Gen co nhiệt 3000 10 30,000
+Tổng 12,179,000
+--- PAGE 38 ---
+TỔNG GIÁ THÀNH CỦA MÔ HÌNH
+Khung cơ khí 6,742,000 VND
+Thiết bị điện 12,179,000 VND
+Phí vận chuyển 500,000 VND
+Tổng 19,421,000 VND
+--- PAGE 39 ---

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slide - XGBoost Trong Đồ Án</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background-color: #f8fafc; font-family: 'Inter', sans-serif;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        .slide-container {
+            width: 1920px; height: 1080px;
+            background: linear-gradient(135deg, #fff7ed 0%, #fefcbf 100%);
+            position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            overflow: hidden; transform-origin: top left;
+        }
+
+        .slide-container::before {
+            content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background-image:
+                linear-gradient(rgba(214, 158, 46, 0.06) 2px, transparent 2px),
+                linear-gradient(90deg, rgba(214, 158, 46, 0.06) 2px, transparent 2px);
+            background-size: 60px 60px; z-index: 1;
+        }
+
+        .header { position: absolute; top: 45px; left: 70px; z-index: 10; }
+        .header h1 {
+            color: #744210; font-size: 48px; margin: 0; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 1px; display: inline-flex; align-items: center; gap: 18px;
+        }
+        .header .badge {
+            background-color: #dd6b20; color: white; padding: 8px 18px;
+            border-radius: 8px; font-size: 23px; font-weight: 700; vertical-align: middle;
+        }
+        .header p { font-size: 24px; color: #9c4221; margin-top: 12px; font-weight: 600; border-left: 5px solid #dd6b20; padding-left: 15px; }
+
+        .content-area {
+            position: absolute; top: 205px; left: 70px;
+            width: calc(100% - 140px); height: calc(100% - 250px);
+            z-index: 10; display: grid; grid-template-columns: 470px 1fr; gap: 30px;
+        }
+
+        /* LEFT: Explanation Cards */
+        .left-panel { display: flex; flex-direction: column; gap: 22px; }
+        .info-card {
+            background: white; border-left: 6px solid #dd6b20; border-radius: 14px;
+            padding: 28px 28px; box-shadow: 0 10px 24px rgba(221, 107, 32, 0.12);
+            flex: 1; display: flex; flex-direction: column; justify-content: center;
+        }
+        .info-card h3 { margin: 0 0 14px 0; color: #744210; font-size: 25px; display: flex; align-items: center; gap: 14px; }
+        .info-card h3 i { color: #dd6b20; font-size: 30px; }
+        .info-card p { margin: 0; color: #4a5568; font-size: 20px; line-height: 1.5; text-align: justify; }
+        .info-card strong { color: #c05621; }
+
+        /* RIGHT: System Flow */
+        .right-panel {
+            background: white; border-radius: 24px; border: 2px solid #fbd38d;
+            padding: 28px; box-shadow: 0 15px 35px rgba(0,0,0,0.06);
+            display: flex; flex-direction: column; min-width: 0;
+        }
+        .right-panel h2 { margin: 0 0 24px 0; color: #2f855a; font-size: 30px; text-align: center; }
+
+        .pipeline {
+            display: grid; grid-template-columns: repeat(5, 1fr); align-items: stretch; gap: 16px;
+            flex: 1;
+        }
+        .stage {
+            min-width: 0; min-height: 0; border-radius: 18px; padding: 24px 16px 20px;
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+            text-align: center; position: relative; box-shadow: 0 12px 26px rgba(0,0,0,0.08);
+            border: 3px solid transparent;
+        }
+        .stage::after {
+            content: "\f061"; font-family: "Font Awesome 6 Free"; font-weight: 900;
+            position: absolute; right: -24px; top: 50%; transform: translateY(-50%);
+            font-size: 28px; color: #a0aec0; z-index: 20;
+        }
+        .stage:last-child::after { display: none; }
+        .stage .num {
+            position: absolute; top: -22px; width: 44px; height: 44px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; color: white;
+            font-size: 21px; font-weight: 800; border: 4px solid white;
+        }
+        .stage i { font-size: 46px; margin: 20px 0 15px; }
+        .stage h4 { margin: 0 0 12px 0; font-size: 22px; color: #2d3748; }
+        .stage p { margin: 0; font-size: 16px; color: #4a5568; line-height: 1.42; }
+
+        .st-data { background: #ebf8ff; border-color: #3182ce; }
+        .st-data .num { background: #3182ce; } .st-data i { color: #3182ce; }
+        .st-feature { background: #faf5ff; border-color: #805ad5; }
+        .st-feature .num { background: #805ad5; } .st-feature i { color: #805ad5; }
+        .st-model { background: #f0fff4; border-color: #38a169; }
+        .st-model .num { background: #38a169; } .st-model i { color: #38a169; }
+        .st-api { background: #fffaf0; border-color: #dd6b20; }
+        .st-api .num { background: #dd6b20; } .st-api i { color: #dd6b20; }
+        .st-ui { background: #fff5f5; border-color: #e53e3e; }
+        .st-ui .num { background: #e53e3e; } .st-ui i { color: #e53e3e; }
+
+        .arrow { display: none; }
+
+        .tree-mini {
+            display: flex; justify-content: center; gap: 6px; margin: 12px 0 10px;
+        }
+        .tree-mini span {
+            background: white; border: 2px solid #68d391; color: #276749;
+            border-radius: 8px; padding: 7px 8px; font-weight: 800; font-size: 13px;
+        }
+
+        .bottom-strip {
+            margin-top: 24px; background: #1a202c; border-radius: 14px; padding: 18px 24px;
+            display: grid; grid-template-columns: 1fr 1fr 1.2fr; gap: 22px;
+            color: #e2e8f0;
+        }
+        .metric { border-left: 4px solid #fbd38d; padding-left: 14px; }
+        .metric h5 { margin: 0 0 8px 0; color: #fbd38d; font-size: 19px; }
+        .metric p { margin: 0; color: #cbd5e0; font-size: 16px; line-height: 1.35; }
+        code { background: rgba(45,55,72,0.1); padding: 2px 6px; border-radius: 5px; color: #c05621; font-weight: 700; }
+        .bottom-strip code { background: rgba(255,255,255,0.1); color: #9ae6b4; }
+    </style>
+</head>
+<body>
+<script>
+    function resizeSlide() {
+        const slide = document.getElementById('slide');
+        const scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080) * 0.95;
+        slide.style.transform = `scale(${scale})`;
+    }
+    window.addEventListener('resize', resizeSlide);
+    window.onload = resizeSlide;
+</script>
+
+<div class="slide-container" id="slide">
+    <div class="header">
+        <h1><i class="fa-solid fa-seedling"></i> XGBOOST SẼ LÀM GÌ TRONG ĐỒ ÁN?</h1>
+        <span class="badge">Growth Prediction</span>
+        <p>Dự báo phần trăm sinh trưởng và số ngày còn lại đến kỳ thu hoạch cho hệ thống thủy canh NFT</p>
+    </div>
+
+    <div class="content-area">
+        <div class="left-panel">
+            <div class="info-card">
+                <h3><i class="fa-solid fa-circle-question"></i> Vai trò của XGBoost</h3>
+                <p>Trong hệ thống này, <strong>CNN</strong> dùng để nhìn ảnh lá và phát hiện bệnh. Còn <strong>XGBoost</strong> dùng để đọc dữ liệu dạng số từ cảm biến, sau đó dự báo cây đang phát triển được bao nhiêu phần trăm và còn khoảng bao nhiêu ngày nữa đến lúc thu hoạch.</p>
+            </div>
+
+            <div class="info-card">
+                <h3><i class="fa-solid fa-table-list"></i> Vì sao phù hợp?</h3>
+                <p>Dữ liệu thủy canh chủ yếu là dữ liệu bảng: nhiệt độ, độ ẩm, pH, TDS, ánh sáng, nhiệt độ nước theo thời gian. XGBoost rất mạnh với loại dữ liệu này vì nó ghép nhiều cây quyết định nhỏ lại, cây sau học để sửa sai cho cây trước.</p>
+            </div>
+
+            <div class="info-card">
+                <h3><i class="fa-solid fa-bullseye"></i> Kết quả cần đạt</h3>
+                <p>Đầu ra không phải là nhãn đúng/sai, mà là bài toán <strong>hồi quy</strong>: dự đoán <code>growth_percent</code> từ 0% đến 100% và <code>days_remaining</code> để hiển thị trực tiếp lên Web UI.</p>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <h2>Luồng triển khai XGBoost trong hệ thống thực tế</h2>
+            <div class="pipeline">
+                <div class="stage st-data">
+                    <div class="num">1</div>
+                    <i class="fa-solid fa-database"></i>
+                    <h4>Lấy dữ liệu</h4>
+                    <p>FastAPI đọc dữ liệu cảm biến lịch sử từ <strong>InfluxDB</strong>: nhiệt độ, độ ẩm, pH, TDS, ánh sáng, nhiệt độ nước.</p>
+                </div>
+
+                <i class="fa-solid fa-arrow-right arrow"></i>
+
+                <div class="stage st-feature">
+                    <div class="num">2</div>
+                    <i class="fa-solid fa-filter"></i>
+                    <h4>Tạo đặc trưng</h4>
+                    <p>Tính trung bình, min/max, tổng ánh sáng theo ngày, độ ổn định pH/TDS và tuổi cây theo lứa trồng.</p>
+                </div>
+
+                <i class="fa-solid fa-arrow-right arrow"></i>
+
+                <div class="stage st-model">
+                    <div class="num">3</div>
+                    <i class="fa-solid fa-chart-line"></i>
+                    <h4>Mô hình XGBoost</h4>
+                    <p>Nhiều cây quyết định học nối tiếp nhau. Mỗi cây mới tập trung sửa phần sai số của các cây trước.</p>
+                    <div class="tree-mini">
+                        <span>Tree 1</span><span>Tree 2</span><span>Tree N</span>
+                    </div>
+                    <p style="font-size:15px;color:#2f855a;font-weight:700;">Boosting = học dần để giảm lỗi dự báo</p>
+                </div>
+
+                <i class="fa-solid fa-arrow-right arrow"></i>
+
+                <div class="stage st-api">
+                    <div class="num">4</div>
+                    <i class="fa-solid fa-server"></i>
+                    <h4>Đưa lên API</h4>
+                    <p>Backend tạo endpoint <code>/api/ai/growth-predict</code>, chạy định kỳ hoặc khi Web UI yêu cầu.</p>
+                </div>
+
+                <i class="fa-solid fa-arrow-right arrow"></i>
+
+                <div class="stage st-ui">
+                    <div class="num">5</div>
+                    <i class="fa-solid fa-desktop"></i>
+                    <h4>Hiển thị Web UI</h4>
+                    <p>Dashboard hiển thị % sinh trưởng, số ngày còn lại và lưu kết quả vào InfluxDB để theo dõi lịch sử.</p>
+                </div>
+            </div>
+
+            <div class="bottom-strip">
+                <div class="metric">
+                    <h5><i class="fa-solid fa-right-to-bracket"></i> Input</h5>
+                    <p><code>air_temp</code>, <code>humidity</code>, <code>water_temp</code>, <code>pH</code>, <code>TDS</code>, <code>light</code>, tuổi cây.</p>
+                </div>
+                <div class="metric">
+                    <h5><i class="fa-solid fa-right-from-bracket"></i> Output</h5>
+                    <p><code>growth_percent</code> và <code>days_remaining</code> phục vụ dự báo tiến độ vụ trồng.</p>
+                </div>
+                <div class="metric">
+                    <h5><i class="fa-solid fa-link"></i> Liên kết hệ thống</h5>
+                    <p>InfluxDB lưu dữ liệu → FastAPI gọi model → Web UI hiển thị → OPC UA/Digital Twin có thể đồng bộ trạng thái.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

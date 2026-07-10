@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sơ Đồ Khối Hệ Thống AIOT Thủy Canh NFT</title>
+    <meta name="description" content="Sơ đồ khối hệ thống tương tác thông minh cho đồ án tốt nghiệp Ứng dụng AIOT trồng xà lách thủy canh NFT. Thiết kế chi tiết phần cứng, kết nối và luồng dữ liệu.">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- App Container -->
+    <div class="app-container">
+        
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-logo">
+                <i class="fa-solid fa-network-wired logo-icon"></i>
+                <div class="logo-text">
+                    <h1>SƠ ĐỒ KHỐI HỆ THỐNG</h1>
+                    <span class="subtitle">AIoT NFT Hydroponics & Digital Twin</span>
+                </div>
+            </div>
+            <div class="view-controls">
+                <button class="control-btn active" id="btn-flow-all" data-flow="all">
+                    <i class="fa-solid fa-globe"></i> Tất Cả
+                </button>
+                <button class="control-btn" id="btn-flow-data" data-flow="data">
+                    <i class="fa-solid fa-chart-line"></i> Luồng Dữ Liệu
+                </button>
+                <button class="control-btn" id="btn-flow-power" data-flow="power">
+                    <i class="fa-solid fa-bolt"></i> Luồng Nguồn
+                </button>
+                <button class="control-btn" id="btn-flow-control" data-flow="control">
+                    <i class="fa-solid fa-sliders"></i> Luồng Điều Khiển
+                </button>
+            </div>
+            <div class="header-actions">
+                <button class="action-btn" id="btn-open-simulator" title="Mở giả lập hệ thống">
+                    <i class="fa-solid fa-gamepad"></i> Giả Lập
+                </button>
+                <a href="../plan_viewer/index.html" class="action-btn secondary-btn" title="Quay lại Kế hoạch Đồ án">
+                    <i class="fa-solid fa-chevron-left"></i> Kế Hoạch
+                </a>
+            </div>
+        </header>
+
+        <!-- Main Body -->
+        <div class="main-layout">
+            
+            <!-- Sidebar Panel: Simulator & Info -->
+            <aside class="sidebar-panel" id="sidebar-panel">
+                <!-- Resize Handle -->
+                <div class="sidebar-resize-handle" id="sidebar-resize-handle" title="Kéo để thay đổi kích thước panel"></div>
+                
+                <!-- Quick Instructions/Header -->
+                <div class="panel-section header-section">
+                    <h3><i class="fa-solid fa-circle-info"></i> Khám Phá Hệ Thống</h3>
+                    <p>Click vào bất kỳ khối nào trong sơ đồ để xem thông số chi tiết, sơ đồ chân GPIO, và tài liệu linh kiện đi kèm.</p>
+                </div>
+
+                <!-- Simulation Control Center -->
+                <div class="panel-section simulator-section" id="sim-control-panel">
+                    <div class="section-title">
+                        <span><i class="fa-solid fa-laptop-code"></i> GIẢ LẬP SỰ KIỆN</span>
+                        <span class="status-indicator online">Online</span>
+                    </div>
+                    <div class="simulator-grid">
+                        <button class="sim-btn" id="sim-temp-high">
+                            <i class="fa-solid fa-temperature-arrow-up"></i>
+                            <span>Nhiệt độ cao (>28°C)</span>
+                        </button>
+                        <button class="sim-btn" id="sim-tds-low">
+                            <i class="fa-solid fa-droplet-slash"></i>
+                            <span>TDS thấp (<500 ppm)</span>
+                        </button>
+                        <button class="sim-btn" id="sim-ph-high">
+                            <i class="fa-solid fa-flask-vial"></i>
+                            <span>pH tăng cao (>6.5)</span>
+                        </button>
+                        <button class="sim-btn" id="sim-water-low">
+                            <i class="fa-solid fa-circle-exclamation"></i>
+                            <span>Cạn nước bể chứa</span>
+                        </button>
+                        <button class="sim-btn" id="sim-disease-detect">
+                            <i class="fa-solid fa-bug"></i>
+                            <span>Quét bệnh hại lá AI</span>
+                        </button>
+                        <button class="sim-btn" id="sim-grow-predict">
+                            <i class="fa-solid fa-seedling"></i>
+                            <span>Dự đoán ngày thu hoạch</span>
+                        </button>
+                    </div>
+                    <div class="console-box">
+                        <div class="console-header">
+                            <span><i class="fa-solid fa-terminal"></i> Log sự kiện hệ thống</span>
+                            <button class="clear-console-btn" id="clear-console">Xóa</button>
+                        </div>
+                        <div class="console-output" id="console-output">
+                            <div class="log-line system">[SYSTEM] Sẵn sàng giả lập. Hãy click chọn sự kiện.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Block Details Inspector (Dynamic Content) -->
+                <div class="panel-section inspector-section active" id="inspector-panel">
+                    <div class="inspector-placeholder" id="inspector-placeholder">
+                        <i class="fa-solid fa-mouse-pointer placeholder-icon"></i>
+                        <p>Chọn một khối trên sơ đồ để xem thông tin chi tiết</p>
+                    </div>
+                    
+                    <div class="inspector-content hidden" id="inspector-content">
+                        <!-- Header details -->
+                        <div class="block-details-header">
+                            <div class="block-details-icon" id="ins-icon-bg">
+                                <i class="fa-solid fa-microchip" id="ins-icon"></i>
+                            </div>
+                            <div>
+                                <h2 id="ins-title">ESP32 Control Board</h2>
+                                <span class="badge" id="ins-layer">Controller</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Tabs -->
+                        <div class="inspector-tabs">
+                            <button class="tab-btn active" data-tab="specs">Mô Tả & Thông Số</button>
+                            <button class="tab-btn" data-tab="connections" id="tab-btn-conn">Sơ Đồ Chân</button>
+                        </div>
+                        
+                        <!-- Tab contents -->
+                        <div class="tab-content active" id="tab-specs">
+                            <div class="specs-content" id="ins-specs">
+                                <!-- Dynamic specs content -->
+                            </div>
+                        </div>
+                        
+                        <div class="tab-content" id="tab-connections">
+                            <div class="connections-content" id="ins-connections">
+                                <!-- Dynamic connections table/list -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Diagram Workspace -->
+            <main class="diagram-workspace">
+                
+                <!-- Diagram Grid Canvas -->
+                <div class="diagram-canvas" id="diagram-canvas">
+                    
+                    <!-- SVG Connections Overlay -->
+                    <svg class="connections-svg" id="connections-svg">
+                        <defs>
+                            <!-- Markers for flow direction -->
+                            <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                <path d="M 0 1 L 10 5 L 0 9 z" fill="rgba(255, 255, 255, 0.4)" />
+                            </marker>
+                            <marker id="arrow-data" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                <path d="M 0 1 L 10 5 L 0 9 z" fill="#06b6d4" />
+                            </marker>
+                            <marker id="arrow-power" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                <path d="M 0 1 L 10 5 L 0 9 z" fill="#f59e0b" />
+                            </marker>
+                            <marker id="arrow-control" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                <path d="M 0 1 L 10 5 L 0 9 z" fill="#ec4899" />
+                            </marker>
+                        </defs>
+
+                        <!-- Connection Paths (Dynamic drawing) -->
+                        <!-- Power paths -->
+                        <path id="path-psu-mcu" class="conn-line power" d="" />
+                        <path id="path-psu-pwm" class="conn-line power" d="" />
+                        <path id="path-psu-relay" class="conn-line power" d="" />
+                        <path id="path-psu-y26" class="conn-line power" d="" />
+                        <path id="path-mcu-sht31-pwr" class="conn-line power" d="" />
+                        
+                        <!-- Data paths -->
+                        <path id="path-sht31-mcu" class="conn-line data" d="" />
+                        <path id="path-ds18b20-mcu" class="conn-line data" d="" />
+                        <path id="path-tds-mcu" class="conn-line data" d="" />
+                        <path id="path-ph-mcu" class="conn-line data" d="" />
+                        <path id="path-bh1750-mcu" class="conn-line data" d="" />
+                        <path id="path-y26-mcu" class="conn-line data" d="" />
+                        
+                        <!-- MCU to Actuators (Signal paths - Data/Control) -->
+                        <path id="path-mcu-pwm" class="conn-line data control" d="" />
+                        <path id="path-mcu-relay" class="conn-line data control" d="" />
+                        
+                        <!-- Actuators to Devices -->
+                        <path id="path-pwm-pumps" class="conn-line control" d="" />
+                        <path id="path-pwm-fans" class="conn-line control" d="" />
+                        <path id="path-relay-ac" class="conn-line control" d="" />
+                        <path id="path-relay-led" class="conn-line control" d="" />
+
+                        <!-- Network / Communication paths -->
+                        <path id="path-mcu-mqtt" class="conn-line data control wifi-line" d="" />
+                        <path id="path-mqtt-pi" class="conn-line data control wifi-line" d="" />
+                        <path id="path-pi-web" class="conn-line data control" d="" />
+                        <path id="path-pi-opcua" class="conn-line data control" d="" />
+                        <path id="path-opcua-nx" class="conn-line data control" d="" />
+                    </svg>
+                    
+                    <!-- LAYER 0: POWER SUPPLY -->
+                    <div class="diagram-node power-node clickable" id="node-psu" style="grid-column: 1 / span 2; grid-row: 1;">
+                        <div class="node-glow"></div>
+                        <div class="node-body">
+                            <i class="fa-solid fa-car-battery node-icon"></i>
+                            <div class="node-info">
+                                <h3>Nguồn Tổ Ong 12V 20A</h3>
+                                <span class="tag">Power Source</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- LAYER 1: SENSORS (Left side) -->
+                    <div class="sensor-container" style="grid-column: 1; grid-row: 2 / span 4;">
+                        <div class="container-title">TẦNG CẢM BIẾN</div>
+                        
+                        <div class="diagram-node sensor-node clickable" id="node-sht31">
+                            <div class="node-glow"></div>
+                            <div class="node-body">
+                                <i class="fa-solid fa-temperature-half node-icon"></i>
+                                <div class="node-info">
+                                    <h4>SHT31</h4>
+                                    <span>Nhiệt độ & ẩm KK (I2C)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="diagram-node sensor-node clickable" id="node-ds18b20">
+                            <div class="node-glow"></div>
+                            <div class="node-body">
+                                <i class="fa-solid fa-thermometer node-icon"></i>
+                                <div class="node-info">
+                                    <h4>DS18B20</h4>
+                                    <span>Nhiệt độ nước (1-Wire)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="diagram-node sensor-node clickable" id="node-tds">
+                            <div class="node-glow"></div>
+                            <div class="node-body">
+                                <i class="fa-solid fa-vial-circle-check node-icon"></i>
+                                <div class="node-info">
+                                    <h4>DFRobot TDS</h4>
+                                    <span>Độ dinh dưỡng (Analog)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="diagram-node sensor-node clickable" id="node-ph">
+                            <div class="node-glow"></div>
+                            <div class="node-body">
+                                <i class="fa-solid fa-flask-vial node-icon"></i>
+                                <div class="node-info">
+                                    <h4>DFRobot pH V2</h4>
+                                    <span>Độ acid/kiềm (Analog)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="diagram-node sensor-node clickable" id="node-bh1750">
+                            <div class="node-glow"></div>
+                            <div class="node-body">
+                                <i class="fa-solid fa-sun node-icon"></i>
+                                <div class="node-info">
+                                    <h4>BH1750</h4>
+                                    <span>Cường độ ánh sáng (I2C)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="diagram-node sensor-node clickable" id="node-y26">
+                            <div class="node-glow"></div>
+                            <div class="node-body">
+                                <i class="fa-solid fa-ruler-vertical node-icon"></i>
+                                <div class="node-info">
+                                    <h4>Y26 PNP ×4</h4>
+                                    <span>Mực nước (Digital)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- LAYER 2: CONTROLLER PCB (Center-Left) -->
+                    <div class="diagram-node controller-node clickable" id="node-mcu" style="grid-column: 2 / span 2; grid-row: 3;">
+                        <div class="node-glow"></div>
+                        <div class="node-body">
+                            <i class="fa-solid fa-microchip node-icon"></i>
+                            <div class="node-info">
+                                <h3>Mạch PCB ESP32-S3</h3>
+                                <span class="tag-model">ESP32-S3-WROOM-1-N8R8</span>
+                                <span class="tag">Trung Tâm Thu Thập & Điều Khiển</span>
+                            </div>
+                        </div>
+                        <div class="sub-components">
+                            <div class="sub-item" title="Chân nạp code UART"><i class="fa-solid fa-plug-circle-bolt"></i> UART</div>
+                            <div class="sub-item" title="Hạ áp xuống 5V"><i class="fa-solid fa-arrow-down-long"></i> LM2596</div>
+                            <div class="sub-item" title="Hạ áp xuống 3.3V"><i class="fa-solid fa-arrow-down-long"></i> AMS1117</div>
+                        </div>
+                    </div>
+
+                    <!-- LAYER 3: INTERMEDIATE ACTUATORS (Below MCU) -->
+                    <div class="actuator-container" style="grid-column: 2 / span 2; grid-row: 5;">
+                        <div class="container-title">GIAO TIẾP ĐIỀU KHIỂN</div>
+                        <div class="actuator-grid">
+                            
+                            <div class="diagram-node driver-node clickable" id="node-pwm">
+                                <div class="node-glow"></div>
+                                <div class="node-body">
+                                    <i class="fa-solid fa-wave-square node-icon"></i>
+                                    <div class="node-info">
+                                        <h4>PWM MOSFET</h4>
+                                        <span>8 Kênh IRLZ44N (3 Bơm DD + 1 Bơm chìm + 4 Quạt)</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="diagram-node driver-node clickable" id="node-relay">
+                                <div class="node-glow"></div>
+                                <div class="node-body">
+                                    <i class="fa-solid fa-toggle-on node-icon"></i>
+                                    <div class="node-info">
+                                        <h4>Relay SRD-12V</h4>
+                                        <span>6 Kênh (Bơm 220V + Sục 220V + 4 Đèn)</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+
+                    <!-- LAYER 3.5: OUTPUT DEVICES (Pumps, Fans, Lights) (Bottom Center) -->
+                    <div class="devices-container" style="grid-column: 2 / span 2; grid-row: 6;">
+                        <div class="container-title">THIẾT BỊ CHẤP HÀNH</div>
+                        <div class="devices-grid devices-grid-6">
+                            <div class="device-item" id="dev-pumps">
+                                <i class="fa-solid fa-pump-soap dev-icon"></i>
+                                <span>3 Bơm DD 12V (A+B+pH)</span>
+                            </div>
+                            <div class="device-item" id="dev-pump12v">
+                                <i class="fa-solid fa-water-ladder dev-icon"></i>
+                                <span>Bơm chìm 12V (PWM)</span>
+                            </div>
+                            <div class="device-item" id="dev-fans">
+                                <i class="fa-solid fa-fan dev-icon"></i>
+                                <span>4 Quạt 12V (PWM)</span>
+                            </div>
+                            <div class="device-item" id="dev-pump220">
+                                <i class="fa-solid fa-water-ladder dev-icon"></i>
+                                <span>Bơm 220V AC (Relay)</span>
+                            </div>
+                            <div class="device-item" id="dev-ac">
+                                <i class="fa-solid fa-wind dev-icon"></i>
+                                <span>Sục 220V AC (Relay)</span>
+                            </div>
+                            <div class="device-item" id="dev-led">
+                                <i class="fa-solid fa-lightbulb dev-icon"></i>
+                                <span>4 Đèn LED 12V (Relay)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- LAYER 4: BROKER (Center-Right) -->
+                    <div class="diagram-node broker-node clickable" id="node-mqtt" style="grid-column: 4; grid-row: 3;">
+                        <div class="node-glow"></div>
+                        <div class="node-body">
+                            <i class="fa-solid fa-cloud-arrow-up node-icon"></i>
+                            <div class="node-info">
+                                <h3>MQTT Broker</h3>
+                                <span class="tag">WiFi - Mosquitto</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- LAYER 5: RASPBERRY PI 4 CENTRAL HUB (Far Right) -->
+                    <div class="diagram-node rpi-node clickable" id="node-pi" style="grid-column: 5; grid-row: 2 / span 3;">
+                        <div class="node-glow"></div>
+                        <div class="node-body">
+                            <i class="fa-brands fa-raspberry-pi node-icon"></i>
+                            <div class="node-info">
+                                <h3>Raspberry Pi 4 (8GB)</h3>
+                                <span class="tag">Trung Tâm Xử Lý Dữ Liệu & Web</span>
+                            </div>
+                        </div>
+                        <div class="rpi-components">
+                            <div class="rpi-comp-box text-cyan clickable" id="rpi-fastapi">
+                                <i class="fa-solid fa-server"></i> FastAPI Backend
+                            </div>
+                            <div class="rpi-comp-box text-emerald clickable" id="rpi-influx">
+                                <i class="fa-solid fa-database"></i> InfluxDB Time-Series
+                            </div>
+                            <div class="rpi-comp-box text-orange clickable" id="rpi-webapp">
+                                <i class="fa-solid fa-desktop"></i> Web UI & 2D Twin
+                            </div>
+                            <div class="rpi-comp-box text-purple clickable" id="rpi-opcua">
+                                <i class="fa-solid fa-network-wired"></i> OPC UA Server
+                            </div>
+                            <div class="rpi-comp-box text-pink clickable" id="rpi-cnn">
+                                <i class="fa-solid fa-brain"></i> CNN Disease Model
+                            </div>
+                            <div class="rpi-comp-box text-pink clickable" id="rpi-xgb">
+                                <i class="fa-solid fa-chart-line"></i> XGBoost Growth Model
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- LAYER 6: DIGITAL TWIN 3D (Extreme Right) -->
+                    <div class="diagram-node twin-node clickable" id="node-nx" style="grid-column: 6; grid-row: 3;">
+                        <div class="node-glow"></div>
+                        <div class="node-body">
+                            <i class="fa-solid fa-cube node-icon"></i>
+                            <div class="node-info">
+                                <h3>Siemens NX MCD</h3>
+                                <span class="tag-model">Digital Twin 3D (PC)</span>
+                                <span class="tag">OPC UA Client (TCP)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </main>
+        </div>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <div class="footer-left">
+                <span>Trạng thái kết nối OPC UA: <strong class="text-cyan">opc.tcp://[IP_RPI]:4840</strong></span>
+            </div>
+            <div class="footer-right">
+                <span>Đồ Án Tốt Nghiệp &copy; 2026 — SV thực hiện: Vũ Thị Hải Yến</span>
+            </div>
+        </footer>
+    </div>
+    
+    <!-- Script -->
+    <script src="app.js"></script>
+</body>
+</html>

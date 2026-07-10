@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slide - Cơ Sở Dữ Liệu InfluxDB</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #f0f4f8;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .slide-container {
+            width: 1920px;
+            height: 1080px;
+            background: linear-gradient(135deg, #f5f3ff 0%, #e2e8f0 100%);
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            overflow: hidden;
+            transform-origin: top left;
+        }
+
+        /* Lưới nền dữ liệu */
+        .slide-container::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: 
+                linear-gradient(rgba(128, 90, 213, 0.1) 2px, transparent 2px),
+                linear-gradient(90deg, rgba(128, 90, 213, 0.1) 2px, transparent 2px);
+            background-size: 50px 50px;
+            z-index: 1;
+        }
+
+        .header {
+            position: absolute;
+            top: 50px;
+            left: 70px;
+            z-index: 10;
+        }
+
+        .header h1 {
+            color: #44337a; /* Tím đậm */
+            font-size: 52px;
+            margin: 0;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .header h1 i { color: #805ad5; } /* InfluxDB purple equivalent */
+
+        .header .badge {
+            background-color: #805ad5;
+            color: white;
+            padding: 8px 18px;
+            border-radius: 8px;
+            font-size: 24px;
+            font-weight: 700;
+            vertical-align: middle;
+        }
+
+        .header p {
+            font-size: 28px;
+            color: #553c9a;
+            margin-top: 15px;
+            font-weight: 600;
+        }
+
+        .content-area {
+            position: absolute;
+            top: 200px;
+            left: 70px;
+            width: calc(100% - 140px);
+            height: calc(100% - 250px);
+            z-index: 10;
+            display: flex;
+            gap: 50px;
+        }
+
+        /* CỘT TRÁI: Tại sao lại chọn */
+        .left-panel {
+            flex: 0 0 750px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            background: rgba(255, 255, 255, 0.85);
+            padding: 40px;
+            border-radius: 20px;
+            border-top: 8px solid #805ad5;
+            box-shadow: 0 15px 35px rgba(128, 90, 213, 0.1);
+        }
+
+        .left-panel h2 {
+            margin: 0 0 20px 0;
+            font-size: 32px;
+            color: #322659;
+            font-weight: 800;
+            border-bottom: 3px dashed #d6bcfa;
+            padding-bottom: 10px;
+            display: inline-block;
+        }
+
+        .reason-box {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+        }
+
+        .reason-icon {
+            width: 70px;
+            height: 70px;
+            background: #faf5ff;
+            color: #6b46c1;
+            font-size: 30px;
+            border-radius: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+            box-shadow: inset 0 0 0 2px #d6bcfa;
+        }
+
+        .reason-txt h4 {
+            margin: 0 0 8px 0;
+            font-size: 24px;
+            color: #2b6cb0;
+            font-weight: 700;
+        }
+
+        .reason-txt p {
+            margin: 0;
+            font-size: 19px;
+            color: #4a5568;
+            line-height: 1.5;
+        }
+
+        /* CỘT PHẢI: Tác động / Ảnh hưởng (Sơ đồ Data) */
+        .right-panel {
+            flex: 1;
+            position: relative;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+            border: 2px solid #e2e8f0;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .right-panel h2 {
+            margin: 0 0 30px 0;
+            font-size: 32px;
+            color: #319795;
+            font-weight: 800;
+        }
+
+        /* Visualization of Time-Series Flow */
+        .ts-flow-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex: 1;
+            padding: 20px;
+        }
+
+        .data-source {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .source-tag {
+            background: #ebf8ff;
+            border: 2px solid #90cdf4;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-size: 20px;
+            font-weight: 700;
+            color: #2b6cb0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: relative;
+        }
+
+        /* Connecting arrows */
+        .flow-lines {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .flow-lines path {
+            fill: none;
+            stroke: #9f7aea;
+            stroke-width: 5;
+            stroke-dasharray: 10 8;
+            animation: dash 5s linear infinite;
+        }
+
+        @keyframes dash {
+            to { stroke-dashoffset: -100; }
+        }
+
+        .db-core {
+            position: relative;
+            z-index: 10;
+            background: #faf5ff;
+            border: 6px solid #805ad5;
+            width: 260px;
+            height: 260px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 50px rgba(128, 90, 213, 0.4);
+        }
+
+        .db-core i { font-size: 70px; color: #6b46c1; margin-bottom: 15px; }
+        .db-core span { font-size: 26px; font-weight: 800; color: #44337a; }
+        .db-core small { font-size: 16px; color: #805ad5; font-weight: 600; text-transform: uppercase; margin-top: 5px; }
+
+        .impact-results {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .result-box {
+            background: #f0fff4;
+            border-left: 5px solid #38a169;
+            padding: 20px;
+            border-radius: 8px;
+            width: 250px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            z-index: 10;
+        }
+
+        .result-box h5 {
+            margin: 0 0 5px 0;
+            font-size: 20px;
+            color: #276749;
+        }
+        .result-box p {
+            margin: 0;
+            font-size: 16px;
+            color: #4a5568;
+            line-height: 1.4;
+        }
+
+    </style>
+</head>
+<body>
+
+<script>
+    function resizeSlide() {
+        const slide = document.getElementById('slide');
+        const scaleX = window.innerWidth / 1920;
+        const scaleY = window.innerHeight / 1080;
+        const scale = Math.min(scaleX, scaleY) * 0.95;
+        slide.style.transform = `scale(${scale})`;
+    }
+    window.addEventListener('resize', resizeSlide);
+    window.onload = resizeSlide;
+</script>
+
+<div class="slide-container" id="slide">
+    
+    <div class="header">
+        <h1><i class="fa-solid fa-database"></i> LỰA CHỌN CƠ SỞ DỮ LIỆU INFLUXDB</h1>
+        <span class="badge">Time-Series Database</span>
+        <p>Tại sao lại bỏ SQL truyền thống để chọn cơ sở dữ liệu chuỗi thời gian?</p>
+    </div>
+
+    <div class="content-area">
+        
+        <!-- Tại sao chọn InfluxDB -->
+        <div class="left-panel">
+            <h2>TẠI SAO CHỌN INFLUXDB?</h2>
+            
+            <div class="reason-box">
+                <div class="reason-icon"><i class="fa-solid fa-stopwatch"></i></div>
+                <div class="reason-txt">
+                    <h4>Đệm Dữ Liệu IoT Dồn Dập</h4>
+                    <p>Database SQL (MySQL) sẽ sập bảng nhanh chóng khi hàng ngàn điểm dữ liệu cảm biến được gửi lên mỗi giây. InfluxDB (TSDB) thiết kế chuyên biệt để <strong>ghi dữ liệu siêu tốc</strong> theo mốc thời gian.</p>
+                </div>
+            </div>
+
+            <div class="reason-box">
+                <div class="reason-icon"><i class="fa-solid fa-chart-area"></i></div>
+                <div class="reason-txt">
+                    <h4>Truy Vấn Biểu Đồ Thần Tốc</h4>
+                    <p>Với ngôn ngữ truy vấn riêng (Flux), việc nhóm dữ liệu, tính trung bình (mean), tìm đỉnh (max) theo từng giờ, từng ngày mất chưa tới vài mili-giây. Siêu nhẹ cho hệ thống.</p>
+                </div>
+            </div>
+
+            <div class="reason-box">
+                <div class="reason-icon"><i class="fa-solid fa-broom"></i></div>
+                <div class="reason-txt">
+                    <h4>Tự Động Dọn Rác (Retention Policy)</h4>
+                    <p>Bộ nhớ Raspberry Pi có hạn. InfluxDB tự động cấu hình xóa hoặc nén các dữ liệu thô đã quá cũ (vd: qua 30 ngày), giúp thẻ nhớ <strong>không bao giờ bị đầy lỗi</strong>.</p>
+                </div>
+            </div>
+            
+            <div class="reason-box">
+                <div class="reason-icon"><i class="fa-solid fa-tags"></i></div>
+                <div class="reason-txt">
+                    <h4>Lọc Theo Nhãn (Tags & Fields)</h4>
+                    <p>Dữ liệu được gắn Tag (vd: `device=esp32_khu_A`). Tìm kiếm thiết bị lỗi tức thì mà không cần duyệt JOIN các bảng phức tạp như SQL.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ảnh hưởng tới hệ thống -->
+        <div class="right-panel">
+            <h2>ẢNH HƯỞNG & LUỒNG DỮ LIỆU</h2>
+            
+            <div class="ts-flow-container">
+
+                <!-- Nguồn dữ liệu -->
+                <div class="data-source" id="sources">
+                    <div class="source-tag"><i class="fa-solid fa-temperature-half"></i> Giá trị Cảm Biến</div>
+                    <div class="source-tag"><i class="fa-solid fa-power-off"></i> Trạng thái Bơm/Quạt</div>
+                    <div class="source-tag"><i class="fa-solid fa-brain"></i> Kết quả dự đoán AI</div>
+                </div>
+
+                <!-- SVG Kết nối -->
+                <svg class="flow-lines">
+                    <defs>
+                        <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 1 L 10 5 L 0 9 z" fill="#9f7aea" />
+                        </marker>
+                    </defs>
+                    <!-- Từ Source tới DB -->
+                    <path d="M 330 200 C 450 200, 480 340, 560 340" marker-end="url(#arrow)" />
+                    <path d="M 330 320 C 450 320, 480 340, 560 340" marker-end="url(#arrow)" />
+                    <path d="M 330 450 C 450 450, 480 340, 560 340" marker-end="url(#arrow)" />
+                    
+                    <!-- Từ DB văng ra Các Kết Quả -->
+                    <path d="M 830 340 C 950 340, 950 170, 1070 170" marker-end="url(#arrow)" />
+                    <path d="M 830 340 C 920 340, 920 340, 1070 340" marker-end="url(#arrow)" />
+                    <path d="M 830 340 C 950 340, 950 510, 1070 510" marker-end="url(#arrow)" />
+                </svg>
+
+                <!-- Core DB -->
+                <div class="db-core">
+                    <i class="fa-solid fa-cubes-stacked"></i>
+                    <span>INFLUXDB</span>
+                    <small>Time-Series Engine</small>
+                </div>
+
+                <!-- Kết quả cho hệ thống -->
+                <div class="impact-results" id="results">
+                    <div class="result-box">
+                        <h5><i class="fa-solid fa-chart-line"></i> Dashboard Chart.js</h5>
+                        <p>Web UI vẽ biểu đồ môi trường siêu mượt nhờ Backend không phải tính toán nặng, DB gánh hết.</p>
+                    </div>
+                    <div class="result-box">
+                        <h5><i class="fa-solid fa-microscope"></i> Phân Tích Diễn Biến</h5>
+                        <p>Truy vết nguyên nhân cây bệnh nhờ lịch sử nhiệt độ, pH liên tục cả tháng.</p>
+                    </div>
+                    <div class="result-box">
+                        <h5><i class="fa-solid fa-seedling"></i> Nuôi AI XGBoost</h5>
+                        <p>Cung cấp mỏ dữ liệu thô dồi dào để train lại mô hình dự báo tăng trưởng.</p>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

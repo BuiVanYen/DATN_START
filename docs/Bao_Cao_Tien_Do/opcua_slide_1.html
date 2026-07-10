@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slide - OPC UA Là Gì?</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background-color: #f8fafc; font-family: 'Inter', sans-serif;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        .slide-container {
+            width: 1920px; height: 1080px;
+            background: linear-gradient(135deg, #fffaf0 0%, #edf2f7 100%);
+            position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            overflow: hidden; transform-origin: top left;
+        }
+
+        /* Nền họa tiết lưới công nghiệp */
+        .slide-container::before {
+            content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background-image: 
+                linear-gradient(rgba(221, 107, 32, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(221, 107, 32, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px; z-index: 1;
+        }
+
+        .header { position: absolute; top: 50px; left: 70px; z-index: 10; }
+        .header h1 {
+            color: #2d3748; font-size: 52px; margin: 0; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 1.5px;
+            display: inline-flex; align-items: center; gap: 20px;
+        }
+        .header h1 i { color: #dd6b20; }
+        .header .badge {
+            background-color: #dd6b20; color: white; padding: 8px 18px;
+            border-radius: 8px; font-size: 24px; font-weight: 700; vertical-align: middle;
+        }
+        .header p { font-size: 28px; color: #4a5568; margin-top: 15px; font-weight: 600; }
+
+        .content-area {
+            position: absolute; top: 200px; left: 70px;
+            width: calc(100% - 140px); height: calc(100% - 250px);
+            z-index: 10; display: flex; gap: 50px;
+        }
+
+        /* LEFT PANEL: Concept */
+        .left-panel {
+            flex: 0 0 650px; display: flex; flex-direction: column; gap: 25px;
+        }
+
+        .concept-card {
+            background: white; border-left: 8px solid #dd6b20;
+            border-radius: 16px; padding: 35px; box-shadow: 0 10px 25px rgba(221, 107, 32, 0.1);
+        }
+
+        .concept-card h2 { margin: 0 0 15px 0; font-size: 32px; color: #1a202c; }
+        .concept-card p { margin: 0; font-size: 22px; color: #4a5568; line-height: 1.6; }
+        .concept-card p strong { color: #dd6b20; }
+
+        /* RIGHT PANEL: Architecture */
+        .right-panel {
+            flex: 1; background: white; border-radius: 24px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.05); border: 2px solid #e2e8f0;
+            position: relative; display: flex; flex-direction: column; padding: 40px;
+        }
+        
+        .right-panel h3 { margin: 0 0 30px 0; font-size: 30px; color: #2b6cb0; text-align: center;}
+
+        .arch-diagram {
+            flex: 1; position: relative; display: flex; justify-content: center; align-items: center;
+        }
+
+        /* Server Box */
+        .server-box {
+            width: 380px; height: 380px; background: #fffaf0; border: 4px solid #dd6b20;
+            border-radius: 24px; position: relative; z-index: 10; box-shadow: 0 0 40px rgba(221,107,32,0.2);
+            display: flex; flex-direction: column; align-items: center; padding: 20px;
+        }
+        .server-head { font-size: 28px; font-weight: 800; color: #c05621; margin-bottom: 20px; text-align:center;}
+        .server-head i { font-size: 50px; display: block; margin-bottom: 10px; }
+
+        /* Address Space / Nodes */
+        .address-space {
+            background: white; border: 2px dashed #ed8936; width: 90%; flex: 1;
+            border-radius: 12px; padding: 15px; display: flex; flex-direction: column; gap: 10px;
+        }
+        .node-tag {
+            background: #feebc8; color: #9c4221; padding: 8px 12px; border-radius: 6px;
+            font-size: 16px; font-weight: 600; display: flex; justify-content: space-between;
+        }
+
+        /* Client Blocks */
+        .client-block {
+            position: absolute; background: white; border: 3px solid #3182ce; border-radius: 16px;
+            padding: 20px; width: 220px; text-align: center; z-index: 15;
+            box-shadow: 0 10px 20px rgba(49,130,206,0.15);
+        }
+        .client-block i { font-size: 40px; color: #3182ce; margin-bottom: 10px; }
+        .client-block h4 { margin: 0; font-size: 22px; color: #2b6cb0; }
+        
+        .client-top { top: 20px; left: 50%; transform: translateX(-50%); }
+        .client-left { left: 40px; top: 50%; transform: translateY(-50%); }
+        .client-right { right: 40px; top: 50%; transform: translateY(-50%); }
+        .client-bottom { bottom: 20px; left: 50%; transform: translateX(-50%); }
+
+        /* Lines */
+        .arch-lines {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;
+        }
+        .arch-lines path {
+            fill: none; stroke: #a0aec0; stroke-width: 4; stroke-dasharray: 8 6; animation: dash 5s linear infinite;
+        }
+        @keyframes dash { to { stroke-dashoffset: -100; } }
+
+    </style>
+</head>
+<body>
+<script>
+    function resizeSlide() {
+        const slide = document.getElementById('slide');
+        const scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080) * 0.95;
+        slide.style.transform = `scale(${scale})`;
+    }
+    window.addEventListener('resize', resizeSlide);
+    window.onload = resizeSlide;
+</script>
+
+<div class="slide-container" id="slide">
+    <div class="header">
+        <h1><i class="fa-solid fa-network-wired"></i> OPC UA LÀ GÌ?</h1>
+        <span class="badge">Kiến Trúc Truyền Thông Công Nghiệp</span>
+        <p>Tiêu chuẩn giao tiếp mở, an toàn và độc lập nền tảng cho Công nghiệp 4.0</p>
+    </div>
+
+    <div class="content-area">
+        <div class="left-panel">
+            <div class="concept-card">
+                <h2>1. OPC UA Là Gì?</h2>
+                <p><strong>OPC UA (Open Platform Communications Unified Architecture)</strong> là giao thức truyền thông công nghiệp chuẩn hóa, độc lập với nền tảng, giúp các thiết bị phần cứng (PLC, Cảm biến) và các phần mềm (SCADA, Siemens NX, MES) trao đổi dữ liệu an toàn, tin cậy.</p>
+            </div>
+            
+            <div class="concept-card">
+                <h2>2. Đặc Điểm Nổi Bật</h2>
+                <p>
+                    • <strong>Mô hình Client-Server:</strong> Quản lý tập trung mọi kết nối.<br><br>
+                    • <strong>Không Gian Địa Chỉ (Address Space):</strong> Dữ liệu không chỉ là các bit vô nghĩa, mà được phân cấp thành các <em>Nodes (Nút)</em> hoặc <em>Tags</em> có ngữ nghĩa rõ ràng.<br><br>
+                    • <strong>Độc lập:</strong> Chạy trên Windows, Linux, Raspberry Pi, hay thậm chí nhúng trực tiếp vào vi điều khiển.
+                </p>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <h3>Nguyên Lý Hoạt Động Kiến Trúc Client - Server</h3>
+            <div class="arch-diagram">
+                
+                <svg class="arch-lines">
+                    <defs>
+                        <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 1 L 10 5 L 0 9 z" fill="#a0aec0" />
+                        </marker>
+                    </defs>
+                    <!-- Top (X:530, Y:120) to Center (X:530, Y:220) -->
+                    <path d="M 530 140 L 530 220" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+                    <!-- Bottom (X:530, Y:520) to Center -->
+                    <path d="M 530 500 L 530 420" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+                    <!-- Left (X:280, Y:320) to Center (X:340, Y:320) -->
+                    <path d="M 280 320 L 340 320" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+                    <!-- Right (X:780, Y:320) to Center (X:720, Y:320) -->
+                    <path d="M 780 320 L 720 320" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+                </svg>
+
+                <div class="client-block client-top">
+                    <i class="fa-solid fa-desktop"></i>
+                    <h4>SCADA / HMI</h4>
+                    <small>Đọc/Ghi dữ liệu</small>
+                </div>
+                
+                <div class="client-block client-left">
+                    <i class="fa-solid fa-microchip"></i>
+                    <h4>PLC / Sensors</h4>
+                    <small>Gửi trạng thái</small>
+                </div>
+
+                <div class="server-box">
+                    <div class="server-head">
+                        <i class="fa-solid fa-server"></i>
+                        OPC UA SERVER
+                    </div>
+                    <div class="address-space">
+                        <div style="text-align: center; color: #dd6b20; font-weight: bold; margin-bottom: 5px;">Không Gian Địa Chỉ (Nodes)</div>
+                        <div class="node-tag"><span>▶ Trạm Bơm 1</span> <span>Values</span></div>
+                        <div class="node-tag" style="margin-left: 20px;"><span>├─ Nhiệt độ</span> <span>25.4 °C</span></div>
+                        <div class="node-tag" style="margin-left: 20px;"><span>├─ Trạng thái</span> <span>ON</span></div>
+                        <div class="node-tag"><span>▶ Máy Quạt</span> <span>Values</span></div>
+                        <div class="node-tag" style="margin-left: 20px;"><span>├─ Tốc độ</span> <span>1500 RPM</span></div>
+                    </div>
+                </div>
+
+                <div class="client-block client-right">
+                    <i class="fa-solid fa-cube"></i>
+                    <h4>Digital Twin</h4>
+                    <small>Mô phỏng vật lý</small>
+                </div>
+
+                <div class="client-block client-bottom">
+                    <i class="fa-solid fa-cloud"></i>
+                    <h4>Cloud / ERP</h4>
+                    <small>Phân tích Big Data</small>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

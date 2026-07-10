@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slide - Web UI & Digital Twin 2D</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #0f172a; /* Nền tối phong cách Dashboard */
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .slide-container {
+            width: 1920px;
+            height: 1080px;
+            background: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 100%);
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            overflow: hidden;
+            transform-origin: top left;
+        }
+
+        /* Lưới nền công nghệ */
+        .slide-container::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: 
+                linear-gradient(rgba(56, 189, 248, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(56, 189, 248, 0.05) 1px, transparent 1px);
+            background-size: 60px 60px;
+            z-index: 1;
+        }
+
+        .header {
+            position: absolute;
+            top: 50px;
+            left: 70px;
+            z-index: 10;
+        }
+
+        .header h1 {
+            color: #f8fafc;
+            font-size: 52px;
+            margin: 0;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .header h1 i { color: #38bdf8; }
+
+        .header .badge {
+            background-color: #0284c7;
+            color: white;
+            border: 1px solid #38bdf8;
+            padding: 8px 18px;
+            border-radius: 8px;
+            font-size: 24px;
+            font-weight: 700;
+            vertical-align: middle;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+        }
+
+        .header p {
+            font-size: 26px;
+            color: #94a3b8;
+            margin-top: 15px;
+            font-weight: 500;
+            border-left: 4px solid #38bdf8;
+            padding-left: 15px;
+        }
+
+        .content-area {
+            position: absolute;
+            top: 220px;
+            left: 70px;
+            width: calc(100% - 140px);
+            height: calc(100% - 270px);
+            z-index: 10;
+            display: flex;
+            gap: 40px;
+        }
+
+        /* CARD STYLE VÀ CỘT */
+        .panel {
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 35px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-heading {
+            font-size: 28px;
+            color: #e2e8f0;
+            font-weight: 800;
+            margin: 0 0 30px 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-bottom: 2px solid rgba(56, 189, 248, 0.3);
+            padding-bottom: 15px;
+        }
+
+        .panel-heading i {
+            color: #38bdf8;
+        }
+
+        /* 1. GIÁM SÁT & ĐIỀU KHIỂN (Cột Trái) */
+        .col-monitor { flex: 0 0 450px; }
+        
+        .control-item {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(51, 65, 85, 0.8);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: all 0.3s;
+        }
+
+        .control-item:hover {
+            border-color: #38bdf8;
+            transform: translateX(10px);
+            background: rgba(56, 189, 248, 0.05);
+        }
+
+        .icon-box {
+            width: 60px; height: 60px;
+            border-radius: 12px;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 28px;
+            flex-shrink: 0;
+        }
+        
+        .ic-ws { background: rgba(56, 189, 248, 0.15); color: #38bdf8; }
+        .ic-ui { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+        .ic-chart { background: rgba(139, 92, 246, 0.15); color: #8b5cf6; }
+
+        .control-item h4 { margin: 0 0 8px 0; color: #f8fafc; font-size: 22px; }
+        .control-item p { margin: 0; color: #94a3b8; font-size: 16px; line-height: 1.4; }
+
+        /* 2. DIGITAL TWIN 2D (Cột Giữa, To Nhất) */
+        .col-twin { flex: 1; position: relative; }
+        
+        .twin-stage {
+            flex: 1;
+            background: #0f172a;
+            border-radius: 16px;
+            border: 2px dashed #475569;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Mô phỏng đường ống nước */
+        .pipe-system {
+            width: 80%;
+            height: 160px;
+            border: 8px solid #cbd5e1;
+            border-radius: 20px;
+            border-top: none;
+            position: relative;
+            margin-top: 100px;
+        }
+
+        /* Nước chảy trong ống */
+        .water-flow {
+            position: absolute;
+            bottom: 0; left: 0; width: 100%; height: 60%;
+            background: linear-gradient(90deg, #0ea5e9, #38bdf8, #0ea5e9);
+            background-size: 200% 100%;
+            border-radius: 0 0 10px 10px;
+            animation: flowWater 3s linear infinite;
+            opacity: 0.8;
+        }
+
+        @keyframes flowWater { 0% { background-position: 100% 0; } 100% { background-position: 0 0; } }
+
+        /* Cây trồng */
+        .plants {
+            position: absolute;
+            top: -120px;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            padding: 0 40px;
+        }
+
+        .plant {
+            font-size: 80px;
+            animation: grow 4s ease-in-out infinite alternate;
+        }
+
+        @keyframes grow { 0% { transform: scale(0.9) rotate(-3deg); } 100% { transform: scale(1.1) rotate(3deg); } }
+
+        /* Quạt và Đèn */
+        .fan-sim {
+            position: absolute; top: -160px; left: -40px;
+            font-size: 60px; color: #94a3b8;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        .light-sim {
+            position: absolute; top: -180px; right: 20%;
+            font-size: 70px; color: #fbbf24;
+            filter: drop-shadow(0 0 20px rgba(251, 191, 36, 0.8));
+            animation: pulseLight 2s infinite alternate;
+        }
+        @keyframes pulseLight { 0% { opacity: 0.6; } 100% { opacity: 1; } }
+
+        .twin-label {
+            position: absolute; bottom: 20px;
+            color: #38bdf8; font-size: 22px; font-weight: 700;
+            background: rgba(15, 23, 42, 0.8);
+            padding: 10px 20px; border-radius: 30px;
+        }
+
+        .twin-desc {
+            margin-top: 25px;
+            font-size: 18px; color: #e2e8f0; line-height: 1.6;
+            text-align: justify;
+        }
+        .twin-desc strong { color: #38bdf8; }
+
+        /* 3. TÍCH HỢP AI CHẨN ĐOÁN (Cột Phải) */
+        .col-ai { flex: 0 0 450px; }
+
+        .phone-mockup {
+            width: 100%;
+            height: 480px;
+            border: 4px solid #334155;
+            border-radius: 30px;
+            background: #0f172a;
+            position: relative;
+            overflow: hidden;
+            display: flex; flex-direction: column;
+        }
+
+        .phone-notch {
+            position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+            width: 120px; height: 25px;
+            background: #334155;
+            border-radius: 0 0 15px 15px;
+            z-index: 5;
+        }
+
+        .phone-screen {
+            flex: 1; margin-top: 30px; padding: 20px;
+            display: flex; flex-direction: column; gap: 15px;
+        }
+
+        .ai-cam-area {
+            background: #1e293b;
+            border: 2px dashed #10b981;
+            border-radius: 12px;
+            height: 180px;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            color: #10b981; gap: 10px;
+        }
+        .ai-cam-area i { font-size: 40px; }
+
+        .ai-result-box {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid #10b981;
+            border-radius: 12px;
+            padding: 15px;
+        }
+
+        .ai-result-box h5 { margin: 0 0 10px 0; color: #f8fafc; font-size: 18px; }
+        
+        .progress-bg { background: #334155; height: 12px; border-radius: 6px; overflow: hidden; margin-bottom: 5px;}
+        .progress-bar { background: #10b981; width: 92%; height: 100%; }
+        
+        .ai-desc { margin-top: 25px; color: #94a3b8; font-size: 17px; line-height: 1.5; }
+        .ai-desc span { color: #10b981; font-weight: bold; }
+
+    </style>
+</head>
+<body>
+
+<script>
+    function resizeSlide() {
+        const slide = document.getElementById('slide');
+        const scaleX = window.innerWidth / 1920;
+        const scaleY = window.innerHeight / 1080;
+        const scale = Math.min(scaleX, scaleY) * 0.95;
+        slide.style.transform = `scale(${scale})`;
+    }
+    window.addEventListener('resize', resizeSlide);
+    window.onload = resizeSlide;
+</script>
+
+<div class="slide-container" id="slide">
+    
+    <div class="header">
+        <h1><i class="fa-solid fa-laptop-code"></i> GIAO DIỆN WEB UI & DIGITAL TWIN 2D</h1>
+        <span class="badge">Dashboard Trung Tâm</span>
+        <p>Bảng điều khiển giám sát trực quan trên nền tảng Web cho mọi thiết bị</p>
+    </div>
+
+    <div class="content-area">
+        
+        <!-- Cột 1: Giám sát chung -->
+        <div class="panel col-monitor">
+            <h2 class="panel-heading"><i class="fa-solid fa-gauge-high"></i> Giám Sát & Điều Khiển</h2>
+            
+            <div class="control-item">
+                <div class="icon-box ic-ws"><i class="fa-solid fa-bolt"></i></div>
+                <div>
+                    <h4>WebSocket Tốc Độ Cao</h4>
+                    <p>Số liệu nhiệt độ, độ ẩm cập nhật nhảy số liên tục ngay trên màn hình mà không cần f5 (tải lại) trang web.</p>
+                </div>
+            </div>
+
+            <div class="control-item">
+                <div class="icon-box ic-ui"><i class="fa-solid fa-sliders"></i></div>
+                <div>
+                    <h4>Bảng Điều Khiển Cứng</h4>
+                    <p>Trang bị thanh kéo (Slider)ỉnh tốc độ PWM Quạt/Bơm và Nút Gạt (Toggle Switch) 1 click để đóng/mở Relay.</p>
+                </div>
+            </div>
+
+            <div class="control-item">
+                <div class="icon-box ic-chart"><i class="fa-solid fa-chart-line"></i></div>
+                <div>
+                    <h4>Biểu Đồ Lịch Sử</h4>
+                    <p>Sử dụng Chart.js để vẽ đồ thị đường diễn biến môi trường trong 24h qua, giúp nhận diện xu hướng dinh dưỡng.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cột 2: Digital Twin 2D Mở Rộng -->
+        <div class="panel col-twin">
+            <h2 class="panel-heading"><i class="fa-solid fa-clone"></i> Mô Phỏng Digital Twin 2D</h2>
+            
+            <!-- Hoạt cảnh mô phỏng SVG/HTML/CSS -->
+            <div class="twin-stage">
+                
+                <i class="fa-solid fa-fan fan-sim"></i>
+                <i class="fa-solid fa-lightbulb light-sim"></i>
+
+                <div class="pipe-system">
+                    <div class="plants">
+                        <span class="plant">🥬</span>
+                        <span class="plant">🪴</span>
+                        <span class="plant">🥬</span>
+                    </div>
+                    <div class="water-flow"></div>
+                </div>
+
+                <div class="twin-label"><i class="fa-solid fa-play"></i> Live Animation</div>
+            </div>
+
+            <div class="twin-desc">
+                Việc giám sát bằng con số thông thường rất nhàm chán. Do đó, hệ thống tích hợp công nghệ <strong>Digital Twin 2D (Bản sao số 2D)</strong> bằng SVG/Canvas ngay trên web. <br><br>
+                Khi quạt ngoài đời thực quay, <strong>cánh quạt trên UI web cũng quay theo</strong>. Khi bật bơm, đường ống ảo trên màn hình điện thoại lập tức hiển thị <strong>hoạt ảnh dòng nước chảy</strong>. Qua đó, chủ vườn nắm bắt chuẩn xác trạng thái thủy động lực học của hệ thống dù ở cách xa ngàn cây số.
+            </div>
+        </div>
+
+        <!-- Cột 3: Tích hợp AI Camera -->
+        <div class="panel col-ai">
+            <h2 class="panel-heading"><i class="fa-solid fa-microscope"></i> Tích Hợp AI Chẩn Đoán</h2>
+            
+            <div class="phone-mockup">
+                <div class="phone-notch"></div>
+                
+                <div class="phone-screen">
+                    <div class="ai-cam-area">
+                        <i class="fa-solid fa-camera"></i>
+                        <span style="font-weight: bold;">Chụp Cận Cảnh Lá Bệnh</span>
+                        <small>(HTML5 capture="camera")</small>
+                    </div>
+
+                    <div class="ai-result-box">
+                        <h5>Kết quả phân tích CNN</h5>
+                        <div style="display:flex; justify-content:space-between; color:#10b981; font-weight:bold; margin-bottom:5px;">
+                            <span>Thối Rễ (Root Rot)</span>
+                            <span>92.5%</span>
+                        </div>
+                        <div class="progress-bg"><div class="progress-bar"></div></div>
+                        <p style="margin:10px 0 0 0; color:#94a3b8; font-size:14px; text-align:center;">Phản hồi từ FastAPI Server</p>
+                    </div>
+                </div>
+            </div>
+
+            <p class="ai-desc">
+                Tận dụng trình duyệt Web Mobile, người chụp trực tiếp lá bằng thẻ <span>&lt;input type="file" capture="camera"&gt;</span>. Ảnh đẩy lên Backend chạy MobileNetV2 để phát hiện bệnh lập tức.
+            </p>
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slide - Thuật Toán CNN (MobileNetV2)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background-color: #f7fafc; font-family: 'Inter', sans-serif;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        .slide-container {
+            width: 1920px; height: 1080px;
+            background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+            position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            overflow: hidden; transform-origin: top left;
+        }
+
+        .slide-container::before {
+            content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background-image: 
+                linear-gradient(rgba(229, 62, 62, 0.05) 2px, transparent 2px),
+                linear-gradient(90deg, rgba(229, 62, 62, 0.05) 2px, transparent 2px);
+            background-size: 60px 60px; z-index: 1;
+        }
+
+        .header { position: absolute; top: 50px; left: 70px; z-index: 10; }
+        .header h1 {
+            color: #742a2a; font-size: 52px; margin: 0; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 1px; display: inline-flex; align-items: center; gap: 20px;
+        }
+        .header .badge {
+            background-color: #e53e3e; color: white; padding: 8px 18px;
+            border-radius: 8px; font-size: 24px; font-weight: 700; vertical-align: middle;
+        }
+        .header p { font-size: 26px; color: #c53030; margin-top: 15px; font-weight: 600; }
+
+        .content-area {
+            position: absolute; top: 220px; left: 70px;
+            width: calc(100% - 140px); height: calc(100% - 270px);
+            z-index: 10; display: flex; gap: 40px;
+        }
+
+        /* LEFT PANEL: Concept */
+        .left-panel {
+            flex: 0 0 500px; display: flex; flex-direction: column; gap: 30px;
+        }
+        
+        .info-card {
+            background: white; border-left: 6px solid #e53e3e; border-radius: 12px;
+            padding: 30px; box-shadow: 0 10px 20px rgba(229, 62, 62, 0.1);
+        }
+        
+        .info-card h3 { margin: 0 0 15px 0; color: #9b2c2c; font-size: 26px; display: flex; align-items: center; gap: 15px;}
+        .info-card p { margin: 0; color: #4a5568; font-size: 20px; line-height: 1.6; }
+
+        /* RIGHT PANEL: Architecture Visualization */
+        .right-panel {
+            flex: 1; background: white; border-radius: 24px; border: 2px solid #feb2b2;
+            padding: 30px; display: flex; flex-direction: column; position: relative;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+        }
+        
+        .right-panel h2 { margin: 0 0 30px 0; color: #c05621; font-size: 32px; text-align: center; }
+
+        .cnn-arch {
+            display: flex; flex: 1; align-items: center; justify-content: space-between; padding: 0 20px;
+        }
+
+        /* Image Input */
+        .image-input {
+            width: 180px; height: 180px; background: #fff5f5; border: 4px dashed #fc8181;
+            border-radius: 16px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
+        }
+        .image-input i { font-size: 60px; color: #f56565; margin-bottom: 10px; }
+        .image-input span { font-weight: bold; color: #c53030; font-size: 18px;}
+        .image-input small { color: #e53e3e; font-size: 14px;}
+
+        /* Conv Layers (MobileNet block) */
+        .conv-blocks {
+            display: flex; align-items: center; gap: 15px; position: relative;
+        }
+        .c-block {
+            width: 140px; height: 280px; background: linear-gradient(180deg, #feb2b2 0%, #f56565 100%);
+            border-radius: 12px; display: flex; justify-content: center; align-items: center;
+            color: white; font-weight: bold; font-size: 22px; text-align: center; padding: 10px;
+            box-shadow: -10px 10px 20px rgba(0,0,0,0.1); transform: perspective(500px) rotateY(-15deg);
+        }
+        .c-block.pool {
+            width: 80px; height: 200px; background: linear-gradient(180deg, #fbd38d 0%, #ed8936 100%);
+            font-size: 18px;
+        }
+        
+        .mobilenet-label {
+            position: absolute; bottom: -40px; width: 100%; text-align: center;
+            color: #c53030; font-weight: 800; font-size: 24px;
+        }
+
+        /* Fully Connected & Output */
+        .fc-layer {
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        .neuron {
+            width: 25px; height: 25px; background: #3182ce; border-radius: 50%;
+            box-shadow: 0 0 10px rgba(49, 130, 206, 0.5);
+        }
+
+        .output-box {
+            background: #f0fff4; border: 3px solid #48bb78; border-radius: 16px;
+            padding: 20px; width: 220px; text-align: center; box-shadow: 0 10px 20px rgba(72,187,120,0.15);
+        }
+        .output-box h4 { margin: 0 0 15px 0; color: #2f855a; font-size: 24px; }
+        .prob-bar { margin-bottom: 15px; }
+        .prob-label { display: flex; justify-content: space-between; font-weight: bold; font-size: 16px; margin-bottom: 5px; color: #276749;}
+        .p-bg { background: #c6f6d5; height: 12px; border-radius: 6px; overflow: hidden; }
+        .p-fill.high { background: #38a169; width: 95%; height: 100%; }
+        .p-fill.low { background: #e53e3e; width: 5%; height: 100%; }
+
+        /* Arrows */
+        .arrow { font-size: 40px; color: #cbd5e0; }
+        
+    </style>
+</head>
+<body>
+<script>
+    function resizeSlide() {
+        const slide = document.getElementById('slide');
+        const scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080) * 0.95;
+        slide.style.transform = `scale(${scale})`;
+    }
+    window.addEventListener('resize', resizeSlide);
+    window.onload = resizeSlide;
+</script>
+
+<div class="slide-container" id="slide">
+    <div class="header">
+        <h1><i class="fa-solid fa-brain"></i> THUẬT TOÁN AI: MẠNG NƠ-RON TÍCH CHẬP (CNN)</h1>
+        <span class="badge">MobileNetV2</span>
+        <p>Lý thuyết cốt lõi về màng lọc đặc trưng hình ảnh giúp máy tính "nhìn" thấy bệnh cây</p>
+    </div>
+
+    <div class="content-area">
+        
+        <div class="left-panel">
+            <div class="info-card">
+                <h3><i class="fa-solid fa-eye"></i> CNN Là Gì?</h3>
+                <p>Khác với AI truyền thống đọc số liệu, <strong>CNN (Convolutional Neural Network)</strong> chuyên xử lý dữ liệu ma trận điểm ảnh (pixel). Nó quét qua bức ảnh bằng các "bộ lọc" (filters) để tìm ra cạnh, góc, vân lá, vùng đốm nâu...</p>
+            </div>
+            
+            <div class="info-card">
+                <h3><i class="fa-solid fa-bolt"></i> Tại sao chọn MobileNetV2?</h3>
+                <p>Nhận diện ảnh thường tốn Card Đồ Họa (GPU) cực mạnh. Tuy nhiên, <strong>MobileNetV2</strong> sử dụng kiến trúc <em>Depthwise Separable Convolution</em>, giảm số lượng phép tính gấp 10 lần. Giúp mô hình chạy mượt mà ngay trên CPU của Raspberry Pi.</p>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <h2>Kiến trúc trích xuất đặc trưng hình ảnh</h2>
+            
+            <div class="cnn-arch">
+                <!-- Input -->
+                <div class="image-input">
+                    <i class="fa-solid fa-leaf"></i>
+                    <span>Tấm Ảnh Lá</span>
+                    <small>Ma trận RGB<br>224 x 224 x 3</small>
+                </div>
+
+                <i class="fa-solid fa-arrow-right arrow"></i>
+
+                <!-- CNN Layers -->
+                <div class="conv-blocks">
+                    <div class="c-block">Conv2D<br><small>(Tìm cạnh)</small></div>
+                    <div class="c-block pool">Pool<br><small>(Thu nhỏ)</small></div>
+                    <div class="c-block" style="height:240px; background:linear-gradient(180deg, #90cdf4 0%, #3182ce 100%);">Depthwise<br>Conv</div>
+                    <div class="c-block pool" style="height:160px;">Pool</div>
+                    <div class="mobilenet-label">MobileNetV2 Backbone</div>
+                </div>
+
+                <i class="fa-solid fa-arrow-right arrow"></i>
+
+                <!-- Flatten / FC Layer -->
+                <div class="fc-layer">
+                    <div class="neuron"></div><div class="neuron"></div><div class="neuron"></div>
+                    <div class="neuron"></div><div class="neuron"></div><div class="neuron"></div>
+                    <div style="text-align: center; color: #4a5568; font-weight: bold; font-size:14px;">Dense<br>Layer</div>
+                </div>
+
+                <i class="fa-solid fa-arrow-right arrow"></i>
+
+                <!-- Output Softmax -->
+                <div class="output-box">
+                    <h4>Softmax Output</h4>
+                    <div class="prob-bar">
+                        <div class="prob-label"><span>Bệnh Thối Rễ</span> <span>95%</span></div>
+                        <div class="p-bg"><div class="p-fill high"></div></div>
+                    </div>
+                    <div class="prob-bar">
+                        <div class="prob-label"><span style="color:#c53030;">Lá Khỏe Mạnh</span> <span style="color:#c53030;">5%</span></div>
+                        <div class="p-bg"><div class="p-fill low"></div></div>
+                    </div>
+                </div>
+            </div>
+
+            <p style="text-align: center; margin-top: 40px; font-size: 20px; color: #718096; font-style: italic;">
+                "Ma trận ảnh thô đi vào &rarr; Đặc trưng bị nén lại liên tục &rarr; Lưới nơ-ron phân loại ra xác suất bệnh học"
+            </p>
+        </div>
+
+    </div>
+</div>
+</body>
+</html>
