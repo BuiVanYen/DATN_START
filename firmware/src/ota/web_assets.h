@@ -206,25 +206,7 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(<!DOCTYPE html>
 
                 <!-- Bottom Row: Chart and Control Panel -->
                 <div class="dashboard-bottom-row">
-                    <!-- Left: Realtime Chart -->
-                    <div class="card chart-card">
-                        <div class="chart-header">
-                            <h2>Biểu Đồ Theo Dõi (Giờ Thực)</h2>
-                            <div class="chart-tabs">
-                                <button class="chart-tab active" data-sensor="lux">Ánh sáng</button>
-                                <button class="chart-tab" data-sensor="temp">Nhiệt độ KK</button>
-                                <button class="chart-tab" data-sensor="humi">Độ ẩm KK</button>
-                                <button class="chart-tab" data-sensor="temp_w">Nhiệt độ nước</button>
-                                <button class="chart-tab" data-sensor="tds">TDS</button>
-                                <button class="chart-tab" data-sensor="ph">pH</button>
-                            </div>
-                        </div>
-                        <div class="chart-body">
-                            <canvas id="realtimeChart" width="600" height="280"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- Right: Control Panel (10 Actuators) -->
+                    <!-- Top: Control Panel (10 Actuators) -->
                     <div class="card control-card">
                         <div class="card-header">
                             <h2>Bảng Điều Khiển Ngoại Vi</h2>
@@ -411,6 +393,24 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(<!DOCTYPE html>
                                     <span class="slider-switch"></span>
                                 </label>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom: Realtime Chart -->
+                    <div class="card chart-card">
+                        <div class="chart-header">
+                            <h2>Biểu Đồ Theo Dõi (Giờ Thực)</h2>
+                            <div class="chart-tabs">
+                                <button class="chart-tab active" data-sensor="lux">Ánh sáng</button>
+                                <button class="chart-tab" data-sensor="temp">Nhiệt độ KK</button>
+                                <button class="chart-tab" data-sensor="humi">Độ ẩm KK</button>
+                                <button class="chart-tab" data-sensor="temp_w">Nhiệt độ nước</button>
+                                <button class="chart-tab" data-sensor="tds">TDS</button>
+                                <button class="chart-tab" data-sensor="ph">pH</button>
+                            </div>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="realtimeChart" width="600" height="280"></canvas>
                         </div>
                     </div>
                 </div>
@@ -1339,12 +1339,11 @@ input[type="text"]:focus, input[type="password"]:focus {
 
 /* Bố cục dòng dưới: Đồ thị & Bảng điều khiển */
 .dashboard-bottom-row {
-    display: grid;
-    grid-template-columns: 1.3fr 0.7fr;
+    display: flex;
+    flex-direction: column;
     gap: 24px;
     width: 100%;
-    margin-top: 8px;
-    align-items: start;
+    margin-top: 16px;
 }
 
 .chart-card, .control-card {
@@ -1416,20 +1415,23 @@ input[type="text"]:focus, input[type="password"]:focus {
 }
 
 .control-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
 }
 
 .control-item {
     display: grid;
-    grid-template-columns: 180px 1fr 50px;
+    grid-template-areas: 
+        "info toggle"
+        "pwm pwm";
+    grid-template-columns: 1fr auto;
     align-items: center;
-    padding: 12px 16px;
+    padding: 16px;
     background: #ffffff;
     border: 1px solid var(--border-color);
     border-radius: 12px;
-    gap: 16px;
+    gap: 12px;
     transition: all 0.2s ease;
 }
 
@@ -1439,6 +1441,7 @@ input[type="text"]:focus, input[type="password"]:focus {
 }
 
 .device-info {
+    grid-area: info;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -1470,12 +1473,14 @@ input[type="text"]:focus, input[type="password"]:focus {
     margin-top: 1px;
 }
 
-/* Khu vực thanh trượt PWM ở giữa */
+/* Khu vực thanh trượt PWM */
 .pwm-control-area {
+    grid-area: pwm;
     display: flex;
     align-items: center;
     gap: 10px;
     width: 100%;
+    margin-top: 4px;
 }
 
 .pwm-slider {
@@ -1532,6 +1537,7 @@ input[type="text"]:focus, input[type="password"]:focus {
 
 /* Switch Toggle iOS Style */
 .switch {
+    grid-area: toggle;
     position: relative;
     display: inline-block;
     width: 44px;
@@ -1575,27 +1581,9 @@ input:checked + .slider-switch:before {
     transform: translateX(22px);
 }
 
-@media (max-width: 1024px) {
-    .dashboard-bottom-row {
-        grid-template-columns: 1fr;
-    }
-}
-
 @media (max-width: 768px) {
     .sensor-grid {
         grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    }
-    .control-item {
-        grid-template-columns: 1fr;
-        gap: 12px;
-    }
-    .pwm-control-area {
-        order: 3;
-        margin-top: 4px;
-    }
-    .switch {
-        order: 2;
-        justify-self: end;
     }
 }
 
@@ -1659,12 +1647,40 @@ const char SCRIPT_JS[] PROGMEM = R"rawliteral(document.addEventListener("DOMCont
     const maxDataPoints = 30;
     const sensorKeys = ["lux", "temp", "humi", "temp_w", "tds", "ph"];
     const chartData = {};
+    const chartTimes = Array(maxDataPoints).fill(""); // Khởi tạo mảng mốc thời gian trục X
+    
     sensorKeys.forEach(k => {
         chartData[k] = Array(maxDataPoints).fill(null); // Tạo sẵn 30 điểm trống để đồ thị cuộn mượt
     });
 
     const canvas = document.getElementById("realtimeChart");
     let activeSensor = "lux";
+    
+    // Lưu tọa độ chuột để vẽ tooltip tương tác
+    let mouseX = -1;
+    let mouseY = -1;
+
+    if (canvas) {
+        canvas.addEventListener("mousemove", (e) => {
+            const rect = canvas.getBoundingClientRect();
+            // Map tọa độ chuột của trình duyệt sang độ phân giải thực của canvas
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            mouseX = (e.clientX - rect.left) * scaleX;
+            mouseY = (e.clientY - rect.top) * scaleY;
+            drawChart();
+        });
+
+        canvas.addEventListener("mouseleave", () => {
+            mouseX = -1;
+            mouseY = -1;
+            drawChart();
+        });
+        
+        window.addEventListener("resize", () => {
+            drawChart();
+        });
+    }
 
     // Lắng nghe sự kiện đổi tab đồ thị cảm biến
     document.querySelectorAll(".chart-tab").forEach(tab => {
@@ -1678,6 +1694,16 @@ const char SCRIPT_JS[] PROGMEM = R"rawliteral(document.addEventListener("DOMCont
 
     function drawChart() {
         if (!canvas) return;
+        
+        // Tự động điều chỉnh độ phân giải canvas theo CSS (responsive)
+        const rect = canvas.getBoundingClientRect();
+        const displayWidth = Math.floor(rect.width);
+        const displayHeight = Math.floor(rect.height);
+        if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
+            canvas.width = displayWidth;
+            canvas.height = displayHeight;
+        }
+        
         const ctx = canvas.getContext("2d");
         const width = canvas.width;
         const height = canvas.height;
@@ -1695,7 +1721,7 @@ const char SCRIPT_JS[] PROGMEM = R"rawliteral(document.addEventListener("DOMCont
             return;
         }
         
-        const padding = { top: 30, right: 20, bottom: 40, left: 50 };
+        const padding = { top: 35, right: 30, bottom: 40, left: 60 };
         const graphWidth = width - padding.left - padding.right;
         const graphHeight = height - padding.top - padding.bottom;
         
@@ -1707,14 +1733,15 @@ const char SCRIPT_JS[] PROGMEM = R"rawliteral(document.addEventListener("DOMCont
             maxVal += 10;
         } else {
             const range = maxVal - minVal;
-            minVal -= range * 0.1;
-            maxVal += range * 0.1;
+            minVal -= range * 0.15;
+            maxVal += range * 0.15;
         }
         if (minVal < 0 && activeSensor !== "temp") minVal = 0;
         
-        // Vẽ lưới tọa độ ngang
+        // Vẽ lưới tọa độ ngang (Y axis grid)
         const gridLines = 4;
-        ctx.strokeStyle = "#e1e8e4";
+        ctx.strokeStyle = "rgba(46, 125, 50, 0.08)";
+        ctx.setLineDash([4, 4]);
         ctx.lineWidth = 1;
         ctx.fillStyle = "var(--text-secondary)";
         ctx.font = "10px sans-serif";
@@ -1745,14 +1772,35 @@ const char SCRIPT_JS[] PROGMEM = R"rawliteral(document.addEventListener("DOMCont
             if (data[i] === null || isNaN(data[i])) continue;
             const x = padding.left + i * xStep;
             const y = padding.top + graphHeight - ((data[i] - minVal) / (maxVal - minVal)) * graphHeight;
-            points.push({ x, y, value: data[i] });
+            points.push({ x, y, value: data[i], time: chartTimes[i] });
         }
         
         if (points.length === 0) return;
         
+        // Vẽ lưới tọa độ dọc (X axis grid) mỗi 5 mốc
+        ctx.strokeStyle = "rgba(46, 125, 50, 0.06)";
+        for (let i = 0; i < maxDataPoints; i += 5) {
+            const x = padding.left + i * xStep;
+            ctx.beginPath();
+            ctx.moveTo(x, padding.top);
+            ctx.lineTo(x, padding.top + graphHeight);
+            ctx.stroke();
+        }
+        
+        ctx.setLineDash([]); // Reset nét đứt về nét liền
+        
+        // Vẽ trục tọa độ
+        ctx.strokeStyle = "#cbd5e1";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(padding.left, padding.top);
+        ctx.lineTo(padding.left, padding.top + graphHeight);
+        ctx.lineTo(width - padding.right, padding.top + graphHeight);
+        ctx.stroke();
+        
         const primaryColor = "#2e7d32"; // Xanh lá đậm chủ đạo
         
-        // Vẽ vùng Gradient dưới đồ thị
+        // Vẽ vùng Gradient dưới đồ thị (Area Fill)
         if (points.length > 1) {
             ctx.beginPath();
             ctx.moveTo(points[0].x, padding.top + graphHeight);
@@ -1772,15 +1820,20 @@ const char SCRIPT_JS[] PROGMEM = R"rawliteral(document.addEventListener("DOMCont
             ctx.closePath();
             
             const areaGrad = ctx.createLinearGradient(0, padding.top, 0, padding.top + graphHeight);
-            areaGrad.addColorStop(0, "rgba(46, 125, 50, 0.2)");
+            areaGrad.addColorStop(0, "rgba(46, 125, 50, 0.25)");
             areaGrad.addColorStop(1, "rgba(46, 125, 50, 0.0)");
             ctx.fillStyle = areaGrad;
             ctx.fill();
         }
         
-        // Vẽ đường cong Spline mượt mà
+        // Vẽ đường cong Spline mượt mà (Line với đổ bóng đổ)
+        ctx.save();
+        ctx.shadowColor = "rgba(46, 125, 50, 0.3)";
+        ctx.shadowBlur = 8;
+        ctx.shadowOffsetY = 4;
+        
         ctx.strokeStyle = primaryColor;
-        ctx.lineWidth = 2.5;
+        ctx.lineWidth = 3;
         ctx.lineCap = "round";
         ctx.lineJoin = "round";
         ctx.beginPath();
@@ -1798,26 +1851,117 @@ const char SCRIPT_JS[] PROGMEM = R"rawliteral(document.addEventListener("DOMCont
             }
         }
         ctx.stroke();
+        ctx.restore(); // Khôi phục trạng thái ban đầu để tránh đổ bóng các phần tử khác
         
         // Vẽ các nút tròn dữ liệu
-        ctx.fillStyle = "#ffffff";
-        ctx.lineWidth = 2;
-        points.forEach(p => {
+        points.forEach((p, idx) => {
+            ctx.fillStyle = "#ffffff";
             ctx.strokeStyle = primaryColor;
+            ctx.lineWidth = 2;
             ctx.beginPath();
-            ctx.arc(p.x, p.y, 4.5, 0, 2 * Math.PI);
+            ctx.arc(p.x, p.y, idx === points.length - 1 ? 5 : 3.5, 0, 2 * Math.PI);
             ctx.fill();
             ctx.stroke();
         });
         
-        // Nhãn trục X thời gian
+        // Vẽ nhãn thời gian trục X
         ctx.fillStyle = "var(--text-muted)";
         ctx.textAlign = "center";
         ctx.textBaseline = "top";
         ctx.font = "9px sans-serif";
-        ctx.fillText("-2.5m", padding.left, padding.top + graphHeight + 8);
-        ctx.fillText("-1.5m", padding.left + graphWidth / 2, padding.top + graphHeight + 8);
-        ctx.fillText("Vừa xong", width - padding.right, padding.top + graphHeight + 8);
+        
+        // Chỉ in một số mốc thời gian để tránh chen chúc nhãn
+        const printIndices = [0, 10, 20, 29];
+        printIndices.forEach(idx => {
+            if (idx < chartTimes.length && chartTimes[idx] !== "") {
+                const x = padding.left + idx * xStep;
+                ctx.fillText(chartTimes[idx], x, padding.top + graphHeight + 8);
+            }
+        });
+
+        // Xử lý tooltip hướng dẫn khi di chuột
+        let activePoint = null;
+        const hoverThreshold = 15;
+        if (mouseX >= padding.left && mouseX <= width - padding.right) {
+            let minDist = Infinity;
+            points.forEach(p => {
+                const dist = Math.abs(p.x - mouseX);
+                if (dist < minDist && dist < hoverThreshold) {
+                    minDist = dist;
+                    activePoint = p;
+                }
+            });
+        }
+
+        if (activePoint) {
+            // Vẽ đường guides gióng dọc
+            ctx.strokeStyle = "rgba(46, 125, 50, 0.4)";
+            ctx.lineWidth = 1;
+            ctx.setLineDash([3, 3]);
+            ctx.beginPath();
+            ctx.moveTo(activePoint.x, padding.top);
+            ctx.lineTo(activePoint.x, padding.top + graphHeight);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // Vẽ nút tròn nổi bật
+            ctx.fillStyle = primaryColor;
+            ctx.strokeStyle = "#ffffff";
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.arc(activePoint.x, activePoint.y, 6.5, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.stroke();
+            
+            const unit = activeSensor === "temp" || activeSensor === "temp_w" ? "°C" :
+                         activeSensor === "humi" ? "%" :
+                         activeSensor === "lux" ? "Lux" :
+                         activeSensor === "tds" ? "ppm" : "pH";
+            
+            let valStr = activePoint.value.toFixed(1);
+            if (activeSensor === "lux" || activeSensor === "tds") valStr = Math.round(activePoint.value);
+            
+            const tooltipText = `${valStr} ${unit}`;
+            const timeText = activePoint.time || "Đang đo";
+            
+            ctx.save();
+            ctx.shadowColor = "rgba(0, 0, 0, 0.15)";
+            ctx.shadowBlur = 8;
+            ctx.shadowOffsetY = 4;
+            
+            ctx.fillStyle = "#1e293b"; // Tooltip màu đen Slate sang trọng
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
+            ctx.lineWidth = 1;
+            
+            const boxWidth = 90;
+            const boxHeight = 42;
+            let boxX = activePoint.x - boxWidth / 2;
+            let boxY = activePoint.y - boxHeight - 12;
+            
+            if (boxX < padding.left) boxX = padding.left;
+            if (boxX + boxWidth > width - padding.right) boxX = width - padding.right - boxWidth;
+            if (boxY < padding.top) boxY = activePoint.y + 12;
+            
+            ctx.beginPath();
+            if (ctx.roundRect) {
+                ctx.roundRect(boxX, boxY, boxWidth, boxHeight, 6);
+            } else {
+                ctx.rect(boxX, boxY, boxWidth, boxHeight);
+            }
+            ctx.fill();
+            ctx.stroke();
+            ctx.restore();
+            
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "bold 11px sans-serif";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "top";
+            ctx.fillText(tooltipText, boxX + boxWidth / 2, boxY + 6);
+            
+            ctx.fillStyle = "#94a3b8";
+            ctx.font = "9px sans-serif";
+            ctx.fillText(timeText, boxX + boxWidth / 2, boxY + 22);
+        }
     }
 
     function pushChartPoint(sensor, val) {
@@ -1936,6 +2080,13 @@ const char SCRIPT_JS[] PROGMEM = R"rawliteral(document.addEventListener("DOMCont
         updateSensorCard("lvl4", data.lvl4, data.lvl4_conn, "%", levelStatusFn);
 
         // 2. Lưu lịch sử đồ thị cảm biến (chỉ khi kết nối tốt, ngược lại đẩy null)
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        chartTimes.push(timeStr);
+        if (chartTimes.length > maxDataPoints) {
+            chartTimes.shift();
+        }
+
         pushChartPoint("lux", data.lux_conn ? data.lux : null);
         pushChartPoint("temp", data.temp_conn ? data.temp : null);
         pushChartPoint("humi", data.humi_conn ? data.humi : null);
