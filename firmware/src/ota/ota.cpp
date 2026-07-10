@@ -95,13 +95,20 @@ void saveCredentials(String ssid, String pass) {
   preferences.end();
 }
 
-// ===================== WEB SERVER HANDLERS =====================
+void handleRoot() {
+  server.sendHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+  server.send_P(200, "text/html", INDEX_HTML);
+}
 
-void handleRoot() { server.send_P(200, "text/html", INDEX_HTML); }
+void handleCSS() {
+  server.sendHeader("Cache-Control", "public, max-age=31536000");
+  server.send_P(200, "text/css", STYLE_CSS);
+}
 
-void handleCSS() { server.send_P(200, "text/css", STYLE_CSS); }
-
-void handleJS() { server.send_P(200, "application/javascript", SCRIPT_JS); }
+void handleJS() {
+  server.sendHeader("Cache-Control", "public, max-age=31536000");
+  server.send_P(200, "application/javascript", SCRIPT_JS);
+}
 
 void handleWiFiScan() {
   int16_t scanResult = WiFi.scanComplete();

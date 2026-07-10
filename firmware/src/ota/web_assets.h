@@ -7,7 +7,7 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(<!DOCTYPE html>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DATN_AIOT_LETTUCE - ESP32 Control Center</title>
-    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/style.css?v=1.0.4">
 </head>
 <body>
     <div class="layout">
@@ -570,7 +570,7 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(<!DOCTYPE html>
             </section>
         </main>
     </div>
-    <script src="/script.js"></script>
+    <script src="/script.js?v=1.0.4"></script>
 </body>
 </html>
 )rawliteral";
