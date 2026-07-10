@@ -34,6 +34,10 @@ unsigned long ledTimer = 0;
 bool ledState = false;
 unsigned long connectionLostTimer = 0;
 bool wifiLostFlag = false;
+
+// Bộ đệm lưu trữ giá trị cảm biến (tránh đọc I2C trực tiếp gây treo/lag khi tắt/bật relay)
+float cached_lux = -1.0;
+bool cached_bh1750_connected = false;
 } // namespace
 
 // --- Khởi tạo AP Mode ---
@@ -173,8 +177,6 @@ String getSystemStatusJSON() {
   const esp_partition_t *running = esp_ota_get_running_partition();
   String partitionName = (running != NULL) ? String(running->label) : "Unknown";
 
-  float luxVal = sensors_read_light();
-
   String json = "{";
   json += "\"version\":\"" + String(FW_VERSION) + "\",";
   json += "\"ssid\":\"" + currentSSID + "\",";
@@ -189,8 +191,8 @@ String getSystemStatusJSON() {
   json += "\"free_sketch\":" + String(ESP.getFreeSketchSpace()) + ",";
   
   // Dữ liệu cảm biến & Trạng thái kết nối (1 = Connected, 0 = Disconnected)
-  json += "\"lux\":" + String(luxVal, 1) + ",";
-  json += "\"lux_conn\":" + String(sensors_is_bh1750_connected() ? 1 : 0) + ",";
+  json += "\"lux\":" + String(cached_lux, 1) + ",";
+  json += "\"lux_conn\":" + String(cached_bh1750_connected ? 1 : 0) + ",";
   
   json += "\"temp\":" + String(30.9, 1) + ",";
   json += "\"temp_conn\":0,"; // SHT31 chưa kết nối
@@ -380,6 +382,10 @@ void ota_init() {
   webSocket.begin();
   webSocket.onEvent(webSocketEvent);
   Serial.println("[OTA] WebSocket Server da san sang tren cong 81!");
+
+  // Cập nhật giá trị cảm biến ban đầu vào cache
+  cached_lux = sensors_read_light();
+  cached_bh1750_connected = sensors_is_bh1750_connected();
 }
 
 // --- Hàm xử lý liên tục trong vòng lặp loop() ---
@@ -457,6 +463,10 @@ void ota_handle() {
   static unsigned long lastWsBroadcast = 0;
   if (now - lastWsBroadcast >= 5000) {
     lastWsBroadcast = now;
+    // Cập nhật bộ đệm cảm biến định kỳ
+    cached_lux = sensors_read_light();
+    cached_bh1750_connected = sensors_is_bh1750_connected();
+    
     String statusJson = getSystemStatusJSON();
     webSocket.broadcastTXT(statusJson);
   }

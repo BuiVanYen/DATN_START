@@ -5,12 +5,31 @@
 static BH1750 lightMeter;
 static bool bh1750_connected = false;
 
+// Khôi phục I2C bus khi gặp sự cố nhiễu (do đóng ngắt Relay/Bơm tạo tia lửa điện)
+void sensors_recover_i2c() {
+    Serial.println("[I2C] He thong phat hien treo bus I2C. Dang thuc hien khoi phuc...");
+    
+    // Cấu hình các chân I2C về chế độ INPUT_PULLUP để giải phóng bus vật lý
+    pinMode(PIN_SDA, INPUT_PULLUP);
+    pinMode(PIN_SCL, INPUT_PULLUP);
+    delay(10);
+    
+    // Ngắt kết nối Wire và khởi tạo lại
+    Wire.end();
+    Wire.begin(PIN_SDA, PIN_SCL);
+    Wire.setTimeOut(10); // Đặt timeout ngắn (10ms) để không gây nghẽn luồng loop
+    
+    // Khởi tạo lại cảm biến BH1750
+    lightMeter.begin(BH1750::CONTINUOUS_HIGH_RES_MODE);
+}
+
 void sensors_init() {
     Serial.println("[SENSOR] Dang khoi tao giao tiep I2C...");
     
     // Khởi tạo I2C với cấu hình chân custom trên mạch
     Wire.setPins(PIN_SDA, PIN_SCL); // Ghim cứng cấu hình chân vào ESP32 Core
     Wire.begin();
+    Wire.setTimeOut(10);            // Thiết lập I2C timeout là 10ms để chống nghẽn
     
     // --- QUÉT THIẾT BỊ I2C ---
     Serial.println("[I2C] Bat dau quet thiet bi tren bus I2C...");
@@ -44,10 +63,39 @@ void sensors_init() {
 }
 
 float sensors_read_light() {
-    if (!bh1750_connected) {
-        return -1.0; // Trả về -1 nếu cảm biến mất kết nối
+    // Ping thử thiết bị tại địa chỉ 0x23 (mặc định BH1750) để kiểm tra kết nối vật lý trước khi đọc
+    Wire.beginTransmission(0x23);
+    byte err = Wire.endTransmission();
+    
+    if (err != 0) {
+        // Thử ping địa chỉ phụ 0x5C nếu chân ADDR bị nối HIGH
+        Wire.beginTransmission(0x5C);
+        err = Wire.endTransmission();
     }
+    
+    if (err != 0) {
+        if (bh1750_connected) {
+            Serial.printf("[SENSOR] BH1750 mat phan hoi (Ma loi: %d). Thuc hien recovery...\n", err);
+            sensors_recover_i2c();
+            bh1750_connected = false;
+        }
+        return -1.0;
+    }
+    
+    // Nếu trước đó mất kết nối mà hiện tại ping được -> Khởi tạo lại cảm biến
+    if (!bh1750_connected) {
+        Serial.println("[SENSOR] BH1750 da ket noi lai. Dang tai khoi tao...");
+        if (lightMeter.begin(BH1750::CONTINUOUS_HIGH_RES_MODE)) {
+            bh1750_connected = true;
+        } else {
+            return -1.0;
+        }
+    }
+    
     float lux = lightMeter.readLightLevel();
+    if (lux < 0) {
+        return -1.0;
+    }
     return lux;
 }
 
