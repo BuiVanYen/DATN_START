@@ -97,17 +97,20 @@ void saveCredentials(String ssid, String pass) {
 
 void handleRoot() {
   server.sendHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-  server.send_P(200, "text/html", INDEX_HTML);
+  server.sendHeader("Content-Encoding", "gzip");
+  server.send_P(200, "text/html", (const char*)INDEX_HTML_GZ, INDEX_HTML_GZ_LEN);
 }
 
 void handleCSS() {
   server.sendHeader("Cache-Control", "public, max-age=31536000");
-  server.send_P(200, "text/css", STYLE_CSS);
+  server.sendHeader("Content-Encoding", "gzip");
+  server.send_P(200, "text/css", (const char*)STYLE_CSS_GZ, STYLE_CSS_GZ_LEN);
 }
 
 void handleJS() {
   server.sendHeader("Cache-Control", "public, max-age=31536000");
-  server.send_P(200, "application/javascript", SCRIPT_JS);
+  server.sendHeader("Content-Encoding", "gzip");
+  server.send_P(200, "application/javascript", (const char*)SCRIPT_JS_GZ, SCRIPT_JS_GZ_LEN);
 }
 
 void handleWiFiScan() {

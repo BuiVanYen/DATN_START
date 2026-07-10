@@ -1,4 +1,5 @@
 import os
+import gzip
 
 Import("env")
 
@@ -9,8 +10,17 @@ css_path = os.path.join(source_dir, "style.css")
 js_path = os.path.join(source_dir, "script.js")
 output_path = os.path.join(source_dir, "web_assets.h")
 
+def to_hex_array(data):
+    # Convert bytes into a comma-separated hex values, split into lines for readability
+    lines = []
+    for i in range(0, len(data), 16):
+        chunk = data[i:i+16]
+        hex_vals = ", ".join(f"0x{b:02x}" for b in chunk)
+        lines.append(f"  {hex_vals}")
+    return ",\n".join(lines)
+
 def build_web_assets(*args, **kwargs):
-    print("Generating web_assets.h from HTML/CSS/JS files...")
+    print("Generating web_assets.h (Gzip Compressed) from HTML/CSS/JS files...")
     
     # Ensure source directory exists
     if not os.path.exists(source_dir):
@@ -33,18 +43,38 @@ def build_web_assets(*args, **kwargs):
         with open(js_path, "r", encoding="utf-8") as f:
             js_content = f.read()
             
-    # Generate C++ header content with raw string literals
+    # Compress with gzip (best compression ratio = 9)
+    html_gz = gzip.compress(html_content.encode('utf-8'), compresslevel=9)
+    css_gz = gzip.compress(css_content.encode('utf-8'), compresslevel=9)
+    js_gz = gzip.compress(js_content.encode('utf-8'), compresslevel=9)
+
+    html_hex = to_hex_array(html_gz)
+    css_hex = to_hex_array(css_gz)
+    js_hex = to_hex_array(js_gz)
+
+    # Generate C++ header content with gzip byte arrays
     cpp_content = f"""#pragma once
 #include <Arduino.h>
 
-const char INDEX_HTML[] PROGMEM = R"rawliteral({html_content})rawliteral";
-const char STYLE_CSS[] PROGMEM = R"rawliteral({css_content})rawliteral";
-const char SCRIPT_JS[] PROGMEM = R"rawliteral({js_content})rawliteral";
+const uint8_t INDEX_HTML_GZ[] PROGMEM = {{
+{html_hex}
+}};
+const size_t INDEX_HTML_GZ_LEN = {len(html_gz)};
+
+const uint8_t STYLE_CSS_GZ[] PROGMEM = {{
+{css_hex}
+}};
+const size_t STYLE_CSS_GZ_LEN = {len(css_gz)};
+
+const uint8_t SCRIPT_JS_GZ[] PROGMEM = {{
+{js_hex}
+}};
+const size_t SCRIPT_JS_GZ_LEN = {len(js_gz)};
 """
 
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(cpp_content)
-    print("web_assets.h generated successfully!")
+    print("web_assets.h (Gzip Compressed) generated successfully!")
 
 # Hook into the build process
 env.AddPreAction("buildprog", build_web_assets)
