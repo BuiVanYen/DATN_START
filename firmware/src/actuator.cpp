@@ -16,6 +16,16 @@ static int state_BUZZER = 0;
 static int state_PIN_EN_TDS = 0;
 static int state_LED_SYS = 0;
 
+// --- Theo dõi trạng thái pending để lưu NVS (Settle-time debouncing) ---
+struct {
+  int pending_value;      // Giá trị chờ lưu
+  unsigned long last_change_time; // Thời điểm thay đổi cuối
+  bool has_pending;       // Có giá trị đang chờ không?
+} static pwm_debounce[8]; // 8 kênh PWM: DEN1, DEN2, QUAT1, QUAT2, BOMLL1-3, BOM12V
+
+// Timeout settle-time: 2 giây không thay đổi → lưu vào NVS
+const unsigned long PWM_SETTLE_TIME_MS = 2000;
+
 // --- Hàm ghi/đọc bộ nhớ Flash (NVS Preferences) ---
 static void save_actuator_state(int pin, int state) {
   Preferences prefs;
@@ -24,6 +34,8 @@ static void save_actuator_state(int pin, int state) {
     snprintf(key, sizeof(key), "p%d", pin);
     prefs.putInt(key, state);
     prefs.end();
+  } else {
+    Serial.printf("[ACTUATOR] LOI: Khong the ghi NVS Preferences cho GPIO %d!\n", pin);
   }
 }
 
@@ -35,6 +47,8 @@ static int load_actuator_state(int pin, int default_val) {
     snprintf(key, sizeof(key), "p%d", pin);
     val = prefs.getInt(key, default_val);
     prefs.end();
+  } else {
+    Serial.printf("[ACTUATOR] LOI: Khong the doc NVS Preferences cho GPIO %d!\n", pin);
   }
   return val;
 }
@@ -43,25 +57,8 @@ static int load_actuator_state(int pin, int default_val) {
 void hardware_init() {
   Serial.println("[HARDWARE] Dang khoi tao cac chan ngoai vi...");
 
-  // Danh sách các chân điều khiển Relay (2 kênh) và PWM MOSFET (8 kênh)
-  // Tất cả cần được kéo xuống LOW ngay lập tức để tránh tải ngoại vi tự bật
-  // do mạch PCB không có trở pull-down trên gate MOSFET / base transistor
-  const int output_pins[] = {// 2 kênh Relay
-                             IN_RL1, IN_RL2,
-                             // 8 kênh PWM MOSFET
-                             DEN1, DEN2, QUAT1, QUAT2, BOMLL1, BOMLL2, BOMLL3, BOM12V,
-                             // Ngoại vi khác
-                             BUZZER, PIN_EN_TDS, LED_SYS};
-
-  // Kỹ thuật: Ghi LOW trước → sau đó mới chuyển sang OUTPUT
-  // Tránh chân bị nháy glitch HIGH trong quá trình chuyển mode
-  for (int pin : output_pins) {
-    digitalWrite(pin, LOW);
-    pinMode(pin, OUTPUT);
-    digitalWrite(pin, LOW); // Đảm bảo chắc chắn LOW sau khi set OUTPUT
-  }
-
-  // Khôi phục các biến trạng thái từ bộ nhớ NVS (Flash)
+  // Bước 1: Khôi phục các biến trạng thái từ bộ nhớ NVS (Flash) TRƯỚC KHI khởi tạo GPIO
+  // Điều này giảm thiểu thời gian các thiết bị ở trạng thái sai
   state_IN_RL1 = load_actuator_state(IN_RL1, 0);
   state_IN_RL2 = load_actuator_state(IN_RL2, 0);
   state_DEN1 = load_actuator_state(DEN1, 0);
@@ -76,7 +73,19 @@ void hardware_init() {
   state_PIN_EN_TDS = load_actuator_state(PIN_EN_TDS, 0);
   state_LED_SYS = load_actuator_state(LED_SYS, 0);
 
-  // Áp dụng các trạng thái đã khôi phục lên phần cứng vật lý
+  // Bước 2: Khởi tạo GPIO pins với kỹ thuật LOW → OUTPUT → Target State
+  // Danh sách các chân điều khiển (2 relay + 8 PWM + 3 khác)
+  const int output_pins[] = {IN_RL1, IN_RL2, DEN1, DEN2, QUAT1, QUAT2,
+                             BOMLL1, BOMLL2, BOMLL3, BOM12V,
+                             BUZZER, PIN_EN_TDS, LED_SYS};
+
+  for (int pin : output_pins) {
+    digitalWrite(pin, LOW);      // Ghi LOW trước
+    pinMode(pin, OUTPUT);        // Chuyển sang OUTPUT
+    digitalWrite(pin, LOW);      // Đảm bảo LOW
+  }
+
+  // Bước 3: Áp dụng các trạng thái đã khôi phục lên phần cứng vật lý
   digitalWrite(IN_RL1, state_IN_RL1 ? HIGH : LOW);
   digitalWrite(IN_RL2, state_IN_RL2 ? HIGH : LOW);
   digitalWrite(BUZZER, state_BUZZER ? HIGH : LOW);
@@ -101,6 +110,41 @@ void hardware_init() {
   Serial.printf("  DEN1: %d, DEN2: %d\n", state_DEN1, state_DEN2);
   Serial.printf("  QUAT1: %d, QUAT2: %d\n", state_QUAT1, state_QUAT2);
   Serial.printf("  BOMLL1: %d, BOMLL2: %d, BOMLL3: %d, BOM12V: %d\n", state_BOMLL1, state_BOMLL2, state_BOMLL3, state_BOM12V);
+}
+
+// --- Xử lý lưu giá trị PWM pending sau khi settle (gọi trong loop) ---
+void actuator_flush_pending() {
+  unsigned long now = millis();
+  const int pwm_pins[] = {DEN1, DEN2, QUAT1, QUAT2, BOMLL1, BOMLL2, BOMLL3, BOM12V};
+
+  for (int i = 0; i < 8; i++) {
+    if (pwm_debounce[i].has_pending) {
+      unsigned long time_since_change = now - pwm_debounce[i].last_change_time;
+
+      // Nếu đã qua 2 giây kể từ lần thay đổi cuối → lưu vào NVS
+      if (time_since_change >= PWM_SETTLE_TIME_MS) {
+        save_actuator_state(pwm_pins[i], pwm_debounce[i].pending_value);
+        pwm_debounce[i].has_pending = false;
+
+        Serial.printf("[ACTUATOR] PWM GPIO %d settled -> Saved to NVS: %d/255\n",
+                      pwm_pins[i], pwm_debounce[i].pending_value);
+      }
+    }
+  }
+}
+
+// --- Force flush tất cả PWM pending (dùng khi OTA, reset, mất điện...) ---
+void actuator_force_flush() {
+  const int pwm_pins[] = {DEN1, DEN2, QUAT1, QUAT2, BOMLL1, BOMLL2, BOMLL3, BOM12V};
+
+  for (int i = 0; i < 8; i++) {
+    if (pwm_debounce[i].has_pending) {
+      save_actuator_state(pwm_pins[i], pwm_debounce[i].pending_value);
+      pwm_debounce[i].has_pending = false;
+      Serial.printf("[ACTUATOR] Force flush PWM GPIO %d -> NVS: %d/255\n",
+                    pwm_pins[i], pwm_debounce[i].pending_value);
+    }
+  }
 }
 
 // --- Lấy trạng thái hiện tại của ngoại vi ---
@@ -137,15 +181,18 @@ void actuator_set_state(int pin, int state) {
 
   // Tiền xử lý và chuẩn hóa giá trị trạng thái
   int val = state;
+  bool clamped = false;
+
   if (is_relay || is_other) {
     val = state ? 1 : 0;
   } else if (is_pwm) {
     if (val < 0) val = 0;
     if (val > 255) val = 255;
-    
+
     // Nếu giá trị PWM dương nhưng nhỏ hơn mức tối thiểu 10% (khoảng 25/255)
     // và không phải là tắt hẳn (val = 0)
     if (val > 0 && val < 25) {
+      clamped = true;
       val = 25; // Giới hạn tối thiểu 10%
     }
   }
@@ -167,15 +214,39 @@ void actuator_set_state(int pin, int state) {
     case LED_SYS: state_LED_SYS = val; break;
   }
 
-  // Lưu trạng thái mới vào bộ nhớ Flash (NVS) để duy trì khi mất nguồn/khởi động lại
-  save_actuator_state(pin, val);
-
-  // Áp dụng trạng thái lên phần cứng
+  // Áp dụng trạng thái lên phần cứng NGAY LẬP TỨC
   if (is_relay || is_other) {
     digitalWrite(pin, val ? HIGH : LOW);
-    Serial.printf("[ACTUATOR] Digital GPIO %d -> %s (Saved NVS)\n", pin, val ? "HIGH" : "LOW");
   } else if (is_pwm) {
     analogWrite(pin, val);
-    Serial.printf("[ACTUATOR] PWM GPIO %d -> %d/255 (%.1f%%) (Saved NVS)\n", pin, val, (val * 100.0) / 255.0);
+  }
+
+  // Lưu trạng thái vào NVS Flash với Settle-Time Debouncing để giảm mòn flash
+  if (is_relay || is_other) {
+    // Relay luôn lưu ngay (trạng thái ON/OFF quan trọng)
+    save_actuator_state(pin, val);
+    Serial.printf("[ACTUATOR] Digital GPIO %d -> %s (Saved NVS)\n",
+                  pin, val ? "HIGH" : "LOW");
+  } else if (is_pwm) {
+    // PWM: Đánh dấu pending, sẽ lưu sau 2s không thay đổi (xử lý trong actuator_flush_pending())
+    int pwm_idx = -1;
+    if (pin == DEN1) pwm_idx = 0;
+    else if (pin == DEN2) pwm_idx = 1;
+    else if (pin == QUAT1) pwm_idx = 2;
+    else if (pin == QUAT2) pwm_idx = 3;
+    else if (pin == BOMLL1) pwm_idx = 4;
+    else if (pin == BOMLL2) pwm_idx = 5;
+    else if (pin == BOMLL3) pwm_idx = 6;
+    else if (pin == BOM12V) pwm_idx = 7;
+
+    if (pwm_idx >= 0) {
+      pwm_debounce[pwm_idx].pending_value = val;
+      pwm_debounce[pwm_idx].last_change_time = millis();
+      pwm_debounce[pwm_idx].has_pending = true;
+    }
+
+    Serial.printf("[ACTUATOR] PWM GPIO %d -> %d/255 (%.1f%%)%s (Pending save...)\n",
+                  pin, val, (val * 100.0) / 255.0,
+                  clamped ? " [Clamped to min 10%]" : "");
   }
 }

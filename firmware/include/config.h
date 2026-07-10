@@ -4,7 +4,7 @@
 // ============================================================
 // THÔNG TIN PHIÊN BẢN FIRMWARE & HỆ THỐNG
 // ============================================================
-#define FW_VERSION "1.0.4"
+#define FW_VERSION "1.0.5"
 #define AP_SSID "DATN_AIOT_LETTUCE"
 #define OTA_PORT 80
 #define WS_PORT 81
@@ -54,6 +54,12 @@ void hardware_init();
 // Điều khiển trạng thái ngoại vi
 void actuator_set_state(int pin, int state);
 int actuator_get_state(int pin);
+
+// Xử lý lưu giá trị PWM pending (gọi trong loop)
+void actuator_flush_pending();
+
+// Force flush tất cả PWM pending (gọi trước OTA, reset...)
+void actuator_force_flush();
 
 // Khởi tạo cảm biến
 void sensors_init();

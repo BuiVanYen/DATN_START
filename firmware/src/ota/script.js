@@ -51,6 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- WebSocket / Polling Real-time logic ---
     let ws = null;
     let pollInterval = null;
+    const lastUserInteraction = {}; // Chặn đè trạng thái từ server khi vừa tương tác cơ học
 
     // --- Cấu hình Đồ thị Canvas mượt mà ngoại tuyến ---
     const maxDataPoints = 30;
@@ -64,6 +65,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const canvas = document.getElementById("realtimeChart");
     let activeSensor = "lux";
+
+    // Cấu hình nhãn & màu sắc cho từng cảm biến để vẽ đồ thị động
+    const sensorConfigs = {
+        lux: { label: "Ánh sáng (Lux)", color: "#d97706", fill: "rgba(217, 119, 6, 0.1)" },
+        temp: { label: "Nhiệt độ không khí (°C)", color: "#10b981", fill: "rgba(16, 185, 129, 0.1)" },
+        humi: { label: "Độ ẩm không khí (%)", color: "#2563eb", fill: "rgba(37, 99, 235, 0.1)" },
+        temp_w: { label: "Nhiệt độ nước (°C)", color: "#4f46e5", fill: "rgba(79, 70, 229, 0.1)" },
+        tds: { label: "Dinh dưỡng TDS (ppm)", color: "#7c3aed", fill: "rgba(124, 58, 237, 0.1)" },
+        ph: { label: "Độ pH (pH)", color: "#2e7d32", fill: "rgba(46, 125, 50, 0.1)" }
+    };
+
+    function updateLegend() {
+        const config = sensorConfigs[activeSensor];
+        const legendText = document.getElementById("legendText");
+        const legendColorBox = document.getElementById("legendColorBox");
+        if (legendText && legendColorBox) {
+            legendText.textContent = config.label;
+            legendColorBox.style.borderColor = config.color;
+            legendColorBox.style.backgroundColor = config.fill;
+        }
+    }
     
     // Lưu tọa độ chuột để vẽ tooltip tương tác
     let mouseX = -1;
@@ -104,6 +126,9 @@ document.addEventListener("DOMContentLoaded", () => {
     function drawChart() {
         if (!canvas) return;
         
+        // Cập nhật Legend HTML đồng bộ
+        updateLegend();
+        
         // Tự động điều chỉnh độ phân giải canvas theo CSS (responsive)
         const rect = canvas.getBoundingClientRect();
         const displayWidth = Math.floor(rect.width);
@@ -130,7 +155,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
         
-        const padding = { top: 35, right: 30, bottom: 40, left: 60 };
+        const padding = { top: 20, right: 20, bottom: 35, left: 55 };
         const graphWidth = width - padding.left - padding.right;
         const graphHeight = height - padding.top - padding.bottom;
         
@@ -147,13 +172,16 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         if (minVal < 0 && activeSensor !== "temp") minVal = 0;
         
-        // Vẽ lưới tọa độ ngang (Y axis grid)
+        // Cấu hình vẽ đồ thị động từ sensorConfigs
+        const config = sensorConfigs[activeSensor];
+        const primaryColor = config.color;
+        
+        // Vẽ lưới tọa độ ngang (Y axis grid) - Đường lưới mờ màu xám nhạt như hình mẫu
         const gridLines = 4;
-        ctx.strokeStyle = "rgba(46, 125, 50, 0.08)";
-        ctx.setLineDash([4, 4]);
+        ctx.strokeStyle = "rgba(226, 232, 240, 0.8)";
         ctx.lineWidth = 1;
-        ctx.fillStyle = "var(--text-secondary)";
-        ctx.font = "10px sans-serif";
+        ctx.fillStyle = "#64748b"; // Màu xám slate cho chữ trục
+        ctx.font = "11px -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif";
         ctx.textAlign = "right";
         ctx.textBaseline = "middle";
         
@@ -187,7 +215,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (points.length === 0) return;
         
         // Vẽ lưới tọa độ dọc (X axis grid) mỗi 5 mốc
-        ctx.strokeStyle = "rgba(46, 125, 50, 0.06)";
+        ctx.strokeStyle = "rgba(226, 232, 240, 0.8)";
         for (let i = 0; i < maxDataPoints; i += 5) {
             const x = padding.left + i * xStep;
             ctx.beginPath();
@@ -195,19 +223,6 @@ document.addEventListener("DOMContentLoaded", () => {
             ctx.lineTo(x, padding.top + graphHeight);
             ctx.stroke();
         }
-        
-        ctx.setLineDash([]); // Reset nét đứt về nét liền
-        
-        // Vẽ trục tọa độ
-        ctx.strokeStyle = "#cbd5e1";
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.moveTo(padding.left, padding.top);
-        ctx.lineTo(padding.left, padding.top + graphHeight);
-        ctx.lineTo(width - padding.right, padding.top + graphHeight);
-        ctx.stroke();
-        
-        const primaryColor = "#2e7d32"; // Xanh lá đậm chủ đạo
         
         // Vẽ vùng Gradient dưới đồ thị (Area Fill)
         if (points.length > 1) {
@@ -229,17 +244,17 @@ document.addEventListener("DOMContentLoaded", () => {
             ctx.closePath();
             
             const areaGrad = ctx.createLinearGradient(0, padding.top, 0, padding.top + graphHeight);
-            areaGrad.addColorStop(0, "rgba(46, 125, 50, 0.25)");
-            areaGrad.addColorStop(1, "rgba(46, 125, 50, 0.0)");
+            areaGrad.addColorStop(0, config.fill);
+            areaGrad.addColorStop(1, "rgba(255, 255, 255, 0)");
             ctx.fillStyle = areaGrad;
             ctx.fill();
         }
         
-        // Vẽ đường cong Spline mượt mà (Line với đổ bóng đổ)
+        // Vẽ đường cong Spline mượt mà (Line với bóng đổ nhẹ)
         ctx.save();
-        ctx.shadowColor = "rgba(46, 125, 50, 0.3)";
-        ctx.shadowBlur = 8;
-        ctx.shadowOffsetY = 4;
+        ctx.shadowColor = primaryColor + "33"; // Đổ bóng nhẹ 20%
+        ctx.shadowBlur = 6;
+        ctx.shadowOffsetY = 3;
         
         ctx.strokeStyle = primaryColor;
         ctx.lineWidth = 3;
@@ -260,7 +275,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
         ctx.stroke();
-        ctx.restore(); // Khôi phục trạng thái ban đầu để tránh đổ bóng các phần tử khác
+        ctx.restore();
         
         // Vẽ các nút tròn dữ liệu
         points.forEach((p, idx) => {
@@ -274,12 +289,11 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         
         // Vẽ nhãn thời gian trục X
-        ctx.fillStyle = "var(--text-muted)";
+        ctx.fillStyle = "#64748b";
         ctx.textAlign = "center";
         ctx.textBaseline = "top";
-        ctx.font = "9px sans-serif";
+        ctx.font = "10px -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif";
         
-        // Chỉ in một số mốc thời gian để tránh chen chúc nhãn
         const printIndices = [0, 10, 20, 29];
         printIndices.forEach(idx => {
             if (idx < chartTimes.length && chartTimes[idx] !== "") {
@@ -304,7 +318,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (activePoint) {
             // Vẽ đường guides gióng dọc
-            ctx.strokeStyle = "rgba(46, 125, 50, 0.4)";
+            ctx.strokeStyle = primaryColor + "55"; // 33% opacity
             ctx.lineWidth = 1;
             ctx.setLineDash([3, 3]);
             ctx.beginPath();
@@ -338,11 +352,11 @@ document.addEventListener("DOMContentLoaded", () => {
             ctx.shadowBlur = 8;
             ctx.shadowOffsetY = 4;
             
-            ctx.fillStyle = "#1e293b"; // Tooltip màu đen Slate sang trọng
+            ctx.fillStyle = "#1e293b";
             ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
             ctx.lineWidth = 1;
             
-            const boxWidth = 90;
+            const boxWidth = 95;
             const boxHeight = 42;
             let boxX = activePoint.x - boxWidth / 2;
             let boxY = activePoint.y - boxHeight - 12;
@@ -436,40 +450,52 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("info-uptime").textContent = 
             `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 
-        // 1. Cập nhật 11 thẻ cảm biến dựa trên cờ kết nối _conn từ ESP32
+        // 1. Cập nhật 11 thẻ cảm biến dựa trên cờ kết nối _conn từ ESP32 và ngưỡng động từ thresholds.h
+        const th_tempa_l = data.th_tempa_l !== undefined ? data.th_tempa_l : 20.0;
+        const th_tempa_h = data.th_tempa_h !== undefined ? data.th_tempa_h : 30.0;
         updateSensorCard("temp", data.temp, data.temp_conn, "°C", (val) => {
-            if (val < 18 || val > 32) return { text: "Trạng thái: Khẩn cấp", cl: "status-danger" };
-            if (val >= 21 && val <= 29) return { text: "Trạng thái: Ổn định", cl: "status-normal" };
+            if (val < th_tempa_l - 2 || val > th_tempa_h + 2) return { text: "Trạng thái: Khẩn cấp", cl: "status-danger" };
+            if (val >= th_tempa_l && val <= th_tempa_h) return { text: "Trạng thái: Ổn định", cl: "status-normal" };
             return { text: "Trạng thái: Lưu ý", cl: "status-warning" };
         });
         
+        const th_humi_l = data.th_humi_l !== undefined ? data.th_humi_l : 50.0;
+        const th_humi_h = data.th_humi_h !== undefined ? data.th_humi_h : 85.0;
         updateSensorCard("humi", data.humi, data.humi_conn, "%", (val) => {
-            if (val < 40 || val > 85) return { text: "Trạng thái: Cảnh báo", cl: "status-danger" };
-            if (val >= 50 && val <= 80) return { text: "Trạng thái: Tốt", cl: "status-normal" };
+            if (val < th_humi_l - 10 || val > th_humi_h + 10) return { text: "Trạng thái: Cảnh báo", cl: "status-danger" };
+            if (val >= th_humi_l && val <= th_humi_h) return { text: "Trạng thái: Tốt", cl: "status-normal" };
             return { text: "Trạng thái: Hơi ẩm/khô", cl: "status-warning" };
         });
 
+        const th_light_l = data.th_light_l !== undefined ? data.th_light_l : 1000.0;
+        const th_light_h = data.th_light_h !== undefined ? data.th_light_h : 25000.0;
         updateSensorCard("lux", data.lux, data.lux_conn, "Lux", (val) => {
             if (val < 100) return { text: "Trạng thái: Quá tối", cl: "status-danger" };
-            if (val >= 800 && val <= 2000) return { text: "Trạng thái: Đủ sáng", cl: "status-normal" };
+            if (val >= th_light_l && val <= th_light_h) return { text: "Trạng thái: Đủ sáng", cl: "status-normal" };
             return { text: "Trạng thái: Ánh sáng lệch", cl: "status-warning" };
         });
 
+        const th_tempw_l = data.th_tempw_l !== undefined ? data.th_tempw_l : 18.0;
+        const th_tempw_h = data.th_tempw_h !== undefined ? data.th_tempw_h : 26.0;
         updateSensorCard("tempw", data.temp_w, data.temp_w_conn, "°C", (val) => {
-            if (val < 16 || val > 28) return { text: "Trạng thái: Nguy hiểm", cl: "status-danger" };
-            if (val >= 20 && val <= 25) return { text: "Trạng thái: Đạt chuẩn", cl: "status-normal" };
+            if (val < th_tempw_l - 2 || val > th_tempw_h + 2) return { text: "Trạng thái: Nguy hiểm", cl: "status-danger" };
+            if (val >= th_tempw_l && val <= th_tempw_h) return { text: "Trạng thái: Đạt chuẩn", cl: "status-normal" };
             return { text: "Trạng thái: Cần lưu ý", cl: "status-warning" };
         });
 
+        const th_tds_l = data.th_tds_l !== undefined ? data.th_tds_l : 600.0;
+        const th_tds_h = data.th_tds_h !== undefined ? data.th_tds_h : 900.0;
         updateSensorCard("tds", data.tds, data.tds_conn, "ppm", (val) => {
-            if (val < 500) return { text: "Trạng thái: Thiếu DD", cl: "status-danger" };
-            if (val >= 600 && val <= 850) return { text: "Trạng thái: Đạt chuẩn", cl: "status-normal" };
+            if (val < th_tds_l - 100 || val > th_tds_h + 100) return { text: "Trạng thái: Thiếu DD", cl: "status-danger" };
+            if (val >= th_tds_l && val <= th_tds_h) return { text: "Trạng thái: Đạt chuẩn", cl: "status-normal" };
             return { text: "Trạng thái: Hơi lệch", cl: "status-warning" };
         });
 
+        const th_ph_l = data.th_ph_l !== undefined ? data.th_ph_l : 5.5;
+        const th_ph_h = data.th_ph_h !== undefined ? data.th_ph_h : 6.5;
         updateSensorCard("ph", data.ph, data.ph_conn, "pH", (val) => {
-            if (val < 5.0 || val > 7.0) return { text: "Trạng thái: Nguy hiểm", cl: "status-danger" };
-            if (val >= 5.5 && val <= 6.5) return { text: "Trạng thái: Ổn định", cl: "status-normal" };
+            if (val < th_ph_l - 0.5 || val > th_ph_h + 0.5) return { text: "Trạng thái: Nguy hiểm", cl: "status-danger" };
+            if (val >= th_ph_l && val <= th_ph_h) return { text: "Trạng thái: Ổn định", cl: "status-normal" };
             return { text: "Trạng thái: Cần điều chỉnh", cl: "status-warning" };
         });
 
@@ -523,6 +549,11 @@ document.addEventListener("DOMContentLoaded", () => {
             const toggle = document.getElementById(`ctrl-${act.id}`);
             if (!toggle) return;
             
+            // Nếu người dùng vừa mới tương tác cơ học (< 2.5s), bỏ qua đồng bộ đè từ server để tránh "giật" ngược công tắc
+            if (lastUserInteraction[act.id] && (Date.now() - lastUserInteraction[act.id] < 2500)) {
+                return;
+            }
+            
             const stateVal = data[act.key];
             if (stateVal === undefined) return;
             
@@ -567,6 +598,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const isPwm = toggle.closest(".pwm-item") !== null;
             const id = toggle.id.replace("ctrl-", "");
             
+            lastUserInteraction[id] = Date.now(); // Ghi nhận thời gian tương tác người dùng
+            
             let sendVal = 0;
             if (toggle.checked) {
                 if (isPwm) {
@@ -602,6 +635,7 @@ document.addEventListener("DOMContentLoaded", () => {
         slider.addEventListener("change", () => {
             const toggle = document.getElementById(`ctrl-${id}`);
             if (toggle && toggle.checked) {
+                lastUserInteraction[id] = Date.now(); // Ghi nhận thời gian tương tác người dùng
                 const sendVal = Math.round((slider.value * 255) / 100);
                 sendControlCommand(pin, sendVal);
             }
@@ -614,7 +648,28 @@ document.addEventListener("DOMContentLoaded", () => {
         if (ws && ws.readyState === WebSocket.OPEN) {
             ws.send(payload);
         } else {
-            console.warn("WebSocket chưa kết nối. Không thể gửi lệnh.");
+            console.warn("WebSocket chưa kết nối. Thử gửi qua HTTP...");
+            const formData = new URLSearchParams();
+            formData.append("pin", pin);
+            formData.append("state", state);
+            
+            fetch("/api/control", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: formData
+            })
+            .then(res => {
+                if (res.ok) {
+                    console.log("Gửi lệnh qua HTTP thành công!");
+                } else {
+                    console.error("Gửi lệnh qua HTTP thất bại:", res.statusText);
+                }
+            })
+            .catch(err => {
+                console.error("Lỗi gửi lệnh qua HTTP:", err);
+            });
         }
     }
 
@@ -658,6 +713,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
         ws.onclose = () => {
             console.log(`WebSocket bị đóng. Đang kích hoạt HTTP Polling và thử kết nối lại sau ${wsReconnectDelay/1000}s...`);
+            
+            const statusBadge = document.getElementById("connection-status");
+            const statusText = document.getElementById("status-text");
+            if (statusBadge) {
+                statusBadge.className = "status-badge disconnected";
+                if (statusText) statusText.textContent = " Đang kết nối lại...";
+            }
+
             if (!pollInterval) {
                 pollInterval = setInterval(updateSystemStatusPolling, 3000);
             }
@@ -958,5 +1021,50 @@ document.addEventListener("DOMContentLoaded", () => {
         if (savedWidth) {
             sidebar.style.width = savedWidth;
         }
+    }
+
+    // --- Mock Data For Offline testing (file:// protocol & local dev servers) ---
+    if (window.location.protocol === "file:" || window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+        console.log("Phát hiện chạy offline qua file:// hoặc local server, tự động kích hoạt dữ liệu giả lập!");
+        // Seed mock data
+        const now = new Date();
+        for (let i = maxDataPoints - 1; i >= 0; i--) {
+            const mockTime = new Date(now.getTime() - i * 5000);
+            const timeStr = mockTime.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            chartTimes[i] = timeStr;
+            
+            // Pushing initial mock data
+            chartData["lux"][maxDataPoints - 1 - i] = 1000 + Math.sin(i * 0.5) * 400 + Math.random() * 100;
+            chartData["temp"][maxDataPoints - 1 - i] = 25 + Math.sin(i * 0.3) * 3 + Math.random() * 0.5;
+            chartData["humi"][maxDataPoints - 1 - i] = 65 + Math.cos(i * 0.4) * 10 + Math.random() * 2;
+            chartData["temp_w"][maxDataPoints - 1 - i] = 22 + Math.sin(i * 0.2) * 1.5 + Math.random() * 0.3;
+            chartData["tds"][maxDataPoints - 1 - i] = 700 + Math.cos(i * 0.3) * 50 + Math.random() * 10;
+            chartData["ph"][maxDataPoints - 1 - i] = 6.0 + Math.sin(i * 0.6) * 0.4 + Math.random() * 0.1;
+        }
+        drawChart();
+        
+        // Simulating incoming real-time data
+        setInterval(() => {
+            const nextTime = new Date();
+            const timeStr = nextTime.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            chartTimes.push(timeStr);
+            chartTimes.shift();
+            
+            const lastLux = chartData["lux"][maxDataPoints - 1];
+            const lastTemp = chartData["temp"][maxDataPoints - 1];
+            const lastHumi = chartData["humi"][maxDataPoints - 1];
+            const lastTempW = chartData["temp_w"][maxDataPoints - 1];
+            const lastTds = chartData["tds"][maxDataPoints - 1];
+            const lastPh = chartData["ph"][maxDataPoints - 1];
+            
+            pushChartPoint("lux", lastLux + (Math.random() - 0.5) * 50);
+            pushChartPoint("temp", lastTemp + (Math.random() - 0.5) * 0.4);
+            pushChartPoint("humi", lastHumi + (Math.random() - 0.5) * 1.5);
+            pushChartPoint("temp_w", lastTempW + (Math.random() - 0.5) * 0.2);
+            pushChartPoint("tds", lastTds + (Math.random() - 0.5) * 10);
+            pushChartPoint("ph", Math.max(0, Math.min(14, lastPh + (Math.random() - 0.5) * 0.05)));
+            
+            drawChart();
+        }, 3000);
     }
 });

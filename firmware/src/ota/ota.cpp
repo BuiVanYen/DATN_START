@@ -1,5 +1,6 @@
 #include "ota_handler.h"
 #include "config.h"
+#include "thresholds.h"
 #include "driver/gpio.h"
 #include "esp_ota_ops.h"
 #include "web_assets.h" // Được sinh tự động từ script python
@@ -38,6 +39,16 @@ bool wifiLostFlag = false;
 // Bộ đệm lưu trữ giá trị cảm biến (tránh đọc I2C trực tiếp gây treo/lag khi tắt/bật relay)
 float cached_lux = -1.0;
 bool cached_bh1750_connected = false;
+
+// Hàm escape ký tự đặc biệt trong JSON
+String escapeJson(String input) {
+  input.replace("\\", "\\\\");
+  input.replace("\"", "\\\"");
+  input.replace("\n", "\\n");
+  input.replace("\r", "\\r");
+  input.replace("\t", "\\t");
+  return input;
+}
 } // namespace
 
 // --- Khởi tạo AP Mode ---
@@ -48,12 +59,16 @@ void startAPMode() {
 
   WiFi.mode(WIFI_AP);
   // AP mở không mật khẩu để dễ kết nối
-  WiFi.softAP(AP_SSID);
+  if (!WiFi.softAP(AP_SSID)) {
+    Serial.println("[OTA] LOI: Khong the khoi dong AP Mode!");
+    return;
+  }
   delay(100);
 
-  // Khởi động DNS Server để chuyển hướng toàn bộ tên miền về IP ESP32 (Captive
-  // Portal)
-  dnsServer.start(53, "*", WiFi.softAPIP());
+  // Khởi động DNS Server để chuyển hướng toàn bộ tên miền về IP ESP32 (Captive Portal)
+  if (!dnsServer.start(53, "*", WiFi.softAPIP())) {
+    Serial.println("[OTA] CANH BAO: DNS Server khong khoi dong duoc (Captive Portal se khong hoat dong)");
+  }
 
   Serial.println("\n[OTA] Da khoi dong AP Mode!");
   Serial.printf("[OTA] SSID: %s (Open)\n", AP_SSID);
@@ -72,7 +87,12 @@ void startConnectingSTA() {
   currentState = STATE_STA_CONNECTING;
   stateTimer = millis(); // Bắt đầu đếm ngược 15 giây
 
-  WiFi.mode(WIFI_STA);
+  if (!WiFi.mode(WIFI_STA)) {
+    Serial.println("[OTA] LOI: Khong the chuyen sang STA Mode!");
+    startAPMode(); // Fallback về AP nếu không chuyển được
+    return;
+  }
+
   WiFi.begin(wifi_ssid.c_str(), wifi_pass.c_str());
 
   Serial.print("\n[OTA] Dang ket noi toi WiFi: ");
@@ -102,13 +122,13 @@ void handleRoot() {
 }
 
 void handleCSS() {
-  server.sendHeader("Cache-Control", "public, max-age=31536000");
+  server.sendHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   server.sendHeader("Content-Encoding", "gzip");
   server.send_P(200, "text/css", (const char*)STYLE_CSS_GZ, STYLE_CSS_GZ_LEN);
 }
 
 void handleJS() {
-  server.sendHeader("Cache-Control", "public, max-age=31536000");
+  server.sendHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   server.sendHeader("Content-Encoding", "gzip");
   server.send_P(200, "application/javascript", (const char*)SCRIPT_JS_GZ, SCRIPT_JS_GZ_LEN);
 }
@@ -134,17 +154,27 @@ void handleWiFiScan() {
 
   // Nếu quét đã hoàn tất (scanResult >= 0 là số lượng mạng tìm thấy)
   Serial.printf("[OTA] Da quet xong, tim thay %d mang WiFi.\n", scanResult);
+
+  // Giới hạn tối đa 20 mạng để tránh tràn bộ nhớ (vùng đông dân có thể có 100+ mạng)
+  const int MAX_NETWORKS = 20;
+  int displayCount = (scanResult > MAX_NETWORKS) ? MAX_NETWORKS : scanResult;
+
   String json = "[";
-  for (int i = 0; i < scanResult; i++) {
+  for (int i = 0; i < displayCount; i++) {
     if (i > 0)
       json += ",";
-    json += "{\"ssid\":\"" + WiFi.SSID(i) +
+    json += "{\"ssid\":\"" + escapeJson(WiFi.SSID(i)) +
             "\",\"rssi\":" + String(WiFi.RSSI(i)) + "}";
   }
   json += "]";
 
   // Giải phóng bộ nhớ quét
   WiFi.scanDelete();
+
+  if (scanResult > MAX_NETWORKS) {
+    Serial.printf("[OTA] Chi hien thi %d/%d mang WiFi de tranh qua tai bo nho.\n", MAX_NETWORKS, scanResult);
+  }
+
   server.send(200, "application/json", json);
 }
 
@@ -158,6 +188,9 @@ void handleWiFiSave() {
 
     saveCredentials(ssid, pass);
     server.send(200, "text/plain", "OK");
+
+    // Force flush trước khi restart
+    actuator_force_flush();
 
     delay(1000);
     ESP.restart(); // Reset chip để khởi động lại và kết nối WiFi mới
@@ -173,6 +206,9 @@ void handleWiFiForget() {
   preferences.end();
   server.send(200, "text/plain", "OK");
 
+  // Force flush trước khi restart
+  actuator_force_flush();
+
   delay(1000);
   ESP.restart(); // Reset chip để phát lại AP mode
 }
@@ -187,66 +223,115 @@ String getSystemStatusJSON() {
   const esp_partition_t *running = esp_ota_get_running_partition();
   String partitionName = (running != NULL) ? String(running->label) : "Unknown";
 
-  String json = "{";
-  json += "\"version\":\"" + String(FW_VERSION) + "\",";
-  json += "\"ssid\":\"" + currentSSID + "\",";
-  json += "\"ip\":\"" + currentIP + "\",";
-  json += "\"heap\":" + String(ESP.getFreeHeap()) + ",";
-  json += "\"uptime\":" + String(millis()) + ",";
-  json += "\"rssi\":" + String(rssi) + ",";
-  json += "\"wifimode\":\"" + modeStr + "\",";
-  json += "\"partition\":\"" + partitionName + "\",";
-  json += "\"flash_size\":" + String(ESP.getFlashChipSize()) + ",";
-  json += "\"sketch_size\":" + String(ESP.getSketchSize()) + ",";
-  json += "\"free_sketch\":" + String(ESP.getFreeSketchSpace()) + ",";
-  
-  // Dữ liệu cảm biến & Trạng thái kết nối (1 = Connected, 0 = Disconnected)
-  json += "\"lux\":" + String(cached_lux, 1) + ",";
-  json += "\"lux_conn\":" + String(cached_bh1750_connected ? 1 : 0) + ",";
-  
-  json += "\"temp\":" + String(30.9, 1) + ",";
-  json += "\"temp_conn\":0,"; // SHT31 chưa kết nối
-  
-  json += "\"humi\":" + String(68.0, 1) + ",";
-  json += "\"humi_conn\":0,"; // SHT31 chưa kết nối
-  
-  json += "\"temp_w\":" + String(25.5, 1) + ",";
-  json += "\"temp_w_conn\":0,"; // DS18B20 chưa kết nối
-  
-  json += "\"tds\":" + String(720.0, 1) + ",";
-  json += "\"tds_conn\":0,"; // TDS chưa kết nối
-  
-  json += "\"ph\":" + String(6.0, 1) + ",";
-  json += "\"ph_conn\":0,"; // pH chưa kết nối
-  
-  json += "\"flow\":" + String(1.5, 1) + ",";
-  json += "\"flow_conn\":0,"; // Cảm biến dòng chảy chưa kết nối
-  
-  json += "\"lvl1\":" + String(80.0, 1) + ",";
-  json += "\"lvl1_conn\":0,"; // Mực nước thùng chính chưa kết nối
-  
-  json += "\"lvl2\":" + String(50.0, 1) + ",";
-  json += "\"lvl2_conn\":0,"; // Chai 1 chưa kết nối
-  
-  json += "\"lvl3\":" + String(45.0, 1) + ",";
-  json += "\"lvl3_conn\":0,"; // Chai 2 chưa kết nối
-  
-  json += "\"lvl4\":" + String(90.0, 1) + ",";
-  json += "\"lvl4_conn\":0,"; // Chai 3 chưa kết nối
+  String escapedSSID = escapeJson(currentSSID);
 
-  // Trạng thái 10 thiết bị ngoại vi
-  json += "\"act_IN_RL1\":" + String(actuator_get_state(IN_RL1)) + ",";
-  json += "\"act_IN_RL2\":" + String(actuator_get_state(IN_RL2)) + ",";
-  json += "\"act_DEN1\":" + String(actuator_get_state(DEN1)) + ",";
-  json += "\"act_DEN2\":" + String(actuator_get_state(DEN2)) + ",";
-  json += "\"act_QUAT1\":" + String(actuator_get_state(QUAT1)) + ",";
-  json += "\"act_QUAT2\":" + String(actuator_get_state(QUAT2)) + ",";
-  json += "\"act_BOMLL1\":" + String(actuator_get_state(BOMLL1)) + ",";
-  json += "\"act_BOMLL2\":" + String(actuator_get_state(BOMLL2)) + ",";
-  json += "\"act_BOMLL3\":" + String(actuator_get_state(BOMLL3)) + ",";
-  json += "\"act_BOM12V\":" + String(actuator_get_state(BOM12V));
-  json += "}";
-  return json;
+  // Tăng buffer lên 2048 bytes để an toàn với SSID dài + escape sequences
+  static char buf[2048];
+  snprintf(buf, sizeof(buf),
+    "{"
+    "\"version\":\"%s\","
+    "\"ssid\":\"%s\","
+    "\"ip\":\"%s\","
+    "\"heap\":%u,"
+    "\"uptime\":%lu,"
+    "\"rssi\":%ld,"
+    "\"wifimode\":\"%s\","
+    "\"partition\":\"%s\","
+    "\"flash_size\":%u,"
+    "\"sketch_size\":%u,"
+    "\"free_sketch\":%u,"
+    "\"lux\":%.1f,"
+    "\"lux_conn\":%d,"
+    "\"temp\":%.1f,"
+    "\"temp_conn\":0,"
+    "\"humi\":%.1f,"
+    "\"humi_conn\":0,"
+    "\"temp_w\":%.1f,"
+    "\"temp_w_conn\":0,"
+    "\"tds\":%.1f,"
+    "\"tds_conn\":0,"
+    "\"ph\":%.1f,"
+    "\"ph_conn\":0,"
+    "\"flow\":%.1f,"
+    "\"flow_conn\":0,"
+    "\"lvl1\":%.1f,"
+    "\"lvl1_conn\":0,"
+    "\"lvl2\":%.1f,"
+    "\"lvl2_conn\":0,"
+    "\"lvl3\":%.1f,"
+    "\"lvl3_conn\":0,"
+    "\"lvl4\":%.1f,"
+    "\"lvl4_conn\":0,"
+    "\"act_IN_RL1\":%d,"
+    "\"act_IN_RL2\":%d,"
+    "\"act_DEN1\":%d,"
+    "\"act_DEN2\":%d,"
+    "\"act_QUAT1\":%d,"
+    "\"act_QUAT2\":%d,"
+    "\"act_BOMLL1\":%d,"
+    "\"act_BOMLL2\":%d,"
+    "\"act_BOMLL3\":%d,"
+    "\"act_BOM12V\":%d,"
+    "\"th_light_l\":%.1f,"
+    "\"th_light_h\":%.1f,"
+    "\"th_tempw_l\":%.1f,"
+    "\"th_tempw_h\":%.1f,"
+    "\"th_tempa_l\":%.1f,"
+    "\"th_tempa_h\":%.1f,"
+    "\"th_humi_l\":%.1f,"
+    "\"th_humi_h\":%.1f,"
+    "\"th_tds_l\":%.1f,"
+    "\"th_tds_h\":%.1f,"
+    "\"th_ph_l\":%.2f,"
+    "\"th_ph_h\":%.2f"
+    "}",
+    FW_VERSION,
+    escapedSSID.c_str(),
+    currentIP.c_str(),
+    ESP.getFreeHeap(),
+    millis(),
+    rssi,
+    modeStr.c_str(),
+    partitionName.c_str(),
+    ESP.getFlashChipSize(),
+    ESP.getSketchSize(),
+    ESP.getFreeSketchSpace(),
+    cached_lux,
+    cached_bh1750_connected ? 1 : 0,
+    30.9,
+    68.0,
+    25.5,
+    720.0,
+    6.0,
+    1.5,
+    80.0,
+    50.0,
+    45.0,
+    90.0,
+    actuator_get_state(IN_RL1),
+    actuator_get_state(IN_RL2),
+    actuator_get_state(DEN1),
+    actuator_get_state(DEN2),
+    actuator_get_state(QUAT1),
+    actuator_get_state(QUAT2),
+    actuator_get_state(BOMLL1),
+    actuator_get_state(BOMLL2),
+    actuator_get_state(BOMLL3),
+    actuator_get_state(BOM12V),
+    (float)THRESHOLD_LIGHT_LOW,
+    (float)THRESHOLD_LIGHT_HIGH,
+    (float)THRESHOLD_TEMP_WATER_LOW,
+    (float)THRESHOLD_TEMP_WATER_HIGH,
+    (float)THRESHOLD_TEMP_AIR_LOW,
+    (float)THRESHOLD_TEMP_AIR_HIGH,
+    (float)THRESHOLD_HUMIDITY_LOW,
+    (float)THRESHOLD_HUMIDITY_HIGH,
+    (float)THRESHOLD_TDS_LOW,
+    (float)THRESHOLD_TDS_HIGH,
+    (float)THRESHOLD_PH_LOW,
+    (float)THRESHOLD_PH_HIGH
+  );
+  return String(buf);
 }
 
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload,
@@ -270,6 +355,8 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload,
     int pin = -1;
     int state = -1;
 
+    // Parse JSON thủ công đơn giản (tối ưu cho embedded, không cần thư viện nặng)
+    // Format mong đợi: {"pin":7,"state":1} hoặc {"pin": 7, "state": 1}
     int pinIdx = msg.indexOf("\"pin\"");
     int stateIdx = msg.indexOf("\"state\"");
 
@@ -277,10 +364,13 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload,
       // Tìm vị trí dấu hai chấm sau "pin"
       int colonPin = msg.indexOf(":", pinIdx);
       if (colonPin != -1) {
+        // Tìm dấu phẩy hoặc dấu ngoặc đóng
         int commaPin = msg.indexOf(",", colonPin);
         if (commaPin == -1) commaPin = msg.indexOf("}", colonPin);
         if (commaPin != -1) {
-          pin = msg.substring(colonPin + 1, commaPin).toInt();
+          String pinStr = msg.substring(colonPin + 1, commaPin);
+          pinStr.trim(); // Loại bỏ khoảng trắng
+          pin = pinStr.toInt();
         }
       }
 
@@ -290,18 +380,38 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload,
         int commaState = msg.indexOf(",", colonState);
         if (commaState == -1) commaState = msg.indexOf("}", colonState);
         if (commaState != -1) {
-          state = msg.substring(colonState + 1, commaState).toInt();
+          String stateStr = msg.substring(colonState + 1, commaState);
+          stateStr.trim(); // Loại bỏ khoảng trắng
+          state = stateStr.toInt();
         }
       }
     }
 
-    if (pin != -1 && state != -1) {
+    // Validate pin number trước khi gọi actuator
+    const int valid_pins[] = {IN_RL1, IN_RL2, DEN1, DEN2, QUAT1, QUAT2,
+                              BOMLL1, BOMLL2, BOMLL3, BOM12V};
+    bool pin_valid = false;
+    if (pin != -1) {
+      for (int vp : valid_pins) {
+        if (pin == vp) {
+          pin_valid = true;
+          break;
+        }
+      }
+    }
+
+    if (pin_valid && state != -1) {
       Serial.printf("[WS] Dieu khien thiet bi: GPIO %d -> Gtri %d\n", pin, state);
       actuator_set_state(pin, state);
 
       // Phát thông tin cập nhật trạng thái mới cho toàn bộ các thiết bị đang kết nối
       String statusJson = getSystemStatusJSON();
       webSocket.broadcastTXT(statusJson);
+    } else {
+      Serial.printf("[WS] LOI: JSON khong hop le hoac pin khong hop le. pin=%d, state=%d\n", pin, state);
+      // Gửi thông báo lỗi về client
+      String errorMsg = "{\"error\":\"Invalid pin or state\"}";
+      webSocket.sendTXT(num, errorMsg);
     }
     break;
   }
@@ -314,11 +424,50 @@ void handleSystemStatus() {
   server.send(200, "application/json", getSystemStatusJSON());
 }
 
+void handleControl() {
+  if (server.hasArg("pin") && server.hasArg("state")) {
+    int pin = server.arg("pin").toInt();
+    int state = server.arg("state").toInt();
+
+    // Validate pin number trước khi gọi actuator (giống WebSocket handler)
+    const int valid_pins[] = {IN_RL1, IN_RL2, DEN1, DEN2, QUAT1, QUAT2,
+                              BOMLL1, BOMLL2, BOMLL3, BOM12V};
+    bool pin_valid = false;
+    for (int vp : valid_pins) {
+      if (pin == vp) {
+        pin_valid = true;
+        break;
+      }
+    }
+
+    if (!pin_valid) {
+      Serial.printf("[HTTP-CTRL] LOI: Pin khong hop le: GPIO %d\n", pin);
+      server.send(400, "application/json", "{\"error\":\"Invalid pin\"}");
+      return;
+    }
+
+    Serial.printf("[HTTP-CTRL] Dieu khien thiet bi: GPIO %d -> Gtri %d\n", pin, state);
+    actuator_set_state(pin, state);
+
+    // Phát trạng thái mới qua WebSocket cho tất cả các client đang online cập nhật
+    String statusJson = getSystemStatusJSON();
+    webSocket.broadcastTXT(statusJson);
+
+    server.send(200, "application/json", "{\"status\":\"ok\"}");
+  } else {
+    server.send(400, "text/plain", "Missing pin or state");
+  }
+}
+
 void handleUpdateUpload() {
   HTTPUpload &upload = server.upload();
   if (upload.status == UPLOAD_FILE_START) {
     Serial.printf("[OTA] Bat dau upload firmware: %s\n",
                   upload.filename.c_str());
+
+    // Force flush tất cả giá trị PWM pending trước khi OTA
+    actuator_force_flush();
+
     if (!Update.begin(UPDATE_SIZE_UNKNOWN)) {
       Update.printError(Serial);
     }
@@ -348,10 +497,6 @@ void handleUpdateEnd() {
 
 // --- Khởi tạo hệ thống WiFi/OTA ---
 void ota_init() {
-  gpio_reset_pin((gpio_num_t)SYS_LED_PIN);
-  gpio_set_direction((gpio_num_t)SYS_LED_PIN, GPIO_MODE_OUTPUT);
-  gpio_set_level((gpio_num_t)SYS_LED_PIN, 0); // Tắt LED ban đầu
-
   loadCredentials();
 
   // Cấu hình các route cho WebServer
@@ -362,6 +507,7 @@ void ota_init() {
   server.on("/api/wifi/save", HTTP_POST, handleWiFiSave);
   server.on("/api/wifi/forget", HTTP_POST, handleWiFiForget);
   server.on("/api/system/status", HTTP_GET, handleSystemStatus);
+  server.on("/api/control", HTTP_POST, handleControl);
 
   // Route xử lý upload firmware OTA
   server.on("/update", HTTP_POST, handleUpdateEnd, handleUpdateUpload);
@@ -413,14 +559,14 @@ void ota_handle() {
 
   if (currentState == STATE_STA_CONNECTED) {
     // Đã kết nối WiFi -> LED sáng liên tục
-    gpio_set_level((gpio_num_t)SYS_LED_PIN, 1);
+    digitalWrite(SYS_LED_PIN, HIGH);
   } else {
     // Đang kết nối hoặc ở chế độ AP -> LED nhấp nháy chu kỳ 1s (500ms sáng /
     // 500ms tắt)
     if (now - ledTimer >= 500) {
       ledTimer = now;
       ledState = !ledState;
-      gpio_set_level((gpio_num_t)SYS_LED_PIN, ledState ? 1 : 0);
+      digitalWrite(SYS_LED_PIN, ledState ? HIGH : LOW);
     }
   }
 

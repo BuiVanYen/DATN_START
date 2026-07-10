@@ -16,11 +16,11 @@ void setup() {
   Serial.println("         ECOFARM - ESP32 CONTROL CENTER      ");
   Serial.println("=============================================");
 
-  // 2. Khởi tạo hệ thống WiFi tự động + OTA Web Server
-  ota_init();
-
-  // 3. Khởi tạo các cảm biến
+  // 2. Khởi tạo các cảm biến trước khi chạy hệ thống WiFi/OTA
   sensors_init();
+
+  // 3. Khởi tạo hệ thống WiFi tự động + OTA Web Server
+  ota_init();
 
   Serial.println("[SYSTEM] He thong da khoi dong xong!");
 }
@@ -29,11 +29,6 @@ void loop() {
   // 1. Chạy ngầm các tác vụ kiểm soát WiFi, Captive Portal DNS, và WebServer OTA
   ota_handle();
 
-  // 2. Đọc và hiển thị cường độ ánh sáng mỗi 5 giây
-  static unsigned long last_sensor_read = 0;
-  if (millis() - last_sensor_read >= 5000) {
-    last_sensor_read = millis();
-    float lux = sensors_read_light();
-    Serial.printf("[LUX] Cuong do anh sang: %.2f Lux\n", lux);
-  }
+  // 2. Xử lý flush các giá trị PWM pending sau khi settle (2s không thay đổi)
+  actuator_flush_pending();
 }
