@@ -51,8 +51,15 @@
 // Khởi tạo phần cứng (Relay, MOSFET...)
 void hardware_init();
 
+// Điều khiển trạng thái ngoại vi
+void actuator_set_state(int pin, int state);
+int actuator_get_state(int pin);
+
 // Khởi tạo cảm biến
 void sensors_init();
 
 // Đọc giá trị cường độ ánh sáng (Lux)
 float sensors_read_light();
+
+// Kiểm tra kết nối BH1750
+bool sensors_is_bh1750_connected();

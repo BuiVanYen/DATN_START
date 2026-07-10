@@ -3,6 +3,7 @@
 #include <BH1750.h>
 
 static BH1750 lightMeter;
+static bool bh1750_connected = false;
 
 void sensors_init() {
     Serial.println("[SENSOR] Dang khoi tao giao tiep I2C...");
@@ -35,12 +36,21 @@ void sensors_init() {
     // Khởi tạo cảm biến BH1750
     if (lightMeter.begin(BH1750::CONTINUOUS_HIGH_RES_MODE)) {
         Serial.println("[SENSOR] BH1750 (GY-30) khoi tao thanh cong.");
+        bh1750_connected = true;
     } else {
         Serial.println("[SENSOR] CANH BAO: Khong tim thay cam bien BH1750 qua I2C!");
+        bh1750_connected = false;
     }
 }
 
 float sensors_read_light() {
+    if (!bh1750_connected) {
+        return -1.0; // Trả về -1 nếu cảm biến mất kết nối
+    }
     float lux = lightMeter.readLightLevel();
     return lux;
+}
+
+bool sensors_is_bh1750_connected() {
+    return bh1750_connected;
 }

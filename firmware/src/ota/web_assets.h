@@ -69,19 +69,347 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(<!DOCTYPE html>
 
             <!-- TAB: DASHBOARD -->
             <section class="tab-content active" id="tab-dashboard">
-                <div class="dashboard-grid">
-                    <div class="card sensor-card light-card">
+                <!-- 11 Sensor Cards Grid -->
+                <div class="sensor-grid">
+                    <!-- 1. Nhiệt độ không khí -->
+                    <div class="card sensor-card" id="card-temp">
                         <div class="sensor-card-body">
-                            <div class="sensor-icon-wrapper">
-                                <svg class="sensor-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <circle cx="12" cy="12" r="4"></circle>
-                                    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
-                                </svg>
+                            <div class="sensor-icon-wrapper temp">🌡️</div>
+                            <div class="sensor-details">
+                                <span class="sensor-title">Nhiệt Độ KK</span>
+                                <h3 class="sensor-value"><span id="dash-temp">--</span> <span class="unit">°C</span></h3>
+                                <span class="sensor-status" id="dash-temp-status">Chờ kết nối...</span>
                             </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 2. Độ ẩm không khí -->
+                    <div class="card sensor-card" id="card-humi">
+                        <div class="sensor-card-body">
+                            <div class="sensor-icon-wrapper humi">💧</div>
+                            <div class="sensor-details">
+                                <span class="sensor-title">Độ Ẩm KK</span>
+                                <h3 class="sensor-value"><span id="dash-humi">--</span> <span class="unit">%</span></h3>
+                                <span class="sensor-status" id="dash-humi-status">Chờ kết nối...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Ánh sáng -->
+                    <div class="card sensor-card" id="card-lux">
+                        <div class="sensor-card-body">
+                            <div class="sensor-icon-wrapper lux">☀️</div>
                             <div class="sensor-details">
                                 <span class="sensor-title">Ánh Sáng</span>
                                 <h3 class="sensor-value"><span id="dash-lux">--</span> <span class="unit">Lux</span></h3>
-                                <span class="sensor-status" id="dash-lux-status">Trạng thái: --</span>
+                                <span class="sensor-status" id="dash-lux-status">Chờ kết nối...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. Nhiệt độ nước -->
+                    <div class="card sensor-card" id="card-tempw">
+                        <div class="sensor-card-body">
+                            <div class="sensor-icon-wrapper tempw">🧪🌡️</div>
+                            <div class="sensor-details">
+                                <span class="sensor-title">Nhiệt Độ Nước</span>
+                                <h3 class="sensor-value"><span id="dash-tempw">--</span> <span class="unit">°C</span></h3>
+                                <span class="sensor-status" id="dash-tempw-status">Chờ kết nối...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5. TDS -->
+                    <div class="card sensor-card" id="card-tds">
+                        <div class="sensor-card-body">
+                            <div class="sensor-icon-wrapper tds">📊</div>
+                            <div class="sensor-details">
+                                <span class="sensor-title">Dinh Dưỡng TDS</span>
+                                <h3 class="sensor-value"><span id="dash-tds">--</span> <span class="unit">ppm</span></h3>
+                                <span class="sensor-status" id="dash-tds-status">Chờ kết nối...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 6. pH -->
+                    <div class="card sensor-card" id="card-ph">
+                        <div class="sensor-card-body">
+                            <div class="sensor-icon-wrapper ph">🧪</div>
+                            <div class="sensor-details">
+                                <span class="sensor-title">Độ pH</span>
+                                <h3 class="sensor-value"><span id="dash-ph">--</span> <span class="unit">pH</span></h3>
+                                <span class="sensor-status" id="dash-ph-status">Chờ kết nối...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 7. Lưu lượng -->
+                    <div class="card sensor-card" id="card-flow">
+                        <div class="sensor-card-body">
+                            <div class="sensor-icon-wrapper flow">🌊</div>
+                            <div class="sensor-details">
+                                <span class="sensor-title">Lưu Lượng Nước</span>
+                                <h3 class="sensor-value"><span id="dash-flow">--</span> <span class="unit">L/m</span></h3>
+                                <span class="sensor-status" id="dash-flow-status">Chờ kết nối...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 8. Mực nước thùng chính -->
+                    <div class="card sensor-card" id="card-lvl1">
+                        <div class="sensor-card-body">
+                            <div class="sensor-icon-wrapper lvl">🛢️</div>
+                            <div class="sensor-details">
+                                <span class="sensor-title">Nước Thùng Chính</span>
+                                <h3 class="sensor-value"><span id="dash-lvl1">--</span> <span class="unit">%</span></h3>
+                                <span class="sensor-status" id="dash-lvl1-status">Chờ kết nối...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 9. Mực nước chai 1 -->
+                    <div class="card sensor-card" id="card-lvl2">
+                        <div class="sensor-card-body">
+                            <div class="sensor-icon-wrapper lvl">🧴 A</div>
+                            <div class="sensor-details">
+                                <span class="sensor-title">Mực Nước Chai 1</span>
+                                <h3 class="sensor-value"><span id="dash-lvl2">--</span> <span class="unit">%</span></h3>
+                                <span class="sensor-status" id="dash-lvl2-status">Chờ kết nối...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 10. Mực nước chai 2 -->
+                    <div class="card sensor-card" id="card-lvl3">
+                        <div class="sensor-card-body">
+                            <div class="sensor-icon-wrapper lvl">🧴 B</div>
+                            <div class="sensor-details">
+                                <span class="sensor-title">Mực Nước Chai 2</span>
+                                <h3 class="sensor-value"><span id="dash-lvl3">--</span> <span class="unit">%</span></h3>
+                                <span class="sensor-status" id="dash-lvl3-status">Chờ kết nối...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 11. Mực nước chai 3 -->
+                    <div class="card sensor-card" id="card-lvl4">
+                        <div class="sensor-card-body">
+                            <div class="sensor-icon-wrapper lvl">🧴 pH</div>
+                            <div class="sensor-details">
+                                <span class="sensor-title">Mực Nước Chai 3</span>
+                                <h3 class="sensor-value"><span id="dash-lvl4">--</span> <span class="unit">%</span></h3>
+                                <span class="sensor-status" id="dash-lvl4-status">Chờ kết nối...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom Row: Chart and Control Panel -->
+                <div class="dashboard-bottom-row">
+                    <!-- Left: Realtime Chart -->
+                    <div class="card chart-card">
+                        <div class="chart-header">
+                            <h2>Biểu Đồ Theo Dõi (Giờ Thực)</h2>
+                            <div class="chart-tabs">
+                                <button class="chart-tab active" data-sensor="lux">Ánh sáng</button>
+                                <button class="chart-tab" data-sensor="temp">Nhiệt độ KK</button>
+                                <button class="chart-tab" data-sensor="humi">Độ ẩm KK</button>
+                                <button class="chart-tab" data-sensor="temp_w">Nhiệt độ nước</button>
+                                <button class="chart-tab" data-sensor="tds">TDS</button>
+                                <button class="chart-tab" data-sensor="ph">pH</button>
+                            </div>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="realtimeChart" width="600" height="280"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Right: Control Panel (10 Actuators) -->
+                    <div class="card control-card">
+                        <div class="card-header">
+                            <h2>Bảng Điều Khiển Ngoại Vi</h2>
+                        </div>
+                        <div class="control-list">
+                            <!-- Relay 1 (Bơm chìm 220V) -->
+                            <div class="control-item">
+                                <div class="device-info">
+                                    <span class="device-icon">🚰</span>
+                                    <div>
+                                        <span class="device-name">Bơm chìm 220V</span>
+                                        <span class="device-desc">Bơm cấp nước sạch chính (RL1 - GPIO 7)</span>
+                                    </div>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" class="actuator-toggle" id="ctrl-rl1" data-pin="7">
+                                    <span class="slider-switch"></span>
+                                </label>
+                            </div>
+
+                            <!-- Relay 2 (Sục khí 220V) -->
+                            <div class="control-item">
+                                <div class="device-info">
+                                    <span class="device-icon">💨</span>
+                                    <div>
+                                        <span class="device-name">Sục khí 220V</span>
+                                        <span class="device-desc">Máy sục khí oxy dinh dưỡng (RL2 - GPIO 6)</span>
+                                    </div>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" class="actuator-toggle" id="ctrl-rl2" data-pin="6">
+                                    <span class="slider-switch"></span>
+                                </label>
+                            </div>
+
+                            <!-- PWM 1 (Đèn LED Tầng 1) -->
+                            <div class="control-item pwm-item">
+                                <div class="device-info">
+                                    <span class="device-icon">💡</span>
+                                    <div>
+                                        <span class="device-name">Đèn LED Tầng 1</span>
+                                        <span class="device-desc">Đèn quang hợp tầng 1 (GPIO 17)</span>
+                                    </div>
+                                </div>
+                                <div class="pwm-control-area">
+                                    <input type="range" class="pwm-slider" id="slider-den1" data-pin="17" min="10" max="100" value="100" disabled>
+                                    <span class="pwm-val" id="val-den1">100%</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" class="actuator-toggle" id="ctrl-den1" data-pin="17">
+                                    <span class="slider-switch"></span>
+                                </label>
+                            </div>
+
+                            <!-- PWM 2 (Đèn LED Tầng 2) -->
+                            <div class="control-item pwm-item">
+                                <div class="device-info">
+                                    <span class="device-icon">💡</span>
+                                    <div>
+                                        <span class="device-name">Đèn LED Tầng 2</span>
+                                        <span class="device-desc">Đèn quang hợp tầng 2 (GPIO 18)</span>
+                                    </div>
+                                </div>
+                                <div class="pwm-control-area">
+                                    <input type="range" class="pwm-slider" id="slider-den2" data-pin="18" min="10" max="100" value="100" disabled>
+                                    <span class="pwm-val" id="val-den2">100%</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" class="actuator-toggle" id="ctrl-den2" data-pin="18">
+                                    <span class="slider-switch"></span>
+                                </label>
+                            </div>
+
+                            <!-- PWM 3 (Quạt Tầng 1) -->
+                            <div class="control-item pwm-item">
+                                <div class="device-info">
+                                    <span class="device-icon">🌀</span>
+                                    <div>
+                                        <span class="device-name">Quạt Tầng 1</span>
+                                        <span class="device-desc">Quạt thông gió làm mát (GPIO 11)</span>
+                                    </div>
+                                </div>
+                                <div class="pwm-control-area">
+                                    <input type="range" class="pwm-slider" id="slider-quat1" data-pin="11" min="10" max="100" value="50" disabled>
+                                    <span class="pwm-val" id="val-quat1">50%</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" class="actuator-toggle" id="ctrl-quat1" data-pin="11">
+                                    <span class="slider-switch"></span>
+                                </label>
+                            </div>
+
+                            <!-- PWM 4 (Quạt Tầng 2) -->
+                            <div class="control-item pwm-item">
+                                <div class="device-info">
+                                    <span class="device-icon">🌀</span>
+                                    <div>
+                                        <span class="device-name">Quạt Tầng 2</span>
+                                        <span class="device-desc">Quạt thông gió làm mát (GPIO 10)</span>
+                                    </div>
+                                </div>
+                                <div class="pwm-control-area">
+                                    <input type="range" class="pwm-slider" id="slider-quat2" data-pin="10" min="10" max="100" value="50" disabled>
+                                    <span class="pwm-val" id="val-quat2">50%</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" class="actuator-toggle" id="ctrl-quat2" data-pin="10">
+                                    <span class="slider-switch"></span>
+                                </label>
+                            </div>
+
+                            <!-- PWM 5 (Bơm DD Chai A) -->
+                            <div class="control-item pwm-item">
+                                <div class="device-info">
+                                    <span class="device-icon">🧪</span>
+                                    <div>
+                                        <span class="device-name">Bơm DD Chai A</span>
+                                        <span class="device-desc">Bơm tăng dinh duong A (GPIO 13)</span>
+                                    </div>
+                                </div>
+                                <div class="pwm-control-area">
+                                    <input type="range" class="pwm-slider" id="slider-bomll1" data-pin="13" min="10" max="100" value="30" disabled>
+                                    <span class="pwm-val" id="val-bomll1">30%</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" class="actuator-toggle" id="ctrl-bomll1" data-pin="13">
+                                    <span class="slider-switch"></span>
+                                </label>
+                            </div>
+
+                            <!-- PWM 6 (Bơm DD Chai B) -->
+                            <div class="control-item pwm-item">
+                                <div class="device-info">
+                                    <span class="device-icon">🧪</span>
+                                    <div>
+                                        <span class="device-name">Bơm DD Chai B</span>
+                                        <span class="device-desc">Bơm tăng dinh duong B (GPIO 12)</span>
+                                    </div>
+                                </div>
+                                <div class="pwm-control-area">
+                                    <input type="range" class="pwm-slider" id="slider-bomll2" data-pin="12" min="10" max="100" value="30" disabled>
+                                    <span class="pwm-val" id="val-bomll2">30%</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" class="actuator-toggle" id="ctrl-bomll2" data-pin="12">
+                                    <span class="slider-switch"></span>
+                                </label>
+                            </div>
+
+                            <!-- PWM 7 (Bơm pH Down) -->
+                            <div class="control-item pwm-item">
+                                <div class="device-info">
+                                    <span class="device-icon">🧪</span>
+                                    <div>
+                                        <span class="device-name">Bơm pH Down</span>
+                                        <span class="device-desc">Bơm dung dịch axit hạ pH (GPIO 8)</span>
+                                    </div>
+                                </div>
+                                <div class="pwm-control-area">
+                                    <input type="range" class="pwm-slider" id="slider-bomll3" data-pin="8" min="10" max="100" value="30" disabled>
+                                    <span class="pwm-val" id="val-bomll3">30%</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" class="actuator-toggle" id="ctrl-bomll3" data-pin="8">
+                                    <span class="slider-switch"></span>
+                                </label>
+                            </div>
+
+                            <!-- PWM 8 (Bơm nước 12V) -->
+                            <div class="control-item pwm-item">
+                                <div class="device-info">
+                                    <span class="device-icon">🌊</span>
+                                    <div>
+                                        <span class="device-name">Bơm nước 12V DC</span>
+                                        <span class="device-desc">Bơm tuần hoàn nước 12V (GPIO 9)</span>
+                                    </div>
+                                </div>
+                                <div class="pwm-control-area">
+                                    <input type="range" class="pwm-slider" id="slider-bom12v" data-pin="9" min="10" max="100" value="60" disabled>
+                                    <span class="pwm-val" id="val-bom12v">60%</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" class="actuator-toggle" id="ctrl-bom12v" data-pin="9">
+                                    <span class="slider-switch"></span>
+                                </label>
                             </div>
                         </div>
                     </div>
@@ -965,16 +1293,312 @@ input[type="text"]:focus, input[type="password"]:focus {
 }
 
 .status-normal {
-    color: #10b981;
+    color: #2e7d32;
 }
 
 .status-warning {
-    color: #f59e0b;
+    color: #d97706;
 }
 
 .status-danger {
+    color: #dc2626;
+}
+
+/* ==========================================================================
+   Cải Tiến Dashboard: 11 Thẻ Cảm Biến & Bảng Điều Khiển
+   ========================================================================== */
+
+/* Layout Grid cho 11 Thẻ cảm biến */
+.sensor-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+    width: 100%;
+}
+
+/* Màu nền & Icon Wrapper cho từng loại cảm biến */
+.sensor-icon-wrapper.temp { background-color: rgba(239, 68, 68, 0.1); color: #dc2626; }
+.sensor-icon-wrapper.humi { background-color: rgba(59, 130, 246, 0.1); color: #2563eb; }
+.sensor-icon-wrapper.lux  { background-color: rgba(245, 158, 11, 0.1); color: #d97706; }
+.sensor-icon-wrapper.tempw { background-color: rgba(99, 102, 241, 0.1); color: #4f46e5; }
+.sensor-icon-wrapper.tds  { background-color: rgba(139, 92, 246, 0.1); color: #7c3aed; }
+.sensor-icon-wrapper.ph   { background-color: rgba(16, 185, 129, 0.1); color: #2e7d32; }
+.sensor-icon-wrapper.flow { background-color: rgba(6, 182, 212, 0.1); color: #0891b2; }
+.sensor-icon-wrapper.lvl  { background-color: rgba(14, 165, 233, 0.1); color: #0284c7; }
+
+/* Trạng thái mất kết nối của thẻ cảm biến */
+.sensor-card.disconnected {
+    opacity: 0.6;
+    border-color: #fca5a5;
+    background-color: #fef2f2;
+}
+.sensor-card.disconnected .sensor-status {
     color: #ef4444;
 }
+
+/* Bố cục dòng dưới: Đồ thị & Bảng điều khiển */
+.dashboard-bottom-row {
+    display: grid;
+    grid-template-columns: 1.3fr 0.7fr;
+    gap: 24px;
+    width: 100%;
+    margin-top: 8px;
+    align-items: start;
+}
+
+.chart-card, .control-card {
+    background-color: var(--card-bg);
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+    padding: 24px;
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.chart-header h2 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.chart-tabs {
+    display: flex;
+    gap: 4px;
+    background-color: #f3f4f6;
+    padding: 4px;
+    border-radius: 8px;
+}
+
+.chart-tab {
+    padding: 6px 12px;
+    border: none;
+    background: none;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.chart-tab.active {
+    background-color: #ffffff;
+    color: var(--primary);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.chart-body {
+    width: 100%;
+    position: relative;
+}
+
+#realtimeChart {
+    width: 100%;
+    height: 280px;
+    display: block;
+}
+
+/* Control Panel List */
+.control-card h2 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 20px;
+}
+
+.control-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.control-item {
+    display: grid;
+    grid-template-columns: 180px 1fr 50px;
+    align-items: center;
+    padding: 12px 16px;
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    gap: 16px;
+    transition: all 0.2s ease;
+}
+
+.control-item:hover {
+    border-color: #d2e8db;
+    background-color: #fbfdfc;
+}
+
+.device-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.device-icon {
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background-color: #e8f7ee;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+.device-name {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.device-desc {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    margin-top: 1px;
+}
+
+/* Khu vực thanh trượt PWM ở giữa */
+.pwm-control-area {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.pwm-slider {
+    flex-grow: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 6px;
+    border-radius: 3px;
+    background: #e5e7eb;
+    outline: none;
+    transition: background 0.2s;
+    cursor: pointer;
+}
+
+.pwm-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--primary);
+    cursor: pointer;
+    border: 2px solid #ffffff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    transition: transform 0.1s ease;
+}
+
+.pwm-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.15);
+}
+
+.pwm-slider:disabled {
+    background: #e2e8f0;
+    cursor: not-allowed;
+}
+
+.pwm-slider:disabled::-webkit-slider-thumb {
+    background: #cbd5e1;
+    cursor: not-allowed;
+}
+
+.pwm-val {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--primary);
+    width: 40px;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.pwm-slider:disabled + .pwm-val {
+    color: var(--text-muted);
+}
+
+/* Switch Toggle iOS Style */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 22px;
+    flex-shrink: 0;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider-switch {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #cbd5e1;
+    transition: .3s;
+    border-radius: 22px;
+}
+
+.slider-switch:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+
+input:checked + .slider-switch {
+    background-color: var(--primary);
+}
+
+input:checked + .slider-switch:before {
+    transform: translateX(22px);
+}
+
+@media (max-width: 1024px) {
+    .dashboard-bottom-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .sensor-grid {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    }
+    .control-item {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    .pwm-control-area {
+        order: 3;
+        margin-top: 4px;
+    }
+    .switch {
+        order: 2;
+        justify-self: end;
+    }
+}
+
 
 )rawliteral";
 const char SCRIPT_JS[] PROGMEM = R"rawliteral(document.addEventListener("DOMContentLoaded", () => {
@@ -1031,6 +1655,208 @@ const char SCRIPT_JS[] PROGMEM = R"rawliteral(document.addEventListener("DOMCont
     let ws = null;
     let pollInterval = null;
 
+    // --- Cấu hình Đồ thị Canvas mượt mà ngoại tuyến ---
+    const maxDataPoints = 30;
+    const sensorKeys = ["lux", "temp", "humi", "temp_w", "tds", "ph"];
+    const chartData = {};
+    sensorKeys.forEach(k => {
+        chartData[k] = Array(maxDataPoints).fill(null); // Tạo sẵn 30 điểm trống để đồ thị cuộn mượt
+    });
+
+    const canvas = document.getElementById("realtimeChart");
+    let activeSensor = "lux";
+
+    // Lắng nghe sự kiện đổi tab đồ thị cảm biến
+    document.querySelectorAll(".chart-tab").forEach(tab => {
+        tab.addEventListener("click", () => {
+            document.querySelectorAll(".chart-tab").forEach(t => t.classList.remove("active"));
+            tab.classList.add("active");
+            activeSensor = tab.getAttribute("data-sensor");
+            drawChart();
+        });
+    });
+
+    function drawChart() {
+        if (!canvas) return;
+        const ctx = canvas.getContext("2d");
+        const width = canvas.width;
+        const height = canvas.height;
+        
+        ctx.clearRect(0, 0, width, height);
+        
+        const data = chartData[activeSensor];
+        const validValues = data.filter(v => v !== null && !isNaN(v));
+        
+        if (validValues.length === 0) {
+            ctx.fillStyle = "var(--text-muted)";
+            ctx.font = "14px sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText("Đang chờ dữ liệu cảm biến...", width / 2, height / 2);
+            return;
+        }
+        
+        const padding = { top: 30, right: 20, bottom: 40, left: 50 };
+        const graphWidth = width - padding.left - padding.right;
+        const graphHeight = height - padding.top - padding.bottom;
+        
+        let minVal = Math.min(...validValues);
+        let maxVal = Math.max(...validValues);
+        
+        if (minVal === maxVal) {
+            minVal -= 10;
+            maxVal += 10;
+        } else {
+            const range = maxVal - minVal;
+            minVal -= range * 0.1;
+            maxVal += range * 0.1;
+        }
+        if (minVal < 0 && activeSensor !== "temp") minVal = 0;
+        
+        // Vẽ lưới tọa độ ngang
+        const gridLines = 4;
+        ctx.strokeStyle = "#e1e8e4";
+        ctx.lineWidth = 1;
+        ctx.fillStyle = "var(--text-secondary)";
+        ctx.font = "10px sans-serif";
+        ctx.textAlign = "right";
+        ctx.textBaseline = "middle";
+        
+        for (let i = 0; i <= gridLines; i++) {
+            const yVal = minVal + (maxVal - minVal) * (i / gridLines);
+            const y = padding.top + graphHeight - (i / gridLines) * graphHeight;
+            
+            ctx.beginPath();
+            ctx.moveTo(padding.left, y);
+            ctx.lineTo(width - padding.right, y);
+            ctx.stroke();
+            
+            let displayVal = yVal;
+            if (activeSensor === "lux" || activeSensor === "tds") displayVal = Math.round(yVal);
+            else displayVal = yVal.toFixed(1);
+            
+            ctx.fillText(displayVal, padding.left - 10, y);
+        }
+        
+        // Tính toán tọa độ các điểm
+        const points = [];
+        const xStep = graphWidth / (maxDataPoints - 1);
+        
+        for (let i = 0; i < data.length; i++) {
+            if (data[i] === null || isNaN(data[i])) continue;
+            const x = padding.left + i * xStep;
+            const y = padding.top + graphHeight - ((data[i] - minVal) / (maxVal - minVal)) * graphHeight;
+            points.push({ x, y, value: data[i] });
+        }
+        
+        if (points.length === 0) return;
+        
+        const primaryColor = "#2e7d32"; // Xanh lá đậm chủ đạo
+        
+        // Vẽ vùng Gradient dưới đồ thị
+        if (points.length > 1) {
+            ctx.beginPath();
+            ctx.moveTo(points[0].x, padding.top + graphHeight);
+            ctx.lineTo(points[0].x, points[0].y);
+            
+            for (let i = 0; i < points.length - 1; i++) {
+                const p0 = points[i];
+                const p1 = points[i+1];
+                const cpX1 = p0.x + (p1.x - p0.x) / 3;
+                const cpY1 = p0.y;
+                const cpX2 = p0.x + 2 * (p1.x - p0.x) / 3;
+                const cpY2 = p1.y;
+                ctx.bezierCurveTo(cpX1, cpY1, cpX2, cpY2, p1.x, p1.y);
+            }
+            
+            ctx.lineTo(points[points.length - 1].x, padding.top + graphHeight);
+            ctx.closePath();
+            
+            const areaGrad = ctx.createLinearGradient(0, padding.top, 0, padding.top + graphHeight);
+            areaGrad.addColorStop(0, "rgba(46, 125, 50, 0.2)");
+            areaGrad.addColorStop(1, "rgba(46, 125, 50, 0.0)");
+            ctx.fillStyle = areaGrad;
+            ctx.fill();
+        }
+        
+        // Vẽ đường cong Spline mượt mà
+        ctx.strokeStyle = primaryColor;
+        ctx.lineWidth = 2.5;
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        ctx.beginPath();
+        ctx.moveTo(points[0].x, points[0].y);
+        
+        if (points.length > 1) {
+            for (let i = 0; i < points.length - 1; i++) {
+                const p0 = points[i];
+                const p1 = points[i+1];
+                const cpX1 = p0.x + (p1.x - p0.x) / 3;
+                const cpY1 = p0.y;
+                const cpX2 = p0.x + 2 * (p1.x - p0.x) / 3;
+                const cpY2 = p1.y;
+                ctx.bezierCurveTo(cpX1, cpY1, cpX2, cpY2, p1.x, p1.y);
+            }
+        }
+        ctx.stroke();
+        
+        // Vẽ các nút tròn dữ liệu
+        ctx.fillStyle = "#ffffff";
+        ctx.lineWidth = 2;
+        points.forEach(p => {
+            ctx.strokeStyle = primaryColor;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 4.5, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.stroke();
+        });
+        
+        // Nhãn trục X thời gian
+        ctx.fillStyle = "var(--text-muted)";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "top";
+        ctx.font = "9px sans-serif";
+        ctx.fillText("-2.5m", padding.left, padding.top + graphHeight + 8);
+        ctx.fillText("-1.5m", padding.left + graphWidth / 2, padding.top + graphHeight + 8);
+        ctx.fillText("Vừa xong", width - padding.right, padding.top + graphHeight + 8);
+    }
+
+    function pushChartPoint(sensor, val) {
+        chartData[sensor].push(val);
+        if (chartData[sensor].length > maxDataPoints) {
+            chartData[sensor].shift();
+        }
+    }
+
+    // Cập nhật thẻ hiển thị cảm biến động
+    function updateSensorCard(id, val, conn, unit, statusFn) {
+        const card = document.getElementById(`card-${id}`);
+        const valElem = document.getElementById(`dash-${id}`);
+        const statusElem = document.getElementById(`dash-${id}-status`);
+        
+        if (!card) return;
+        
+        if (!conn) {
+            card.classList.add("disconnected");
+            if (valElem) valElem.textContent = "--";
+            if (statusElem) {
+                statusElem.textContent = "Trạng thái: Mất kết nối";
+                statusElem.className = "sensor-status status-danger";
+            }
+        } else {
+            card.classList.remove("disconnected");
+            if (valElem) {
+                if (id === "lux" || id === "tds") valElem.textContent = Math.round(val);
+                else valElem.textContent = val.toFixed(1);
+            }
+            if (statusElem && statusFn) {
+                const info = statusFn(val);
+                statusElem.textContent = info.text;
+                statusElem.className = `sensor-status ${info.cl}`;
+            }
+        }
+    }
+
+    // --- Cập nhật toàn bộ trạng thái Dashboard ---
     function renderSystemStatus(data) {
         document.getElementById("info-version").textContent = "v" + data.version;
         document.getElementById("info-ssid").textContent = data.ssid || "(Chưa Kết Nối)";
@@ -1040,7 +1866,6 @@ const char SCRIPT_JS[] PROGMEM = R"rawliteral(document.addEventListener("DOMCont
         document.getElementById("info-wifimode").textContent = data.wifimode;
         document.getElementById("info-partition").textContent = data.partition;
         
-        // Hiển thị thông tin Flash
         if (document.getElementById("info-flash-size")) {
             document.getElementById("info-flash-size").textContent = formatSize(data.flash_size);
         }
@@ -1051,7 +1876,6 @@ const char SCRIPT_JS[] PROGMEM = R"rawliteral(document.addEventListener("DOMCont
             document.getElementById("info-free-sketch").textContent = formatSize(data.free_sketch);
         }
 
-        // Format uptime
         const uptimeSeconds = Math.floor(data.uptime / 1000);
         const h = Math.floor(uptimeSeconds / 3600);
         const m = Math.floor((uptimeSeconds % 3600) / 60);
@@ -1059,39 +1883,109 @@ const char SCRIPT_JS[] PROGMEM = R"rawliteral(document.addEventListener("DOMCont
         document.getElementById("info-uptime").textContent = 
             `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 
-        // Cập nhật giá trị cường độ ánh sáng Lux trên Dashboard
-        if (data.hasOwnProperty("lux")) {
-            const luxVal = data.lux;
-            const luxElem = document.getElementById("dash-lux");
-            const statusElem = document.getElementById("dash-lux-status");
+        // 1. Cập nhật 11 thẻ cảm biến dựa trên cờ kết nối _conn từ ESP32
+        updateSensorCard("temp", data.temp, data.temp_conn, "°C", (val) => {
+            if (val < 18 || val > 32) return { text: "Trạng thái: Khẩn cấp", cl: "status-danger" };
+            if (val >= 21 && val <= 29) return { text: "Trạng thái: Ổn định", cl: "status-normal" };
+            return { text: "Trạng thái: Lưu ý", cl: "status-warning" };
+        });
+        
+        updateSensorCard("humi", data.humi, data.humi_conn, "%", (val) => {
+            if (val < 40 || val > 85) return { text: "Trạng thái: Cảnh báo", cl: "status-danger" };
+            if (val >= 50 && val <= 80) return { text: "Trạng thái: Tốt", cl: "status-normal" };
+            return { text: "Trạng thái: Hơi ẩm/khô", cl: "status-warning" };
+        });
+
+        updateSensorCard("lux", data.lux, data.lux_conn, "Lux", (val) => {
+            if (val < 100) return { text: "Trạng thái: Quá tối", cl: "status-danger" };
+            if (val >= 800 && val <= 2000) return { text: "Trạng thái: Đủ sáng", cl: "status-normal" };
+            return { text: "Trạng thái: Ánh sáng lệch", cl: "status-warning" };
+        });
+
+        updateSensorCard("tempw", data.temp_w, data.temp_w_conn, "°C", (val) => {
+            if (val < 16 || val > 28) return { text: "Trạng thái: Nguy hiểm", cl: "status-danger" };
+            if (val >= 20 && val <= 25) return { text: "Trạng thái: Đạt chuẩn", cl: "status-normal" };
+            return { text: "Trạng thái: Cần lưu ý", cl: "status-warning" };
+        });
+
+        updateSensorCard("tds", data.tds, data.tds_conn, "ppm", (val) => {
+            if (val < 500) return { text: "Trạng thái: Thiếu DD", cl: "status-danger" };
+            if (val >= 600 && val <= 850) return { text: "Trạng thái: Đạt chuẩn", cl: "status-normal" };
+            return { text: "Trạng thái: Hơi lệch", cl: "status-warning" };
+        });
+
+        updateSensorCard("ph", data.ph, data.ph_conn, "pH", (val) => {
+            if (val < 5.0 || val > 7.0) return { text: "Trạng thái: Nguy hiểm", cl: "status-danger" };
+            if (val >= 5.5 && val <= 6.5) return { text: "Trạng thái: Ổn định", cl: "status-normal" };
+            return { text: "Trạng thái: Cần điều chỉnh", cl: "status-warning" };
+        });
+
+        updateSensorCard("flow", data.flow, data.flow_conn, "L/m", (val) => {
+            if (val < 0.5) return { text: "Trạng thái: Ngắt nước", cl: "status-danger" };
+            return { text: "Trạng thái: Lưu thông", cl: "status-normal" };
+        });
+
+        const levelStatusFn = (val) => {
+            if (val < 20) return { text: "Trạng thái: Cạn nước", cl: "status-danger" };
+            if (val < 45) return { text: "Trạng thái: Thấp", cl: "status-warning" };
+            return { text: "Trạng thái: Đầy đủ", cl: "status-normal" };
+        };
+        updateSensorCard("lvl1", data.lvl1, data.lvl1_conn, "%", levelStatusFn);
+        updateSensorCard("lvl2", data.lvl2, data.lvl2_conn, "%", levelStatusFn);
+        updateSensorCard("lvl3", data.lvl3, data.lvl3_conn, "%", levelStatusFn);
+        updateSensorCard("lvl4", data.lvl4, data.lvl4_conn, "%", levelStatusFn);
+
+        // 2. Lưu lịch sử đồ thị cảm biến (chỉ khi kết nối tốt, ngược lại đẩy null)
+        pushChartPoint("lux", data.lux_conn ? data.lux : null);
+        pushChartPoint("temp", data.temp_conn ? data.temp : null);
+        pushChartPoint("humi", data.humi_conn ? data.humi : null);
+        pushChartPoint("temp_w", data.temp_w_conn ? data.temp_w : null);
+        pushChartPoint("tds", data.tds_conn ? data.tds : null);
+        pushChartPoint("ph", data.ph_conn ? data.ph : null);
+        
+        drawChart();
+
+        // 3. Cập nhật trạng thái 10 thiết bị ngoại vi lên UI (nút gạt, thanh trượt)
+        const actuators = [
+            { id: "rl1", pin: 7, key: "act_IN_RL1", isPwm: false },
+            { id: "rl2", pin: 6, key: "act_IN_RL2", isPwm: false },
+            { id: "den1", pin: 17, key: "act_DEN1", isPwm: true },
+            { id: "den2", pin: 18, key: "act_DEN2", isPwm: true },
+            { id: "quat1", pin: 11, key: "act_QUAT1", isPwm: true },
+            { id: "quat2", pin: 10, key: "act_QUAT2", isPwm: true },
+            { id: "bomll1", pin: 13, key: "act_BOMLL1", isPwm: true },
+            { id: "bomll2", pin: 12, key: "act_BOMLL2", isPwm: true },
+            { id: "bomll3", pin: 8, key: "act_BOMLL3", isPwm: true },
+            { id: "bom12v", pin: 9, key: "act_BOM12V", isPwm: true }
+        ];
+
+        actuators.forEach(act => {
+            const toggle = document.getElementById(`ctrl-${act.id}`);
+            if (!toggle) return;
             
-            if (luxVal < 0) {
-                if (luxElem) luxElem.textContent = "Lỗi";
-                if (statusElem) {
-                    statusElem.textContent = "Trạng thái: Mất kết nối BH1750";
-                    statusElem.className = "sensor-status status-danger";
-                }
-            } else {
-                if (luxElem) luxElem.textContent = luxVal.toFixed(1);
-                if (statusElem) {
-                    if (luxVal < 100) {
-                        statusElem.textContent = "Trạng thái: Quá tối";
-                        statusElem.className = "sensor-status status-danger";
-                    } else if (luxVal >= 100 && luxVal < 800) {
-                        statusElem.textContent = "Trạng thái: Ánh sáng yếu";
-                        statusElem.className = "sensor-status status-warning";
-                    } else if (luxVal >= 800 && luxVal <= 2000) {
-                        statusElem.textContent = "Trạng thái: Đủ sáng";
-                        statusElem.className = "sensor-status status-normal";
-                    } else {
-                        statusElem.textContent = "Trạng thái: Quá sáng";
-                        statusElem.className = "sensor-status status-warning";
+            const stateVal = data[act.key];
+            if (stateVal === undefined) return;
+            
+            const isChecked = act.isPwm ? (stateVal > 0) : (stateVal === 1);
+            if (toggle.checked !== isChecked) {
+                toggle.checked = isChecked;
+            }
+            
+            if (act.isPwm) {
+                const slider = document.getElementById(`slider-${act.id}`);
+                const valLabel = document.getElementById(`val-${act.id}`);
+                if (slider) {
+                    slider.disabled = !isChecked;
+                    if (isChecked && stateVal > 0) {
+                        const percent = Math.round((stateVal * 100) / 255);
+                        slider.value = percent;
+                        if (valLabel) valLabel.textContent = `${percent}%`;
                     }
                 }
             }
-        }
+        });
 
-        // Update connection status header badge
+        // Badge trạng thái kết nối
         const statusBadge = document.getElementById("connection-status");
         const statusText = document.getElementById("status-text");
         
@@ -1103,6 +1997,64 @@ const char SCRIPT_JS[] PROGMEM = R"rawliteral(document.addEventListener("DOMCont
             statusBadge.className = "status-badge connected";
             if (statusText) statusText.textContent = " Đã Kết Nối";
             sysTime.textContent = `Đang kết nối WiFi: ${data.ssid}`;
+        }
+    }
+
+    // --- Đăng ký sự kiện điều khiển thiết bị (Toggle & Sliders) ---
+    document.querySelectorAll(".actuator-toggle").forEach(toggle => {
+        toggle.addEventListener("change", () => {
+            const pin = parseInt(toggle.getAttribute("data-pin"));
+            const isPwm = toggle.closest(".pwm-item") !== null;
+            const id = toggle.id.replace("ctrl-", "");
+            
+            let sendVal = 0;
+            if (toggle.checked) {
+                if (isPwm) {
+                    const slider = document.getElementById(`slider-${id}`);
+                    sendVal = slider ? Math.round((slider.value * 255) / 100) : 255;
+                    if (slider) slider.disabled = false;
+                } else {
+                    sendVal = 1;
+                }
+            } else {
+                if (isPwm) {
+                    const slider = document.getElementById(`slider-${id}`);
+                    if (slider) slider.disabled = true;
+                }
+                sendVal = 0;
+            }
+            
+            sendControlCommand(pin, sendVal);
+        });
+    });
+
+    document.querySelectorAll(".pwm-slider").forEach(slider => {
+        const id = slider.id.replace("slider-", "");
+        const valLabel = document.getElementById(`val-${id}`);
+        const pin = parseInt(slider.getAttribute("data-pin"));
+        
+        slider.addEventListener("input", () => {
+            if (valLabel) {
+                valLabel.textContent = `${slider.value}%`;
+            }
+        });
+        
+        slider.addEventListener("change", () => {
+            const toggle = document.getElementById(`ctrl-${id}`);
+            if (toggle && toggle.checked) {
+                const sendVal = Math.round((slider.value * 255) / 100);
+                sendControlCommand(pin, sendVal);
+            }
+        });
+    });
+
+    function sendControlCommand(pin, state) {
+        const payload = JSON.stringify({ pin: pin, state: state });
+        console.log("Gửi lệnh điều khiển:", payload);
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(payload);
+        } else {
+            console.warn("WebSocket chưa kết nối. Không thể gửi lệnh.");
         }
     }
 
@@ -1128,7 +2080,7 @@ const char SCRIPT_JS[] PROGMEM = R"rawliteral(document.addEventListener("DOMCont
 
         ws.onopen = () => {
             console.log("Đã kết nối WebSocket thành công!");
-            wsReconnectDelay = 2000; // Reset delay on successful connection
+            wsReconnectDelay = 2000;
             if (pollInterval) {
                 clearInterval(pollInterval);
                 pollInterval = null;
@@ -1150,7 +2102,6 @@ const char SCRIPT_JS[] PROGMEM = R"rawliteral(document.addEventListener("DOMCont
                 pollInterval = setInterval(updateSystemStatusPolling, 3000);
             }
             setTimeout(startWebSocket, wsReconnectDelay);
-            // Exponential backoff with max of 30s
             wsReconnectDelay = Math.min(wsReconnectDelay * 1.5, 30000);
         };
 

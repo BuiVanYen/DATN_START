@@ -717,14 +717,310 @@ input[type="text"]:focus, input[type="password"]:focus {
 }
 
 .status-normal {
-    color: #10b981;
+    color: #2e7d32;
 }
 
 .status-warning {
-    color: #f59e0b;
+    color: #d97706;
 }
 
 .status-danger {
+    color: #dc2626;
+}
+
+/* ==========================================================================
+   Cải Tiến Dashboard: 11 Thẻ Cảm Biến & Bảng Điều Khiển
+   ========================================================================== */
+
+/* Layout Grid cho 11 Thẻ cảm biến */
+.sensor-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+    width: 100%;
+}
+
+/* Màu nền & Icon Wrapper cho từng loại cảm biến */
+.sensor-icon-wrapper.temp { background-color: rgba(239, 68, 68, 0.1); color: #dc2626; }
+.sensor-icon-wrapper.humi { background-color: rgba(59, 130, 246, 0.1); color: #2563eb; }
+.sensor-icon-wrapper.lux  { background-color: rgba(245, 158, 11, 0.1); color: #d97706; }
+.sensor-icon-wrapper.tempw { background-color: rgba(99, 102, 241, 0.1); color: #4f46e5; }
+.sensor-icon-wrapper.tds  { background-color: rgba(139, 92, 246, 0.1); color: #7c3aed; }
+.sensor-icon-wrapper.ph   { background-color: rgba(16, 185, 129, 0.1); color: #2e7d32; }
+.sensor-icon-wrapper.flow { background-color: rgba(6, 182, 212, 0.1); color: #0891b2; }
+.sensor-icon-wrapper.lvl  { background-color: rgba(14, 165, 233, 0.1); color: #0284c7; }
+
+/* Trạng thái mất kết nối của thẻ cảm biến */
+.sensor-card.disconnected {
+    opacity: 0.6;
+    border-color: #fca5a5;
+    background-color: #fef2f2;
+}
+.sensor-card.disconnected .sensor-status {
     color: #ef4444;
 }
+
+/* Bố cục dòng dưới: Đồ thị & Bảng điều khiển */
+.dashboard-bottom-row {
+    display: grid;
+    grid-template-columns: 1.3fr 0.7fr;
+    gap: 24px;
+    width: 100%;
+    margin-top: 8px;
+    align-items: start;
+}
+
+.chart-card, .control-card {
+    background-color: var(--card-bg);
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+    padding: 24px;
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.chart-header h2 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.chart-tabs {
+    display: flex;
+    gap: 4px;
+    background-color: #f3f4f6;
+    padding: 4px;
+    border-radius: 8px;
+}
+
+.chart-tab {
+    padding: 6px 12px;
+    border: none;
+    background: none;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.chart-tab.active {
+    background-color: #ffffff;
+    color: var(--primary);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.chart-body {
+    width: 100%;
+    position: relative;
+}
+
+#realtimeChart {
+    width: 100%;
+    height: 280px;
+    display: block;
+}
+
+/* Control Panel List */
+.control-card h2 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 20px;
+}
+
+.control-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.control-item {
+    display: grid;
+    grid-template-columns: 180px 1fr 50px;
+    align-items: center;
+    padding: 12px 16px;
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    gap: 16px;
+    transition: all 0.2s ease;
+}
+
+.control-item:hover {
+    border-color: #d2e8db;
+    background-color: #fbfdfc;
+}
+
+.device-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.device-icon {
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background-color: #e8f7ee;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+.device-name {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.device-desc {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    margin-top: 1px;
+}
+
+/* Khu vực thanh trượt PWM ở giữa */
+.pwm-control-area {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.pwm-slider {
+    flex-grow: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 6px;
+    border-radius: 3px;
+    background: #e5e7eb;
+    outline: none;
+    transition: background 0.2s;
+    cursor: pointer;
+}
+
+.pwm-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--primary);
+    cursor: pointer;
+    border: 2px solid #ffffff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    transition: transform 0.1s ease;
+}
+
+.pwm-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.15);
+}
+
+.pwm-slider:disabled {
+    background: #e2e8f0;
+    cursor: not-allowed;
+}
+
+.pwm-slider:disabled::-webkit-slider-thumb {
+    background: #cbd5e1;
+    cursor: not-allowed;
+}
+
+.pwm-val {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--primary);
+    width: 40px;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.pwm-slider:disabled + .pwm-val {
+    color: var(--text-muted);
+}
+
+/* Switch Toggle iOS Style */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 22px;
+    flex-shrink: 0;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider-switch {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #cbd5e1;
+    transition: .3s;
+    border-radius: 22px;
+}
+
+.slider-switch:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+
+input:checked + .slider-switch {
+    background-color: var(--primary);
+}
+
+input:checked + .slider-switch:before {
+    transform: translateX(22px);
+}
+
+@media (max-width: 1024px) {
+    .dashboard-bottom-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .sensor-grid {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    }
+    .control-item {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    .pwm-control-area {
+        order: 3;
+        margin-top: 4px;
+    }
+    .switch {
+        order: 2;
+        justify-self: end;
+    }
+}
+
 

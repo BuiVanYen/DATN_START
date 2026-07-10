@@ -52,6 +52,208 @@ document.addEventListener("DOMContentLoaded", () => {
     let ws = null;
     let pollInterval = null;
 
+    // --- Cấu hình Đồ thị Canvas mượt mà ngoại tuyến ---
+    const maxDataPoints = 30;
+    const sensorKeys = ["lux", "temp", "humi", "temp_w", "tds", "ph"];
+    const chartData = {};
+    sensorKeys.forEach(k => {
+        chartData[k] = Array(maxDataPoints).fill(null); // Tạo sẵn 30 điểm trống để đồ thị cuộn mượt
+    });
+
+    const canvas = document.getElementById("realtimeChart");
+    let activeSensor = "lux";
+
+    // Lắng nghe sự kiện đổi tab đồ thị cảm biến
+    document.querySelectorAll(".chart-tab").forEach(tab => {
+        tab.addEventListener("click", () => {
+            document.querySelectorAll(".chart-tab").forEach(t => t.classList.remove("active"));
+            tab.classList.add("active");
+            activeSensor = tab.getAttribute("data-sensor");
+            drawChart();
+        });
+    });
+
+    function drawChart() {
+        if (!canvas) return;
+        const ctx = canvas.getContext("2d");
+        const width = canvas.width;
+        const height = canvas.height;
+        
+        ctx.clearRect(0, 0, width, height);
+        
+        const data = chartData[activeSensor];
+        const validValues = data.filter(v => v !== null && !isNaN(v));
+        
+        if (validValues.length === 0) {
+            ctx.fillStyle = "var(--text-muted)";
+            ctx.font = "14px sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText("Đang chờ dữ liệu cảm biến...", width / 2, height / 2);
+            return;
+        }
+        
+        const padding = { top: 30, right: 20, bottom: 40, left: 50 };
+        const graphWidth = width - padding.left - padding.right;
+        const graphHeight = height - padding.top - padding.bottom;
+        
+        let minVal = Math.min(...validValues);
+        let maxVal = Math.max(...validValues);
+        
+        if (minVal === maxVal) {
+            minVal -= 10;
+            maxVal += 10;
+        } else {
+            const range = maxVal - minVal;
+            minVal -= range * 0.1;
+            maxVal += range * 0.1;
+        }
+        if (minVal < 0 && activeSensor !== "temp") minVal = 0;
+        
+        // Vẽ lưới tọa độ ngang
+        const gridLines = 4;
+        ctx.strokeStyle = "#e1e8e4";
+        ctx.lineWidth = 1;
+        ctx.fillStyle = "var(--text-secondary)";
+        ctx.font = "10px sans-serif";
+        ctx.textAlign = "right";
+        ctx.textBaseline = "middle";
+        
+        for (let i = 0; i <= gridLines; i++) {
+            const yVal = minVal + (maxVal - minVal) * (i / gridLines);
+            const y = padding.top + graphHeight - (i / gridLines) * graphHeight;
+            
+            ctx.beginPath();
+            ctx.moveTo(padding.left, y);
+            ctx.lineTo(width - padding.right, y);
+            ctx.stroke();
+            
+            let displayVal = yVal;
+            if (activeSensor === "lux" || activeSensor === "tds") displayVal = Math.round(yVal);
+            else displayVal = yVal.toFixed(1);
+            
+            ctx.fillText(displayVal, padding.left - 10, y);
+        }
+        
+        // Tính toán tọa độ các điểm
+        const points = [];
+        const xStep = graphWidth / (maxDataPoints - 1);
+        
+        for (let i = 0; i < data.length; i++) {
+            if (data[i] === null || isNaN(data[i])) continue;
+            const x = padding.left + i * xStep;
+            const y = padding.top + graphHeight - ((data[i] - minVal) / (maxVal - minVal)) * graphHeight;
+            points.push({ x, y, value: data[i] });
+        }
+        
+        if (points.length === 0) return;
+        
+        const primaryColor = "#2e7d32"; // Xanh lá đậm chủ đạo
+        
+        // Vẽ vùng Gradient dưới đồ thị
+        if (points.length > 1) {
+            ctx.beginPath();
+            ctx.moveTo(points[0].x, padding.top + graphHeight);
+            ctx.lineTo(points[0].x, points[0].y);
+            
+            for (let i = 0; i < points.length - 1; i++) {
+                const p0 = points[i];
+                const p1 = points[i+1];
+                const cpX1 = p0.x + (p1.x - p0.x) / 3;
+                const cpY1 = p0.y;
+                const cpX2 = p0.x + 2 * (p1.x - p0.x) / 3;
+                const cpY2 = p1.y;
+                ctx.bezierCurveTo(cpX1, cpY1, cpX2, cpY2, p1.x, p1.y);
+            }
+            
+            ctx.lineTo(points[points.length - 1].x, padding.top + graphHeight);
+            ctx.closePath();
+            
+            const areaGrad = ctx.createLinearGradient(0, padding.top, 0, padding.top + graphHeight);
+            areaGrad.addColorStop(0, "rgba(46, 125, 50, 0.2)");
+            areaGrad.addColorStop(1, "rgba(46, 125, 50, 0.0)");
+            ctx.fillStyle = areaGrad;
+            ctx.fill();
+        }
+        
+        // Vẽ đường cong Spline mượt mà
+        ctx.strokeStyle = primaryColor;
+        ctx.lineWidth = 2.5;
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        ctx.beginPath();
+        ctx.moveTo(points[0].x, points[0].y);
+        
+        if (points.length > 1) {
+            for (let i = 0; i < points.length - 1; i++) {
+                const p0 = points[i];
+                const p1 = points[i+1];
+                const cpX1 = p0.x + (p1.x - p0.x) / 3;
+                const cpY1 = p0.y;
+                const cpX2 = p0.x + 2 * (p1.x - p0.x) / 3;
+                const cpY2 = p1.y;
+                ctx.bezierCurveTo(cpX1, cpY1, cpX2, cpY2, p1.x, p1.y);
+            }
+        }
+        ctx.stroke();
+        
+        // Vẽ các nút tròn dữ liệu
+        ctx.fillStyle = "#ffffff";
+        ctx.lineWidth = 2;
+        points.forEach(p => {
+            ctx.strokeStyle = primaryColor;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 4.5, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.stroke();
+        });
+        
+        // Nhãn trục X thời gian
+        ctx.fillStyle = "var(--text-muted)";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "top";
+        ctx.font = "9px sans-serif";
+        ctx.fillText("-2.5m", padding.left, padding.top + graphHeight + 8);
+        ctx.fillText("-1.5m", padding.left + graphWidth / 2, padding.top + graphHeight + 8);
+        ctx.fillText("Vừa xong", width - padding.right, padding.top + graphHeight + 8);
+    }
+
+    function pushChartPoint(sensor, val) {
+        chartData[sensor].push(val);
+        if (chartData[sensor].length > maxDataPoints) {
+            chartData[sensor].shift();
+        }
+    }
+
+    // Cập nhật thẻ hiển thị cảm biến động
+    function updateSensorCard(id, val, conn, unit, statusFn) {
+        const card = document.getElementById(`card-${id}`);
+        const valElem = document.getElementById(`dash-${id}`);
+        const statusElem = document.getElementById(`dash-${id}-status`);
+        
+        if (!card) return;
+        
+        if (!conn) {
+            card.classList.add("disconnected");
+            if (valElem) valElem.textContent = "--";
+            if (statusElem) {
+                statusElem.textContent = "Trạng thái: Mất kết nối";
+                statusElem.className = "sensor-status status-danger";
+            }
+        } else {
+            card.classList.remove("disconnected");
+            if (valElem) {
+                if (id === "lux" || id === "tds") valElem.textContent = Math.round(val);
+                else valElem.textContent = val.toFixed(1);
+            }
+            if (statusElem && statusFn) {
+                const info = statusFn(val);
+                statusElem.textContent = info.text;
+                statusElem.className = `sensor-status ${info.cl}`;
+            }
+        }
+    }
+
+    // --- Cập nhật toàn bộ trạng thái Dashboard ---
     function renderSystemStatus(data) {
         document.getElementById("info-version").textContent = "v" + data.version;
         document.getElementById("info-ssid").textContent = data.ssid || "(Chưa Kết Nối)";
@@ -61,7 +263,6 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("info-wifimode").textContent = data.wifimode;
         document.getElementById("info-partition").textContent = data.partition;
         
-        // Hiển thị thông tin Flash
         if (document.getElementById("info-flash-size")) {
             document.getElementById("info-flash-size").textContent = formatSize(data.flash_size);
         }
@@ -72,7 +273,6 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById("info-free-sketch").textContent = formatSize(data.free_sketch);
         }
 
-        // Format uptime
         const uptimeSeconds = Math.floor(data.uptime / 1000);
         const h = Math.floor(uptimeSeconds / 3600);
         const m = Math.floor((uptimeSeconds % 3600) / 60);
@@ -80,39 +280,109 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("info-uptime").textContent = 
             `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 
-        // Cập nhật giá trị cường độ ánh sáng Lux trên Dashboard
-        if (data.hasOwnProperty("lux")) {
-            const luxVal = data.lux;
-            const luxElem = document.getElementById("dash-lux");
-            const statusElem = document.getElementById("dash-lux-status");
+        // 1. Cập nhật 11 thẻ cảm biến dựa trên cờ kết nối _conn từ ESP32
+        updateSensorCard("temp", data.temp, data.temp_conn, "°C", (val) => {
+            if (val < 18 || val > 32) return { text: "Trạng thái: Khẩn cấp", cl: "status-danger" };
+            if (val >= 21 && val <= 29) return { text: "Trạng thái: Ổn định", cl: "status-normal" };
+            return { text: "Trạng thái: Lưu ý", cl: "status-warning" };
+        });
+        
+        updateSensorCard("humi", data.humi, data.humi_conn, "%", (val) => {
+            if (val < 40 || val > 85) return { text: "Trạng thái: Cảnh báo", cl: "status-danger" };
+            if (val >= 50 && val <= 80) return { text: "Trạng thái: Tốt", cl: "status-normal" };
+            return { text: "Trạng thái: Hơi ẩm/khô", cl: "status-warning" };
+        });
+
+        updateSensorCard("lux", data.lux, data.lux_conn, "Lux", (val) => {
+            if (val < 100) return { text: "Trạng thái: Quá tối", cl: "status-danger" };
+            if (val >= 800 && val <= 2000) return { text: "Trạng thái: Đủ sáng", cl: "status-normal" };
+            return { text: "Trạng thái: Ánh sáng lệch", cl: "status-warning" };
+        });
+
+        updateSensorCard("tempw", data.temp_w, data.temp_w_conn, "°C", (val) => {
+            if (val < 16 || val > 28) return { text: "Trạng thái: Nguy hiểm", cl: "status-danger" };
+            if (val >= 20 && val <= 25) return { text: "Trạng thái: Đạt chuẩn", cl: "status-normal" };
+            return { text: "Trạng thái: Cần lưu ý", cl: "status-warning" };
+        });
+
+        updateSensorCard("tds", data.tds, data.tds_conn, "ppm", (val) => {
+            if (val < 500) return { text: "Trạng thái: Thiếu DD", cl: "status-danger" };
+            if (val >= 600 && val <= 850) return { text: "Trạng thái: Đạt chuẩn", cl: "status-normal" };
+            return { text: "Trạng thái: Hơi lệch", cl: "status-warning" };
+        });
+
+        updateSensorCard("ph", data.ph, data.ph_conn, "pH", (val) => {
+            if (val < 5.0 || val > 7.0) return { text: "Trạng thái: Nguy hiểm", cl: "status-danger" };
+            if (val >= 5.5 && val <= 6.5) return { text: "Trạng thái: Ổn định", cl: "status-normal" };
+            return { text: "Trạng thái: Cần điều chỉnh", cl: "status-warning" };
+        });
+
+        updateSensorCard("flow", data.flow, data.flow_conn, "L/m", (val) => {
+            if (val < 0.5) return { text: "Trạng thái: Ngắt nước", cl: "status-danger" };
+            return { text: "Trạng thái: Lưu thông", cl: "status-normal" };
+        });
+
+        const levelStatusFn = (val) => {
+            if (val < 20) return { text: "Trạng thái: Cạn nước", cl: "status-danger" };
+            if (val < 45) return { text: "Trạng thái: Thấp", cl: "status-warning" };
+            return { text: "Trạng thái: Đầy đủ", cl: "status-normal" };
+        };
+        updateSensorCard("lvl1", data.lvl1, data.lvl1_conn, "%", levelStatusFn);
+        updateSensorCard("lvl2", data.lvl2, data.lvl2_conn, "%", levelStatusFn);
+        updateSensorCard("lvl3", data.lvl3, data.lvl3_conn, "%", levelStatusFn);
+        updateSensorCard("lvl4", data.lvl4, data.lvl4_conn, "%", levelStatusFn);
+
+        // 2. Lưu lịch sử đồ thị cảm biến (chỉ khi kết nối tốt, ngược lại đẩy null)
+        pushChartPoint("lux", data.lux_conn ? data.lux : null);
+        pushChartPoint("temp", data.temp_conn ? data.temp : null);
+        pushChartPoint("humi", data.humi_conn ? data.humi : null);
+        pushChartPoint("temp_w", data.temp_w_conn ? data.temp_w : null);
+        pushChartPoint("tds", data.tds_conn ? data.tds : null);
+        pushChartPoint("ph", data.ph_conn ? data.ph : null);
+        
+        drawChart();
+
+        // 3. Cập nhật trạng thái 10 thiết bị ngoại vi lên UI (nút gạt, thanh trượt)
+        const actuators = [
+            { id: "rl1", pin: 7, key: "act_IN_RL1", isPwm: false },
+            { id: "rl2", pin: 6, key: "act_IN_RL2", isPwm: false },
+            { id: "den1", pin: 17, key: "act_DEN1", isPwm: true },
+            { id: "den2", pin: 18, key: "act_DEN2", isPwm: true },
+            { id: "quat1", pin: 11, key: "act_QUAT1", isPwm: true },
+            { id: "quat2", pin: 10, key: "act_QUAT2", isPwm: true },
+            { id: "bomll1", pin: 13, key: "act_BOMLL1", isPwm: true },
+            { id: "bomll2", pin: 12, key: "act_BOMLL2", isPwm: true },
+            { id: "bomll3", pin: 8, key: "act_BOMLL3", isPwm: true },
+            { id: "bom12v", pin: 9, key: "act_BOM12V", isPwm: true }
+        ];
+
+        actuators.forEach(act => {
+            const toggle = document.getElementById(`ctrl-${act.id}`);
+            if (!toggle) return;
             
-            if (luxVal < 0) {
-                if (luxElem) luxElem.textContent = "Lỗi";
-                if (statusElem) {
-                    statusElem.textContent = "Trạng thái: Mất kết nối BH1750";
-                    statusElem.className = "sensor-status status-danger";
-                }
-            } else {
-                if (luxElem) luxElem.textContent = luxVal.toFixed(1);
-                if (statusElem) {
-                    if (luxVal < 100) {
-                        statusElem.textContent = "Trạng thái: Quá tối";
-                        statusElem.className = "sensor-status status-danger";
-                    } else if (luxVal >= 100 && luxVal < 800) {
-                        statusElem.textContent = "Trạng thái: Ánh sáng yếu";
-                        statusElem.className = "sensor-status status-warning";
-                    } else if (luxVal >= 800 && luxVal <= 2000) {
-                        statusElem.textContent = "Trạng thái: Đủ sáng";
-                        statusElem.className = "sensor-status status-normal";
-                    } else {
-                        statusElem.textContent = "Trạng thái: Quá sáng";
-                        statusElem.className = "sensor-status status-warning";
+            const stateVal = data[act.key];
+            if (stateVal === undefined) return;
+            
+            const isChecked = act.isPwm ? (stateVal > 0) : (stateVal === 1);
+            if (toggle.checked !== isChecked) {
+                toggle.checked = isChecked;
+            }
+            
+            if (act.isPwm) {
+                const slider = document.getElementById(`slider-${act.id}`);
+                const valLabel = document.getElementById(`val-${act.id}`);
+                if (slider) {
+                    slider.disabled = !isChecked;
+                    if (isChecked && stateVal > 0) {
+                        const percent = Math.round((stateVal * 100) / 255);
+                        slider.value = percent;
+                        if (valLabel) valLabel.textContent = `${percent}%`;
                     }
                 }
             }
-        }
+        });
 
-        // Update connection status header badge
+        // Badge trạng thái kết nối
         const statusBadge = document.getElementById("connection-status");
         const statusText = document.getElementById("status-text");
         
@@ -124,6 +394,64 @@ document.addEventListener("DOMContentLoaded", () => {
             statusBadge.className = "status-badge connected";
             if (statusText) statusText.textContent = " Đã Kết Nối";
             sysTime.textContent = `Đang kết nối WiFi: ${data.ssid}`;
+        }
+    }
+
+    // --- Đăng ký sự kiện điều khiển thiết bị (Toggle & Sliders) ---
+    document.querySelectorAll(".actuator-toggle").forEach(toggle => {
+        toggle.addEventListener("change", () => {
+            const pin = parseInt(toggle.getAttribute("data-pin"));
+            const isPwm = toggle.closest(".pwm-item") !== null;
+            const id = toggle.id.replace("ctrl-", "");
+            
+            let sendVal = 0;
+            if (toggle.checked) {
+                if (isPwm) {
+                    const slider = document.getElementById(`slider-${id}`);
+                    sendVal = slider ? Math.round((slider.value * 255) / 100) : 255;
+                    if (slider) slider.disabled = false;
+                } else {
+                    sendVal = 1;
+                }
+            } else {
+                if (isPwm) {
+                    const slider = document.getElementById(`slider-${id}`);
+                    if (slider) slider.disabled = true;
+                }
+                sendVal = 0;
+            }
+            
+            sendControlCommand(pin, sendVal);
+        });
+    });
+
+    document.querySelectorAll(".pwm-slider").forEach(slider => {
+        const id = slider.id.replace("slider-", "");
+        const valLabel = document.getElementById(`val-${id}`);
+        const pin = parseInt(slider.getAttribute("data-pin"));
+        
+        slider.addEventListener("input", () => {
+            if (valLabel) {
+                valLabel.textContent = `${slider.value}%`;
+            }
+        });
+        
+        slider.addEventListener("change", () => {
+            const toggle = document.getElementById(`ctrl-${id}`);
+            if (toggle && toggle.checked) {
+                const sendVal = Math.round((slider.value * 255) / 100);
+                sendControlCommand(pin, sendVal);
+            }
+        });
+    });
+
+    function sendControlCommand(pin, state) {
+        const payload = JSON.stringify({ pin: pin, state: state });
+        console.log("Gửi lệnh điều khiển:", payload);
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(payload);
+        } else {
+            console.warn("WebSocket chưa kết nối. Không thể gửi lệnh.");
         }
     }
 
@@ -149,7 +477,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         ws.onopen = () => {
             console.log("Đã kết nối WebSocket thành công!");
-            wsReconnectDelay = 2000; // Reset delay on successful connection
+            wsReconnectDelay = 2000;
             if (pollInterval) {
                 clearInterval(pollInterval);
                 pollInterval = null;
@@ -171,7 +499,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 pollInterval = setInterval(updateSystemStatusPolling, 3000);
             }
             setTimeout(startWebSocket, wsReconnectDelay);
-            // Exponential backoff with max of 30s
             wsReconnectDelay = Math.min(wsReconnectDelay * 1.5, 30000);
         };
 

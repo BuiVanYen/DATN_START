@@ -66,19 +66,347 @@
 
             <!-- TAB: DASHBOARD -->
             <section class="tab-content active" id="tab-dashboard">
-                <div class="dashboard-grid">
-                    <div class="card sensor-card light-card">
+                <!-- 11 Sensor Cards Grid -->
+                <div class="sensor-grid">
+                    <!-- 1. Nhiệt độ không khí -->
+                    <div class="card sensor-card" id="card-temp">
                         <div class="sensor-card-body">
-                            <div class="sensor-icon-wrapper">
-                                <svg class="sensor-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <circle cx="12" cy="12" r="4"></circle>
-                                    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
-                                </svg>
+                            <div class="sensor-icon-wrapper temp">🌡️</div>
+                            <div class="sensor-details">
+                                <span class="sensor-title">Nhiệt Độ KK</span>
+                                <h3 class="sensor-value"><span id="dash-temp">--</span> <span class="unit">°C</span></h3>
+                                <span class="sensor-status" id="dash-temp-status">Chờ kết nối...</span>
                             </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 2. Độ ẩm không khí -->
+                    <div class="card sensor-card" id="card-humi">
+                        <div class="sensor-card-body">
+                            <div class="sensor-icon-wrapper humi">💧</div>
+                            <div class="sensor-details">
+                                <span class="sensor-title">Độ Ẩm KK</span>
+                                <h3 class="sensor-value"><span id="dash-humi">--</span> <span class="unit">%</span></h3>
+                                <span class="sensor-status" id="dash-humi-status">Chờ kết nối...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Ánh sáng -->
+                    <div class="card sensor-card" id="card-lux">
+                        <div class="sensor-card-body">
+                            <div class="sensor-icon-wrapper lux">☀️</div>
                             <div class="sensor-details">
                                 <span class="sensor-title">Ánh Sáng</span>
                                 <h3 class="sensor-value"><span id="dash-lux">--</span> <span class="unit">Lux</span></h3>
-                                <span class="sensor-status" id="dash-lux-status">Trạng thái: --</span>
+                                <span class="sensor-status" id="dash-lux-status">Chờ kết nối...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. Nhiệt độ nước -->
+                    <div class="card sensor-card" id="card-tempw">
+                        <div class="sensor-card-body">
+                            <div class="sensor-icon-wrapper tempw">🧪🌡️</div>
+                            <div class="sensor-details">
+                                <span class="sensor-title">Nhiệt Độ Nước</span>
+                                <h3 class="sensor-value"><span id="dash-tempw">--</span> <span class="unit">°C</span></h3>
+                                <span class="sensor-status" id="dash-tempw-status">Chờ kết nối...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5. TDS -->
+                    <div class="card sensor-card" id="card-tds">
+                        <div class="sensor-card-body">
+                            <div class="sensor-icon-wrapper tds">📊</div>
+                            <div class="sensor-details">
+                                <span class="sensor-title">Dinh Dưỡng TDS</span>
+                                <h3 class="sensor-value"><span id="dash-tds">--</span> <span class="unit">ppm</span></h3>
+                                <span class="sensor-status" id="dash-tds-status">Chờ kết nối...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 6. pH -->
+                    <div class="card sensor-card" id="card-ph">
+                        <div class="sensor-card-body">
+                            <div class="sensor-icon-wrapper ph">🧪</div>
+                            <div class="sensor-details">
+                                <span class="sensor-title">Độ pH</span>
+                                <h3 class="sensor-value"><span id="dash-ph">--</span> <span class="unit">pH</span></h3>
+                                <span class="sensor-status" id="dash-ph-status">Chờ kết nối...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 7. Lưu lượng -->
+                    <div class="card sensor-card" id="card-flow">
+                        <div class="sensor-card-body">
+                            <div class="sensor-icon-wrapper flow">🌊</div>
+                            <div class="sensor-details">
+                                <span class="sensor-title">Lưu Lượng Nước</span>
+                                <h3 class="sensor-value"><span id="dash-flow">--</span> <span class="unit">L/m</span></h3>
+                                <span class="sensor-status" id="dash-flow-status">Chờ kết nối...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 8. Mực nước thùng chính -->
+                    <div class="card sensor-card" id="card-lvl1">
+                        <div class="sensor-card-body">
+                            <div class="sensor-icon-wrapper lvl">🛢️</div>
+                            <div class="sensor-details">
+                                <span class="sensor-title">Nước Thùng Chính</span>
+                                <h3 class="sensor-value"><span id="dash-lvl1">--</span> <span class="unit">%</span></h3>
+                                <span class="sensor-status" id="dash-lvl1-status">Chờ kết nối...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 9. Mực nước chai 1 -->
+                    <div class="card sensor-card" id="card-lvl2">
+                        <div class="sensor-card-body">
+                            <div class="sensor-icon-wrapper lvl">🧴 A</div>
+                            <div class="sensor-details">
+                                <span class="sensor-title">Mực Nước Chai 1</span>
+                                <h3 class="sensor-value"><span id="dash-lvl2">--</span> <span class="unit">%</span></h3>
+                                <span class="sensor-status" id="dash-lvl2-status">Chờ kết nối...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 10. Mực nước chai 2 -->
+                    <div class="card sensor-card" id="card-lvl3">
+                        <div class="sensor-card-body">
+                            <div class="sensor-icon-wrapper lvl">🧴 B</div>
+                            <div class="sensor-details">
+                                <span class="sensor-title">Mực Nước Chai 2</span>
+                                <h3 class="sensor-value"><span id="dash-lvl3">--</span> <span class="unit">%</span></h3>
+                                <span class="sensor-status" id="dash-lvl3-status">Chờ kết nối...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 11. Mực nước chai 3 -->
+                    <div class="card sensor-card" id="card-lvl4">
+                        <div class="sensor-card-body">
+                            <div class="sensor-icon-wrapper lvl">🧴 pH</div>
+                            <div class="sensor-details">
+                                <span class="sensor-title">Mực Nước Chai 3</span>
+                                <h3 class="sensor-value"><span id="dash-lvl4">--</span> <span class="unit">%</span></h3>
+                                <span class="sensor-status" id="dash-lvl4-status">Chờ kết nối...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom Row: Chart and Control Panel -->
+                <div class="dashboard-bottom-row">
+                    <!-- Left: Realtime Chart -->
+                    <div class="card chart-card">
+                        <div class="chart-header">
+                            <h2>Biểu Đồ Theo Dõi (Giờ Thực)</h2>
+                            <div class="chart-tabs">
+                                <button class="chart-tab active" data-sensor="lux">Ánh sáng</button>
+                                <button class="chart-tab" data-sensor="temp">Nhiệt độ KK</button>
+                                <button class="chart-tab" data-sensor="humi">Độ ẩm KK</button>
+                                <button class="chart-tab" data-sensor="temp_w">Nhiệt độ nước</button>
+                                <button class="chart-tab" data-sensor="tds">TDS</button>
+                                <button class="chart-tab" data-sensor="ph">pH</button>
+                            </div>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="realtimeChart" width="600" height="280"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Right: Control Panel (10 Actuators) -->
+                    <div class="card control-card">
+                        <div class="card-header">
+                            <h2>Bảng Điều Khiển Ngoại Vi</h2>
+                        </div>
+                        <div class="control-list">
+                            <!-- Relay 1 (Bơm chìm 220V) -->
+                            <div class="control-item">
+                                <div class="device-info">
+                                    <span class="device-icon">🚰</span>
+                                    <div>
+                                        <span class="device-name">Bơm chìm 220V</span>
+                                        <span class="device-desc">Bơm cấp nước sạch chính (RL1 - GPIO 7)</span>
+                                    </div>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" class="actuator-toggle" id="ctrl-rl1" data-pin="7">
+                                    <span class="slider-switch"></span>
+                                </label>
+                            </div>
+
+                            <!-- Relay 2 (Sục khí 220V) -->
+                            <div class="control-item">
+                                <div class="device-info">
+                                    <span class="device-icon">💨</span>
+                                    <div>
+                                        <span class="device-name">Sục khí 220V</span>
+                                        <span class="device-desc">Máy sục khí oxy dinh dưỡng (RL2 - GPIO 6)</span>
+                                    </div>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" class="actuator-toggle" id="ctrl-rl2" data-pin="6">
+                                    <span class="slider-switch"></span>
+                                </label>
+                            </div>
+
+                            <!-- PWM 1 (Đèn LED Tầng 1) -->
+                            <div class="control-item pwm-item">
+                                <div class="device-info">
+                                    <span class="device-icon">💡</span>
+                                    <div>
+                                        <span class="device-name">Đèn LED Tầng 1</span>
+                                        <span class="device-desc">Đèn quang hợp tầng 1 (GPIO 17)</span>
+                                    </div>
+                                </div>
+                                <div class="pwm-control-area">
+                                    <input type="range" class="pwm-slider" id="slider-den1" data-pin="17" min="10" max="100" value="100" disabled>
+                                    <span class="pwm-val" id="val-den1">100%</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" class="actuator-toggle" id="ctrl-den1" data-pin="17">
+                                    <span class="slider-switch"></span>
+                                </label>
+                            </div>
+
+                            <!-- PWM 2 (Đèn LED Tầng 2) -->
+                            <div class="control-item pwm-item">
+                                <div class="device-info">
+                                    <span class="device-icon">💡</span>
+                                    <div>
+                                        <span class="device-name">Đèn LED Tầng 2</span>
+                                        <span class="device-desc">Đèn quang hợp tầng 2 (GPIO 18)</span>
+                                    </div>
+                                </div>
+                                <div class="pwm-control-area">
+                                    <input type="range" class="pwm-slider" id="slider-den2" data-pin="18" min="10" max="100" value="100" disabled>
+                                    <span class="pwm-val" id="val-den2">100%</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" class="actuator-toggle" id="ctrl-den2" data-pin="18">
+                                    <span class="slider-switch"></span>
+                                </label>
+                            </div>
+
+                            <!-- PWM 3 (Quạt Tầng 1) -->
+                            <div class="control-item pwm-item">
+                                <div class="device-info">
+                                    <span class="device-icon">🌀</span>
+                                    <div>
+                                        <span class="device-name">Quạt Tầng 1</span>
+                                        <span class="device-desc">Quạt thông gió làm mát (GPIO 11)</span>
+                                    </div>
+                                </div>
+                                <div class="pwm-control-area">
+                                    <input type="range" class="pwm-slider" id="slider-quat1" data-pin="11" min="10" max="100" value="50" disabled>
+                                    <span class="pwm-val" id="val-quat1">50%</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" class="actuator-toggle" id="ctrl-quat1" data-pin="11">
+                                    <span class="slider-switch"></span>
+                                </label>
+                            </div>
+
+                            <!-- PWM 4 (Quạt Tầng 2) -->
+                            <div class="control-item pwm-item">
+                                <div class="device-info">
+                                    <span class="device-icon">🌀</span>
+                                    <div>
+                                        <span class="device-name">Quạt Tầng 2</span>
+                                        <span class="device-desc">Quạt thông gió làm mát (GPIO 10)</span>
+                                    </div>
+                                </div>
+                                <div class="pwm-control-area">
+                                    <input type="range" class="pwm-slider" id="slider-quat2" data-pin="10" min="10" max="100" value="50" disabled>
+                                    <span class="pwm-val" id="val-quat2">50%</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" class="actuator-toggle" id="ctrl-quat2" data-pin="10">
+                                    <span class="slider-switch"></span>
+                                </label>
+                            </div>
+
+                            <!-- PWM 5 (Bơm DD Chai A) -->
+                            <div class="control-item pwm-item">
+                                <div class="device-info">
+                                    <span class="device-icon">🧪</span>
+                                    <div>
+                                        <span class="device-name">Bơm DD Chai A</span>
+                                        <span class="device-desc">Bơm tăng dinh duong A (GPIO 13)</span>
+                                    </div>
+                                </div>
+                                <div class="pwm-control-area">
+                                    <input type="range" class="pwm-slider" id="slider-bomll1" data-pin="13" min="10" max="100" value="30" disabled>
+                                    <span class="pwm-val" id="val-bomll1">30%</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" class="actuator-toggle" id="ctrl-bomll1" data-pin="13">
+                                    <span class="slider-switch"></span>
+                                </label>
+                            </div>
+
+                            <!-- PWM 6 (Bơm DD Chai B) -->
+                            <div class="control-item pwm-item">
+                                <div class="device-info">
+                                    <span class="device-icon">🧪</span>
+                                    <div>
+                                        <span class="device-name">Bơm DD Chai B</span>
+                                        <span class="device-desc">Bơm tăng dinh duong B (GPIO 12)</span>
+                                    </div>
+                                </div>
+                                <div class="pwm-control-area">
+                                    <input type="range" class="pwm-slider" id="slider-bomll2" data-pin="12" min="10" max="100" value="30" disabled>
+                                    <span class="pwm-val" id="val-bomll2">30%</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" class="actuator-toggle" id="ctrl-bomll2" data-pin="12">
+                                    <span class="slider-switch"></span>
+                                </label>
+                            </div>
+
+                            <!-- PWM 7 (Bơm pH Down) -->
+                            <div class="control-item pwm-item">
+                                <div class="device-info">
+                                    <span class="device-icon">🧪</span>
+                                    <div>
+                                        <span class="device-name">Bơm pH Down</span>
+                                        <span class="device-desc">Bơm dung dịch axit hạ pH (GPIO 8)</span>
+                                    </div>
+                                </div>
+                                <div class="pwm-control-area">
+                                    <input type="range" class="pwm-slider" id="slider-bomll3" data-pin="8" min="10" max="100" value="30" disabled>
+                                    <span class="pwm-val" id="val-bomll3">30%</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" class="actuator-toggle" id="ctrl-bomll3" data-pin="8">
+                                    <span class="slider-switch"></span>
+                                </label>
+                            </div>
+
+                            <!-- PWM 8 (Bơm nước 12V) -->
+                            <div class="control-item pwm-item">
+                                <div class="device-info">
+                                    <span class="device-icon">🌊</span>
+                                    <div>
+                                        <span class="device-name">Bơm nước 12V DC</span>
+                                        <span class="device-desc">Bơm tuần hoàn nước 12V (GPIO 9)</span>
+                                    </div>
+                                </div>
+                                <div class="pwm-control-area">
+                                    <input type="range" class="pwm-slider" id="slider-bom12v" data-pin="9" min="10" max="100" value="60" disabled>
+                                    <span class="pwm-val" id="val-bom12v">60%</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" class="actuator-toggle" id="ctrl-bom12v" data-pin="9">
+                                    <span class="slider-switch"></span>
+                                </label>
                             </div>
                         </div>
                     </div>

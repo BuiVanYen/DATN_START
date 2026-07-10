@@ -187,7 +187,52 @@ String getSystemStatusJSON() {
   json += "\"flash_size\":" + String(ESP.getFlashChipSize()) + ",";
   json += "\"sketch_size\":" + String(ESP.getSketchSize()) + ",";
   json += "\"free_sketch\":" + String(ESP.getFreeSketchSpace()) + ",";
-  json += "\"lux\":" + String(luxVal, 1);
+  
+  // Dữ liệu cảm biến & Trạng thái kết nối (1 = Connected, 0 = Disconnected)
+  json += "\"lux\":" + String(luxVal, 1) + ",";
+  json += "\"lux_conn\":" + String(sensors_is_bh1750_connected() ? 1 : 0) + ",";
+  
+  json += "\"temp\":" + String(30.9, 1) + ",";
+  json += "\"temp_conn\":0,"; // SHT31 chưa kết nối
+  
+  json += "\"humi\":" + String(68.0, 1) + ",";
+  json += "\"humi_conn\":0,"; // SHT31 chưa kết nối
+  
+  json += "\"temp_w\":" + String(25.5, 1) + ",";
+  json += "\"temp_w_conn\":0,"; // DS18B20 chưa kết nối
+  
+  json += "\"tds\":" + String(720.0, 1) + ",";
+  json += "\"tds_conn\":0,"; // TDS chưa kết nối
+  
+  json += "\"ph\":" + String(6.0, 1) + ",";
+  json += "\"ph_conn\":0,"; // pH chưa kết nối
+  
+  json += "\"flow\":" + String(1.5, 1) + ",";
+  json += "\"flow_conn\":0,"; // Cảm biến dòng chảy chưa kết nối
+  
+  json += "\"lvl1\":" + String(80.0, 1) + ",";
+  json += "\"lvl1_conn\":0,"; // Mực nước thùng chính chưa kết nối
+  
+  json += "\"lvl2\":" + String(50.0, 1) + ",";
+  json += "\"lvl2_conn\":0,"; // Chai 1 chưa kết nối
+  
+  json += "\"lvl3\":" + String(45.0, 1) + ",";
+  json += "\"lvl3_conn\":0,"; // Chai 2 chưa kết nối
+  
+  json += "\"lvl4\":" + String(90.0, 1) + ",";
+  json += "\"lvl4_conn\":0,"; // Chai 3 chưa kết nối
+
+  // Trạng thái 10 thiết bị ngoại vi
+  json += "\"act_IN_RL1\":" + String(actuator_get_state(IN_RL1)) + ",";
+  json += "\"act_IN_RL2\":" + String(actuator_get_state(IN_RL2)) + ",";
+  json += "\"act_DEN1\":" + String(actuator_get_state(DEN1)) + ",";
+  json += "\"act_DEN2\":" + String(actuator_get_state(DEN2)) + ",";
+  json += "\"act_QUAT1\":" + String(actuator_get_state(QUAT1)) + ",";
+  json += "\"act_QUAT2\":" + String(actuator_get_state(QUAT2)) + ",";
+  json += "\"act_BOMLL1\":" + String(actuator_get_state(BOMLL1)) + ",";
+  json += "\"act_BOMLL2\":" + String(actuator_get_state(BOMLL2)) + ",";
+  json += "\"act_BOMLL3\":" + String(actuator_get_state(BOMLL3)) + ",";
+  json += "\"act_BOM12V\":" + String(actuator_get_state(BOM12V));
   json += "}";
   return json;
 }
@@ -207,9 +252,47 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload,
     webSocket.sendTXT(num, statusJson);
     break;
   }
-  case WStype_TEXT:
+  case WStype_TEXT: {
     Serial.printf("[WS] Nhan tu client #%u: %s\n", num, payload);
+    String msg = (char*)payload;
+    int pin = -1;
+    int state = -1;
+
+    int pinIdx = msg.indexOf("\"pin\"");
+    int stateIdx = msg.indexOf("\"state\"");
+
+    if (pinIdx != -1 && stateIdx != -1) {
+      // Tìm vị trí dấu hai chấm sau "pin"
+      int colonPin = msg.indexOf(":", pinIdx);
+      if (colonPin != -1) {
+        int commaPin = msg.indexOf(",", colonPin);
+        if (commaPin == -1) commaPin = msg.indexOf("}", colonPin);
+        if (commaPin != -1) {
+          pin = msg.substring(colonPin + 1, commaPin).toInt();
+        }
+      }
+
+      // Tìm vị trí dấu hai chấm sau "state"
+      int colonState = msg.indexOf(":", stateIdx);
+      if (colonState != -1) {
+        int commaState = msg.indexOf(",", colonState);
+        if (commaState == -1) commaState = msg.indexOf("}", colonState);
+        if (commaState != -1) {
+          state = msg.substring(colonState + 1, commaState).toInt();
+        }
+      }
+    }
+
+    if (pin != -1 && state != -1) {
+      Serial.printf("[WS] Dieu khien thiet bi: GPIO %d -> Gtri %d\n", pin, state);
+      actuator_set_state(pin, state);
+
+      // Phát thông tin cập nhật trạng thái mới cho toàn bộ các thiết bị đang kết nối
+      String statusJson = getSystemStatusJSON();
+      webSocket.broadcastTXT(statusJson);
+    }
     break;
+  }
   default:
     break;
   }
