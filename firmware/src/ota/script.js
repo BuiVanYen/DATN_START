@@ -507,16 +507,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // 3. Cập nhật trạng thái 10 thiết bị ngoại vi lên UI (nút gạt, thanh trượt)
         const actuators = [
-            { id: "rl1", pin: 7, key: "act_IN_RL1", isPwm: false },
-            { id: "rl2", pin: 6, key: "act_IN_RL2", isPwm: false },
             { id: "den1", pin: 17, key: "act_DEN1", isPwm: true },
             { id: "den2", pin: 18, key: "act_DEN2", isPwm: true },
-            { id: "quat1", pin: 11, key: "act_QUAT1", isPwm: true },
-            { id: "quat2", pin: 10, key: "act_QUAT2", isPwm: true },
-            { id: "bomll1", pin: 13, key: "act_BOMLL1", isPwm: true },
-            { id: "bomll2", pin: 12, key: "act_BOMLL2", isPwm: true },
             { id: "bomll3", pin: 8, key: "act_BOMLL3", isPwm: true },
-            { id: "bom12v", pin: 9, key: "act_BOM12V", isPwm: true }
+            { id: "bom12v", pin: 9, key: "act_BOM12V", isPwm: true },
+            { id: "quat2", pin: 10, key: "act_QUAT2", isPwm: true },
+            { id: "quat1", pin: 11, key: "act_QUAT1", isPwm: true },
+            { id: "bomll2", pin: 12, key: "act_BOMLL2", isPwm: true },
+            { id: "bomll1", pin: 13, key: "act_BOMLL1", isPwm: true },
+            { id: "rl2", pin: 6, key: "act_IN_RL2", isPwm: false },
+            { id: "rl1", pin: 7, key: "act_IN_RL1", isPwm: false }
         ];
 
         actuators.forEach(act => {

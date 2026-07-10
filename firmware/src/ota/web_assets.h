@@ -212,43 +212,13 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(<!DOCTYPE html>
                             <h2>Bảng Điều Khiển Ngoại Vi</h2>
                         </div>
                         <div class="control-list">
-                            <!-- Relay 1 (Bơm chìm 220V) -->
-                            <div class="control-item">
-                                <div class="device-info">
-                                    <span class="device-icon">🚰</span>
-                                    <div>
-                                        <span class="device-name">Bơm chìm 220V</span>
-                                        <span class="device-desc">Bơm cấp nước sạch chính (RL1 - GPIO 7)</span>
-                                    </div>
-                                </div>
-                                <label class="switch">
-                                    <input type="checkbox" class="actuator-toggle" id="ctrl-rl1" data-pin="7">
-                                    <span class="slider-switch"></span>
-                                </label>
-                            </div>
-
-                            <!-- Relay 2 (Sục khí 220V) -->
-                            <div class="control-item">
-                                <div class="device-info">
-                                    <span class="device-icon">💨</span>
-                                    <div>
-                                        <span class="device-name">Sục khí 220V</span>
-                                        <span class="device-desc">Máy sục khí oxy dinh dưỡng (RL2 - GPIO 6)</span>
-                                    </div>
-                                </div>
-                                <label class="switch">
-                                    <input type="checkbox" class="actuator-toggle" id="ctrl-rl2" data-pin="6">
-                                    <span class="slider-switch"></span>
-                                </label>
-                            </div>
-
                             <!-- PWM 1 (Đèn LED Tầng 1) -->
                             <div class="control-item pwm-item">
                                 <div class="device-info">
                                     <span class="device-icon">💡</span>
                                     <div>
                                         <span class="device-name">Đèn LED Tầng 1</span>
-                                        <span class="device-desc">Đèn quang hợp tầng 1 (GPIO 17)</span>
+                                        <span class="device-desc">Đèn quang hợp tầng 1</span>
                                     </div>
                                 </div>
                                 <div class="pwm-control-area">
@@ -267,7 +237,7 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(<!DOCTYPE html>
                                     <span class="device-icon">💡</span>
                                     <div>
                                         <span class="device-name">Đèn LED Tầng 2</span>
-                                        <span class="device-desc">Đèn quang hợp tầng 2 (GPIO 18)</span>
+                                        <span class="device-desc">Đèn quang hợp tầng 2</span>
                                     </div>
                                 </div>
                                 <div class="pwm-control-area">
@@ -280,89 +250,13 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(<!DOCTYPE html>
                                 </label>
                             </div>
 
-                            <!-- PWM 3 (Quạt Tầng 1) -->
-                            <div class="control-item pwm-item">
-                                <div class="device-info">
-                                    <span class="device-icon">🌀</span>
-                                    <div>
-                                        <span class="device-name">Quạt Tầng 1</span>
-                                        <span class="device-desc">Quạt thông gió làm mát (GPIO 11)</span>
-                                    </div>
-                                </div>
-                                <div class="pwm-control-area">
-                                    <input type="range" class="pwm-slider" id="slider-quat1" data-pin="11" min="10" max="100" value="50" disabled>
-                                    <span class="pwm-val" id="val-quat1">50%</span>
-                                </div>
-                                <label class="switch">
-                                    <input type="checkbox" class="actuator-toggle" id="ctrl-quat1" data-pin="11">
-                                    <span class="slider-switch"></span>
-                                </label>
-                            </div>
-
-                            <!-- PWM 4 (Quạt Tầng 2) -->
-                            <div class="control-item pwm-item">
-                                <div class="device-info">
-                                    <span class="device-icon">🌀</span>
-                                    <div>
-                                        <span class="device-name">Quạt Tầng 2</span>
-                                        <span class="device-desc">Quạt thông gió làm mát (GPIO 10)</span>
-                                    </div>
-                                </div>
-                                <div class="pwm-control-area">
-                                    <input type="range" class="pwm-slider" id="slider-quat2" data-pin="10" min="10" max="100" value="50" disabled>
-                                    <span class="pwm-val" id="val-quat2">50%</span>
-                                </div>
-                                <label class="switch">
-                                    <input type="checkbox" class="actuator-toggle" id="ctrl-quat2" data-pin="10">
-                                    <span class="slider-switch"></span>
-                                </label>
-                            </div>
-
-                            <!-- PWM 5 (Bơm DD Chai A) -->
-                            <div class="control-item pwm-item">
-                                <div class="device-info">
-                                    <span class="device-icon">🧪</span>
-                                    <div>
-                                        <span class="device-name">Bơm DD Chai A</span>
-                                        <span class="device-desc">Bơm tăng dinh duong A (GPIO 13)</span>
-                                    </div>
-                                </div>
-                                <div class="pwm-control-area">
-                                    <input type="range" class="pwm-slider" id="slider-bomll1" data-pin="13" min="10" max="100" value="30" disabled>
-                                    <span class="pwm-val" id="val-bomll1">30%</span>
-                                </div>
-                                <label class="switch">
-                                    <input type="checkbox" class="actuator-toggle" id="ctrl-bomll1" data-pin="13">
-                                    <span class="slider-switch"></span>
-                                </label>
-                            </div>
-
-                            <!-- PWM 6 (Bơm DD Chai B) -->
-                            <div class="control-item pwm-item">
-                                <div class="device-info">
-                                    <span class="device-icon">🧪</span>
-                                    <div>
-                                        <span class="device-name">Bơm DD Chai B</span>
-                                        <span class="device-desc">Bơm tăng dinh duong B (GPIO 12)</span>
-                                    </div>
-                                </div>
-                                <div class="pwm-control-area">
-                                    <input type="range" class="pwm-slider" id="slider-bomll2" data-pin="12" min="10" max="100" value="30" disabled>
-                                    <span class="pwm-val" id="val-bomll2">30%</span>
-                                </div>
-                                <label class="switch">
-                                    <input type="checkbox" class="actuator-toggle" id="ctrl-bomll2" data-pin="12">
-                                    <span class="slider-switch"></span>
-                                </label>
-                            </div>
-
                             <!-- PWM 7 (Bơm pH Down) -->
                             <div class="control-item pwm-item">
                                 <div class="device-info">
                                     <span class="device-icon">🧪</span>
                                     <div>
                                         <span class="device-name">Bơm pH Down</span>
-                                        <span class="device-desc">Bơm dung dịch axit hạ pH (GPIO 8)</span>
+                                        <span class="device-desc">Bơm dung dịch axit hạ pH</span>
                                     </div>
                                 </div>
                                 <div class="pwm-control-area">
@@ -375,13 +269,13 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(<!DOCTYPE html>
                                 </label>
                             </div>
 
-                            <!-- PWM 8 (Bơm nước 12V) -->
+                            <!-- PWM 8 (Bơm nước 12V DC) -->
                             <div class="control-item pwm-item">
                                 <div class="device-info">
                                     <span class="device-icon">🌊</span>
                                     <div>
                                         <span class="device-name">Bơm nước 12V DC</span>
-                                        <span class="device-desc">Bơm tuần hoàn nước 12V (GPIO 9)</span>
+                                        <span class="device-desc">Bơm tuần hoàn nước 12V</span>
                                     </div>
                                 </div>
                                 <div class="pwm-control-area">
@@ -390,6 +284,112 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(<!DOCTYPE html>
                                 </div>
                                 <label class="switch">
                                     <input type="checkbox" class="actuator-toggle" id="ctrl-bom12v" data-pin="9">
+                                    <span class="slider-switch"></span>
+                                </label>
+                            </div>
+
+                            <!-- PWM 4 (Quạt Tầng 2) -->
+                            <div class="control-item pwm-item">
+                                <div class="device-info">
+                                    <span class="device-icon">🌀</span>
+                                    <div>
+                                        <span class="device-name">Quạt Tầng 2</span>
+                                        <span class="device-desc">Quạt thông gió làm mát</span>
+                                    </div>
+                                </div>
+                                <div class="pwm-control-area">
+                                    <input type="range" class="pwm-slider" id="slider-quat2" data-pin="10" min="10" max="100" value="50" disabled>
+                                    <span class="pwm-val" id="val-quat2">50%</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" class="actuator-toggle" id="ctrl-quat2" data-pin="10">
+                                    <span class="slider-switch"></span>
+                                </label>
+                            </div>
+
+                            <!-- PWM 3 (Quạt Tầng 1) -->
+                            <div class="control-item pwm-item">
+                                <div class="device-info">
+                                    <span class="device-icon">🌀</span>
+                                    <div>
+                                        <span class="device-name">Quạt Tầng 1</span>
+                                        <span class="device-desc">Quạt thông gió làm mát</span>
+                                    </div>
+                                </div>
+                                <div class="pwm-control-area">
+                                    <input type="range" class="pwm-slider" id="slider-quat1" data-pin="11" min="10" max="100" value="50" disabled>
+                                    <span class="pwm-val" id="val-quat1">50%</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" class="actuator-toggle" id="ctrl-quat1" data-pin="11">
+                                    <span class="slider-switch"></span>
+                                </label>
+                            </div>
+
+                            <!-- PWM 6 (Bơm DD Chai B) -->
+                            <div class="control-item pwm-item">
+                                <div class="device-info">
+                                    <span class="device-icon">🧪</span>
+                                    <div>
+                                        <span class="device-name">Bơm DD Chai B</span>
+                                        <span class="device-desc">Bơm tăng dinh dưỡng B</span>
+                                    </div>
+                                </div>
+                                <div class="pwm-control-area">
+                                    <input type="range" class="pwm-slider" id="slider-bomll2" data-pin="12" min="10" max="100" value="30" disabled>
+                                    <span class="pwm-val" id="val-bomll2">30%</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" class="actuator-toggle" id="ctrl-bomll2" data-pin="12">
+                                    <span class="slider-switch"></span>
+                                </label>
+                            </div>
+
+                            <!-- PWM 5 (Bơm DD Chai A) -->
+                            <div class="control-item pwm-item">
+                                <div class="device-info">
+                                    <span class="device-icon">🧪</span>
+                                    <div>
+                                        <span class="device-name">Bơm DD Chai A</span>
+                                        <span class="device-desc">Bơm tăng dinh dưỡng A</span>
+                                    </div>
+                                </div>
+                                <div class="pwm-control-area">
+                                    <input type="range" class="pwm-slider" id="slider-bomll1" data-pin="13" min="10" max="100" value="30" disabled>
+                                    <span class="pwm-val" id="val-bomll1">30%</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" class="actuator-toggle" id="ctrl-bomll1" data-pin="13">
+                                    <span class="slider-switch"></span>
+                                </label>
+                            </div>
+
+                            <!-- Relay 2 (Sục khí 220V) -->
+                            <div class="control-item">
+                                <div class="device-info">
+                                    <span class="device-icon">💨</span>
+                                    <div>
+                                        <span class="device-name">Sục khí 220V</span>
+                                        <span class="device-desc">Máy sục khí oxy dinh dưỡng</span>
+                                    </div>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" class="actuator-toggle" id="ctrl-rl2" data-pin="6">
+                                    <span class="slider-switch"></span>
+                                </label>
+                            </div>
+
+                            <!-- Relay 1 (Bơm chìm 220V) -->
+                            <div class="control-item">
+                                <div class="device-info">
+                                    <span class="device-icon">🚰</span>
+                                    <div>
+                                        <span class="device-name">Bơm chìm 220V</span>
+                                        <span class="device-desc">Bơm cấp nước sạch chính</span>
+                                    </div>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" class="actuator-toggle" id="ctrl-rl1" data-pin="7">
                                     <span class="slider-switch"></span>
                                 </label>
                             </div>
@@ -2098,16 +2098,16 @@ const char SCRIPT_JS[] PROGMEM = R"rawliteral(document.addEventListener("DOMCont
 
         // 3. Cập nhật trạng thái 10 thiết bị ngoại vi lên UI (nút gạt, thanh trượt)
         const actuators = [
-            { id: "rl1", pin: 7, key: "act_IN_RL1", isPwm: false },
-            { id: "rl2", pin: 6, key: "act_IN_RL2", isPwm: false },
             { id: "den1", pin: 17, key: "act_DEN1", isPwm: true },
             { id: "den2", pin: 18, key: "act_DEN2", isPwm: true },
-            { id: "quat1", pin: 11, key: "act_QUAT1", isPwm: true },
-            { id: "quat2", pin: 10, key: "act_QUAT2", isPwm: true },
-            { id: "bomll1", pin: 13, key: "act_BOMLL1", isPwm: true },
-            { id: "bomll2", pin: 12, key: "act_BOMLL2", isPwm: true },
             { id: "bomll3", pin: 8, key: "act_BOMLL3", isPwm: true },
-            { id: "bom12v", pin: 9, key: "act_BOM12V", isPwm: true }
+            { id: "bom12v", pin: 9, key: "act_BOM12V", isPwm: true },
+            { id: "quat2", pin: 10, key: "act_QUAT2", isPwm: true },
+            { id: "quat1", pin: 11, key: "act_QUAT1", isPwm: true },
+            { id: "bomll2", pin: 12, key: "act_BOMLL2", isPwm: true },
+            { id: "bomll1", pin: 13, key: "act_BOMLL1", isPwm: true },
+            { id: "rl2", pin: 6, key: "act_IN_RL2", isPwm: false },
+            { id: "rl1", pin: 7, key: "act_IN_RL1", isPwm: false }
         ];
 
         actuators.forEach(act => {
