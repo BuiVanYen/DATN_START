@@ -21,11 +21,19 @@
             </div>
             
             <nav class="menu">
-                <button class="menu-item active" data-tab="overview">
+                <button class="menu-item active" data-tab="dashboard">
+                    <span class="icon logo-icon">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 3.5 1 9.8a7 7 0 0 1-9 8.2Z"></path>
+                            <path d="M9 22v-4H5v-4"></path>
+                        </svg>
+                    </span> Dashboard
+                </button>
+                <button class="menu-item" data-tab="overview">
                     <span class="icon">📊</span> Tổng Quan
                 </button>
                 <button class="menu-item" data-tab="wifi">
-                    <span class="icon">📶</span> Cấu Hình WiFi
+                    <span class="icon">📶</span> Cấu HÌnh WiFi
                 </button>
                 <button class="menu-item" data-tab="ota">
                     <span class="icon">⚙️</span> Cập Nhật OTA
@@ -48,7 +56,7 @@
         <main class="content">
             <header class="content-header">
                 <div>
-                    <h1 id="page-title">Tổng Quan Hệ Thống</h1>
+                    <h1 id="page-title">Dashboard Giám Sát</h1>
                     <p class="subtitle" id="system-time">Thiết bị đang chạy ổn định</p>
                 </div>
                 <div class="status-badge connected" id="connection-status">
@@ -56,8 +64,29 @@
                 </div>
             </header>
 
+            <!-- TAB: DASHBOARD -->
+            <section class="tab-content active" id="tab-dashboard">
+                <div class="dashboard-grid">
+                    <div class="card sensor-card light-card">
+                        <div class="sensor-card-body">
+                            <div class="sensor-icon-wrapper">
+                                <svg class="sensor-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="4"></circle>
+                                    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+                                </svg>
+                            </div>
+                            <div class="sensor-details">
+                                <span class="sensor-title">Ánh Sáng</span>
+                                <h3 class="sensor-value"><span id="dash-lux">--</span> <span class="unit">Lux</span></h3>
+                                <span class="sensor-status" id="dash-lux-status">Trạng thái: --</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <!-- TAB: OVERVIEW -->
-            <section class="tab-content active" id="tab-overview">
+            <section class="tab-content" id="tab-overview">
                 <div class="grid">
                     <div class="card stat-card">
                         <div class="card-body">

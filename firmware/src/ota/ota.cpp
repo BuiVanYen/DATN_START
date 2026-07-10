@@ -1,4 +1,5 @@
-#include "ota.h"
+#include "ota_handler.h"
+#include "config.h"
 #include "driver/gpio.h"
 #include "esp_ota_ops.h"
 #include "web_assets.h" // Được sinh tự động từ script python
@@ -10,6 +11,8 @@
 #include <WebSocketsServer.h>
 #include <WiFi.h>
 
+#define SYS_LED_PIN LED_SYS
+
 // --- Định nghĩa trạng thái hệ thống ---
 enum SystemState { STATE_AP_MODE, STATE_STA_CONNECTING, STATE_STA_CONNECTED };
 
@@ -17,7 +20,7 @@ enum SystemState { STATE_AP_MODE, STATE_STA_CONNECTING, STATE_STA_CONNECTED };
 namespace {
 SystemState currentState = STATE_AP_MODE;
 WebServer server(OTA_PORT);
-WebSocketsServer webSocket = WebSocketsServer(81);
+WebSocketsServer webSocket = WebSocketsServer(WS_PORT);
 DNSServer dnsServer;
 Preferences preferences;
 
@@ -31,12 +34,6 @@ unsigned long ledTimer = 0;
 bool ledState = false;
 unsigned long connectionLostTimer = 0;
 bool wifiLostFlag = false;
-
-// Thông tin Firmware
-const String FW_VERSION = "1.0.2";
-
-// SSID AP Mode mặc định
-const char *AP_SSID = "DATN_AIOT_LETTUCE";
 } // namespace
 
 // --- Khởi tạo AP Mode ---
@@ -176,8 +173,10 @@ String getSystemStatusJSON() {
   const esp_partition_t *running = esp_ota_get_running_partition();
   String partitionName = (running != NULL) ? String(running->label) : "Unknown";
 
+  float luxVal = sensors_read_light();
+
   String json = "{";
-  json += "\"version\":\"" + FW_VERSION + "\",";
+  json += "\"version\":\"" + String(FW_VERSION) + "\",";
   json += "\"ssid\":\"" + currentSSID + "\",";
   json += "\"ip\":\"" + currentIP + "\",";
   json += "\"heap\":" + String(ESP.getFreeHeap()) + ",";
@@ -187,7 +186,8 @@ String getSystemStatusJSON() {
   json += "\"partition\":\"" + partitionName + "\",";
   json += "\"flash_size\":" + String(ESP.getFlashChipSize()) + ",";
   json += "\"sketch_size\":" + String(ESP.getSketchSize()) + ",";
-  json += "\"free_sketch\":" + String(ESP.getFreeSketchSpace());
+  json += "\"free_sketch\":" + String(ESP.getFreeSketchSpace()) + ",";
+  json += "\"lux\":" + String(luxVal, 1);
   json += "}";
   return json;
 }
@@ -370,9 +370,9 @@ void ota_handle() {
   // Xử lý WebSocket
   webSocket.loop();
 
-  // Phát quảng bá trạng thái định kỳ 2 giây
+  // Phát quảng bá trạng thái định kỳ 5 giây
   static unsigned long lastWsBroadcast = 0;
-  if (now - lastWsBroadcast >= 2000) {
+  if (now - lastWsBroadcast >= 5000) {
     lastWsBroadcast = now;
     String statusJson = getSystemStatusJSON();
     webSocket.broadcastTXT(statusJson);

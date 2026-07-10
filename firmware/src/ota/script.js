@@ -25,6 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- Tab Switching ---
     const tabTitles = {
+        dashboard: "Dashboard Giám Sát",
         overview: "Tổng Quan Hệ Thống",
         wifi: "Cấu Hình Kết Nối WiFi",
         ota: "Cập Nhật Firmware Không Dây"
@@ -78,6 +79,38 @@ document.addEventListener("DOMContentLoaded", () => {
         const s = uptimeSeconds % 60;
         document.getElementById("info-uptime").textContent = 
             `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+
+        // Cập nhật giá trị cường độ ánh sáng Lux trên Dashboard
+        if (data.hasOwnProperty("lux")) {
+            const luxVal = data.lux;
+            const luxElem = document.getElementById("dash-lux");
+            const statusElem = document.getElementById("dash-lux-status");
+            
+            if (luxVal < 0) {
+                if (luxElem) luxElem.textContent = "Lỗi";
+                if (statusElem) {
+                    statusElem.textContent = "Trạng thái: Mất kết nối BH1750";
+                    statusElem.className = "sensor-status status-danger";
+                }
+            } else {
+                if (luxElem) luxElem.textContent = luxVal.toFixed(1);
+                if (statusElem) {
+                    if (luxVal < 100) {
+                        statusElem.textContent = "Trạng thái: Quá tối";
+                        statusElem.className = "sensor-status status-danger";
+                    } else if (luxVal >= 100 && luxVal < 800) {
+                        statusElem.textContent = "Trạng thái: Ánh sáng yếu";
+                        statusElem.className = "sensor-status status-warning";
+                    } else if (luxVal >= 800 && luxVal <= 2000) {
+                        statusElem.textContent = "Trạng thái: Đủ sáng";
+                        statusElem.className = "sensor-status status-normal";
+                    } else {
+                        statusElem.textContent = "Trạng thái: Quá sáng";
+                        statusElem.className = "sensor-status status-warning";
+                    }
+                }
+            }
+        }
 
         // Update connection status header badge
         const statusBadge = document.getElementById("connection-status");

@@ -24,11 +24,19 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(<!DOCTYPE html>
             </div>
             
             <nav class="menu">
-                <button class="menu-item active" data-tab="overview">
+                <button class="menu-item active" data-tab="dashboard">
+                    <span class="icon logo-icon">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 3.5 1 9.8a7 7 0 0 1-9 8.2Z"></path>
+                            <path d="M9 22v-4H5v-4"></path>
+                        </svg>
+                    </span> Dashboard
+                </button>
+                <button class="menu-item" data-tab="overview">
                     <span class="icon">📊</span> Tổng Quan
                 </button>
                 <button class="menu-item" data-tab="wifi">
-                    <span class="icon">📶</span> Cấu Hình WiFi
+                    <span class="icon">📶</span> Cấu HÌnh WiFi
                 </button>
                 <button class="menu-item" data-tab="ota">
                     <span class="icon">⚙️</span> Cập Nhật OTA
@@ -51,7 +59,7 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(<!DOCTYPE html>
         <main class="content">
             <header class="content-header">
                 <div>
-                    <h1 id="page-title">Tổng Quan Hệ Thống</h1>
+                    <h1 id="page-title">Dashboard Giám Sát</h1>
                     <p class="subtitle" id="system-time">Thiết bị đang chạy ổn định</p>
                 </div>
                 <div class="status-badge connected" id="connection-status">
@@ -59,8 +67,29 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(<!DOCTYPE html>
                 </div>
             </header>
 
+            <!-- TAB: DASHBOARD -->
+            <section class="tab-content active" id="tab-dashboard">
+                <div class="dashboard-grid">
+                    <div class="card sensor-card light-card">
+                        <div class="sensor-card-body">
+                            <div class="sensor-icon-wrapper">
+                                <svg class="sensor-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="4"></circle>
+                                    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+                                </svg>
+                            </div>
+                            <div class="sensor-details">
+                                <span class="sensor-title">Ánh Sáng</span>
+                                <h3 class="sensor-value"><span id="dash-lux">--</span> <span class="unit">Lux</span></h3>
+                                <span class="sensor-status" id="dash-lux-status">Trạng thái: --</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <!-- TAB: OVERVIEW -->
-            <section class="tab-content active" id="tab-overview">
+            <section class="tab-content" id="tab-overview">
                 <div class="grid">
                     <div class="card stat-card">
                         <div class="card-body">
@@ -223,16 +252,16 @@ const char STYLE_CSS[] PROGMEM = R"rawliteral(:root {
     --text-primary: #1f2937;
     --text-secondary: #4b5563;
     --text-muted: #8fa095;
-    --primary: #4caf50; /* Thay đổi primary sang màu xanh #4caf50 */
-    --primary-hover: #43a047;
-    --primary-light: rgba(76, 175, 80, 0.1);
-    --border-color: #d2e8db;
+    --primary: #2e7d32; /* Màu xanh lá đậm EcoFarm */
+    --primary-hover: #1b5e20;
+    --primary-light: rgba(46, 125, 50, 0.1);
+    --border-color: #e1e8e4;
     
     --info-color: #2563eb;
     --wifi-color: #7c3aed;
     --ip-color: #d97706;
     --ram-color: #db2777;
-    --success: #4caf50; /* Đồng bộ màu thành công sang xanh #4caf50 */
+    --success: #2e7d32; /* Đồng bộ màu thành công */
     --danger: #dc2626;
     
     --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
@@ -265,8 +294,8 @@ body {
     width: 260px;
     min-width: 185px;
     max-width: 400px;
-    background-color: #4caf50; /* Màu nền xanh lá #4caf50 */
-    border-right: 1px solid rgba(0, 0, 0, 0.05);
+    background-color: #ffffff; /* Nền trắng như ảnh 2 */
+    border-right: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
     padding: 24px;
@@ -286,20 +315,20 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #ffffff;
+    color: #2e7d32;
     flex-shrink: 0;
 }
 
 .logo svg {
-    color: #ffffff;
-    fill: none;
-    stroke: #ffffff;
+    color: #2e7d32;
+    fill: #2e7d32;
+    stroke: #2e7d32;
 }
 
 .brand-name {
     font-size: 1.05rem; /* Thu nhỏ font chữ để tránh chạm viền */
     font-weight: 700;
-    color: #ffffff;
+    color: #2e7d32;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -321,7 +350,7 @@ body {
     border: none;
     background: none;
     border-radius: 8px;
-    color: rgba(255, 255, 255, 0.85); /* Chữ trắng mờ tương phản tốt */
+    color: #4b5563; /* Màu chữ xám tối */
     font-size: 0.95rem;
     font-weight: 500;
     text-align: left;
@@ -333,14 +362,30 @@ body {
     text-overflow: ellipsis;
 }
 
+.menu-item .icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    font-size: 1.1rem;
+}
+
+.menu-item .icon.logo-icon svg {
+    color: #2e7d32;
+    stroke: #2e7d32;
+    fill: #2e7d32;
+}
+
 .menu-item:hover {
-    background-color: rgba(255, 255, 255, 0.15); /* Hover sáng lên nhẹ */
-    color: #ffffff;
+    background-color: #e8f7ee;
+    color: #2e7d32;
 }
 
 .menu-item.active {
-    background-color: rgba(255, 255, 255, 0.25); /* Active sáng rõ */
-    color: #ffffff;
+    background-color: #d2e8db; /* Màu nền active xanh mint */
+    color: #2e7d32;
     font-weight: 600;
 }
 
@@ -349,15 +394,15 @@ body {
     align-items: center;
     gap: 12px;
     padding-top: 16px;
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    border-top: 1px solid var(--border-color);
 }
 
 .avatar {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background-color: rgba(255, 255, 255, 0.2);
-    color: #ffffff;
+    background-color: #d2e8db;
+    color: #2e7d32;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -375,7 +420,7 @@ body {
 .user-name {
     font-size: 0.9rem;
     font-weight: 600;
-    color: #ffffff;
+    color: #1f2937;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -383,7 +428,7 @@ body {
 
 .user-status {
     font-size: 0.75rem;
-    color: rgba(255, 255, 255, 0.9);
+    color: #10b981;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -412,7 +457,7 @@ body {
     height: 100%;
     overflow-y: auto;
     padding: 40px;
-    background-color: #f9fafb; /* Tạo màu xám nhạt nhẹ cho vùng content dễ nhìn */
+    background-color: var(--bg-color);
 }
 
 .content-header {
@@ -840,6 +885,97 @@ input[type="text"]:focus, input[type="password"]:focus {
         grid-template-columns: 1fr;
     }
 }
+
+/* Dashboard Tab Specific Styling */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.sensor-card {
+    background-color: var(--card-bg);
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sensor-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.06), 0 10px 10px -5px rgba(0, 0, 0, 0.03);
+}
+
+.sensor-card-body {
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.sensor-icon-wrapper {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.light-card .sensor-icon-wrapper {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: #d97706;
+}
+
+.sensor-icon {
+    stroke: currentColor;
+}
+
+.sensor-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.sensor-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.sensor-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #111827;
+}
+
+.sensor-value .unit {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-left: 4px;
+}
+
+.sensor-status {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.status-normal {
+    color: #10b981;
+}
+
+.status-warning {
+    color: #f59e0b;
+}
+
+.status-danger {
+    color: #ef4444;
+}
+
 )rawliteral";
 const char SCRIPT_JS[] PROGMEM = R"rawliteral(document.addEventListener("DOMContentLoaded", () => {
     // Elements
@@ -868,6 +1004,7 @@ const char SCRIPT_JS[] PROGMEM = R"rawliteral(document.addEventListener("DOMCont
 
     // --- Tab Switching ---
     const tabTitles = {
+        dashboard: "Dashboard Giám Sát",
         overview: "Tổng Quan Hệ Thống",
         wifi: "Cấu Hình Kết Nối WiFi",
         ota: "Cập Nhật Firmware Không Dây"
@@ -921,6 +1058,38 @@ const char SCRIPT_JS[] PROGMEM = R"rawliteral(document.addEventListener("DOMCont
         const s = uptimeSeconds % 60;
         document.getElementById("info-uptime").textContent = 
             `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+
+        // Cập nhật giá trị cường độ ánh sáng Lux trên Dashboard
+        if (data.hasOwnProperty("lux")) {
+            const luxVal = data.lux;
+            const luxElem = document.getElementById("dash-lux");
+            const statusElem = document.getElementById("dash-lux-status");
+            
+            if (luxVal < 0) {
+                if (luxElem) luxElem.textContent = "Lỗi";
+                if (statusElem) {
+                    statusElem.textContent = "Trạng thái: Mất kết nối BH1750";
+                    statusElem.className = "sensor-status status-danger";
+                }
+            } else {
+                if (luxElem) luxElem.textContent = luxVal.toFixed(1);
+                if (statusElem) {
+                    if (luxVal < 100) {
+                        statusElem.textContent = "Trạng thái: Quá tối";
+                        statusElem.className = "sensor-status status-danger";
+                    } else if (luxVal >= 100 && luxVal < 800) {
+                        statusElem.textContent = "Trạng thái: Ánh sáng yếu";
+                        statusElem.className = "sensor-status status-warning";
+                    } else if (luxVal >= 800 && luxVal <= 2000) {
+                        statusElem.textContent = "Trạng thái: Đủ sáng";
+                        statusElem.className = "sensor-status status-normal";
+                    } else {
+                        statusElem.textContent = "Trạng thái: Quá sáng";
+                        statusElem.className = "sensor-status status-warning";
+                    }
+                }
+            }
+        }
 
         // Update connection status header badge
         const statusBadge = document.getElementById("connection-status");
