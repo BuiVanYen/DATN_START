@@ -1,4 +1,5 @@
 #include "config.h"
+#include <Preferences.h>
 
 // --- Biến lưu trữ trạng thái hiện tại của từng chân ---
 static int state_IN_RL1 = 0;
@@ -14,6 +15,29 @@ static int state_BOM12V = 0;
 static int state_BUZZER = 0;
 static int state_PIN_EN_TDS = 0;
 static int state_LED_SYS = 0;
+
+// --- Hàm ghi/đọc bộ nhớ Flash (NVS Preferences) ---
+static void save_actuator_state(int pin, int state) {
+  Preferences prefs;
+  if (prefs.begin("actuators", false)) {
+    char key[8];
+    snprintf(key, sizeof(key), "p%d", pin);
+    prefs.putInt(key, state);
+    prefs.end();
+  }
+}
+
+static int load_actuator_state(int pin, int default_val) {
+  Preferences prefs;
+  int val = default_val;
+  if (prefs.begin("actuators", true)) {
+    char key[8];
+    snprintf(key, sizeof(key), "p%d", pin);
+    val = prefs.getInt(key, default_val);
+    prefs.end();
+  }
+  return val;
+}
 
 // --- Khởi tạo và tắt toàn bộ các chân ngoại vi (Relay và PWM) ---
 void hardware_init() {
@@ -37,15 +61,46 @@ void hardware_init() {
     digitalWrite(pin, LOW); // Đảm bảo chắc chắn LOW sau khi set OUTPUT
   }
 
-  // Khởi tạo các biến trạng thái
-  state_IN_RL1 = 0; state_IN_RL2 = 0;
-  state_DEN1 = 0; state_DEN2 = 0;
-  state_QUAT1 = 0; state_QUAT2 = 0;
-  state_BOMLL1 = 0; state_BOMLL2 = 0; state_BOMLL3 = 0;
-  state_BOM12V = 0;
-  state_BUZZER = 0; state_PIN_EN_TDS = 0; state_LED_SYS = 0;
+  // Khôi phục các biến trạng thái từ bộ nhớ NVS (Flash)
+  state_IN_RL1 = load_actuator_state(IN_RL1, 0);
+  state_IN_RL2 = load_actuator_state(IN_RL2, 0);
+  state_DEN1 = load_actuator_state(DEN1, 0);
+  state_DEN2 = load_actuator_state(DEN2, 0);
+  state_QUAT1 = load_actuator_state(QUAT1, 0);
+  state_QUAT2 = load_actuator_state(QUAT2, 0);
+  state_BOMLL1 = load_actuator_state(BOMLL1, 0);
+  state_BOMLL2 = load_actuator_state(BOMLL2, 0);
+  state_BOMLL3 = load_actuator_state(BOMLL3, 0);
+  state_BOM12V = load_actuator_state(BOM12V, 0);
+  state_BUZZER = load_actuator_state(BUZZER, 0);
+  state_PIN_EN_TDS = load_actuator_state(PIN_EN_TDS, 0);
+  state_LED_SYS = load_actuator_state(LED_SYS, 0);
 
-  Serial.println("[HARDWARE] Da tat toan bo 2 Relay + 8 kenh PWM MOSFET + Ngoai vi.");
+  // Áp dụng các trạng thái đã khôi phục lên phần cứng vật lý
+  digitalWrite(IN_RL1, state_IN_RL1 ? HIGH : LOW);
+  digitalWrite(IN_RL2, state_IN_RL2 ? HIGH : LOW);
+  digitalWrite(BUZZER, state_BUZZER ? HIGH : LOW);
+  digitalWrite(PIN_EN_TDS, state_PIN_EN_TDS ? HIGH : LOW);
+  digitalWrite(LED_SYS, state_LED_SYS ? HIGH : LOW);
+
+  auto apply_pwm = [](int pin, int val) {
+    if (val > 0 && val < 25) val = 25; // Áp dụng giới hạn tối thiểu 10%
+    analogWrite(pin, val);
+  };
+  apply_pwm(DEN1, state_DEN1);
+  apply_pwm(DEN2, state_DEN2);
+  apply_pwm(QUAT1, state_QUAT1);
+  apply_pwm(QUAT2, state_QUAT2);
+  apply_pwm(BOMLL1, state_BOMLL1);
+  apply_pwm(BOMLL2, state_BOMLL2);
+  apply_pwm(BOMLL3, state_BOMLL3);
+  apply_pwm(BOM12V, state_BOM12V);
+
+  Serial.println("[HARDWARE] Da phuc hoi trang thai cu tu NVS:");
+  Serial.printf("  RL1: %d, RL2: %d\n", state_IN_RL1, state_IN_RL2);
+  Serial.printf("  DEN1: %d, DEN2: %d\n", state_DEN1, state_DEN2);
+  Serial.printf("  QUAT1: %d, QUAT2: %d\n", state_QUAT1, state_QUAT2);
+  Serial.printf("  BOMLL1: %d, BOMLL2: %d, BOMLL3: %d, BOM12V: %d\n", state_BOMLL1, state_BOMLL2, state_BOMLL3, state_BOM12V);
 }
 
 // --- Lấy trạng thái hiện tại của ngoại vi ---
@@ -80,30 +135,11 @@ void actuator_set_state(int pin, int state) {
     return;
   }
 
-  // Cập nhật biến lưu trữ trạng thái cục bộ
-  switch (pin) {
-    case IN_RL1: state_IN_RL1 = state ? 1 : 0; break;
-    case IN_RL2: state_IN_RL2 = state ? 1 : 0; break;
-    case DEN1: state_DEN1 = state; break;
-    case DEN2: state_DEN2 = state; break;
-    case QUAT1: state_QUAT1 = state; break;
-    case QUAT2: state_QUAT2 = state; break;
-    case BOMLL1: state_BOMLL1 = state; break;
-    case BOMLL2: state_BOMLL2 = state; break;
-    case BOMLL3: state_BOMLL3 = state; break;
-    case BOM12V: state_BOM12V = state; break;
-    case BUZZER: state_BUZZER = state ? 1 : 0; break;
-    case PIN_EN_TDS: state_PIN_EN_TDS = state ? 1 : 0; break;
-    case LED_SYS: state_LED_SYS = state ? 1 : 0; break;
-  }
-
+  // Tiền xử lý và chuẩn hóa giá trị trạng thái
+  int val = state;
   if (is_relay || is_other) {
-    // Thiết bị On/Off (Mức HIGH/LOW)
-    digitalWrite(pin, state ? HIGH : LOW);
-    Serial.printf("[ACTUATOR] Digital GPIO %d -> %s\n", pin, state ? "HIGH" : "LOW");
+    val = state ? 1 : 0;
   } else if (is_pwm) {
-    // Thiết bị điều chế xung PWM (0 - 255)
-    int val = state;
     if (val < 0) val = 0;
     if (val > 255) val = 255;
     
@@ -112,8 +148,34 @@ void actuator_set_state(int pin, int state) {
     if (val > 0 && val < 25) {
       val = 25; // Giới hạn tối thiểu 10%
     }
+  }
 
+  // Cập nhật biến lưu trữ trạng thái cục bộ
+  switch (pin) {
+    case IN_RL1: state_IN_RL1 = val; break;
+    case IN_RL2: state_IN_RL2 = val; break;
+    case DEN1: state_DEN1 = val; break;
+    case DEN2: state_DEN2 = val; break;
+    case QUAT1: state_QUAT1 = val; break;
+    case QUAT2: state_QUAT2 = val; break;
+    case BOMLL1: state_BOMLL1 = val; break;
+    case BOMLL2: state_BOMLL2 = val; break;
+    case BOMLL3: state_BOMLL3 = val; break;
+    case BOM12V: state_BOM12V = val; break;
+    case BUZZER: state_BUZZER = val; break;
+    case PIN_EN_TDS: state_PIN_EN_TDS = val; break;
+    case LED_SYS: state_LED_SYS = val; break;
+  }
+
+  // Lưu trạng thái mới vào bộ nhớ Flash (NVS) để duy trì khi mất nguồn/khởi động lại
+  save_actuator_state(pin, val);
+
+  // Áp dụng trạng thái lên phần cứng
+  if (is_relay || is_other) {
+    digitalWrite(pin, val ? HIGH : LOW);
+    Serial.printf("[ACTUATOR] Digital GPIO %d -> %s (Saved NVS)\n", pin, val ? "HIGH" : "LOW");
+  } else if (is_pwm) {
     analogWrite(pin, val);
-    Serial.printf("[ACTUATOR] PWM GPIO %d -> %d/255 (%.1f%%)\n", pin, val, (val * 100.0) / 255.0);
+    Serial.printf("[ACTUATOR] PWM GPIO %d -> %d/255 (%.1f%%) (Saved NVS)\n", pin, val, (val * 100.0) / 255.0);
   }
 }
