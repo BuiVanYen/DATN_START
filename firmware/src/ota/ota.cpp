@@ -39,6 +39,11 @@ bool wifiLostFlag = false;
 // Bộ đệm lưu trữ giá trị cảm biến (tránh đọc I2C trực tiếp gây treo/lag khi tắt/bật relay)
 float cached_lux = -1.0;
 bool cached_bh1750_connected = false;
+float cached_lvl1 = 0.0;
+float cached_lvl2 = 0.0;
+float cached_lvl3 = 0.0;
+float cached_lvl4 = 0.0;
+bool cached_lvl_connected = false;
 
 // Hàm escape ký tự đặc biệt trong JSON
 String escapeJson(String input) {
@@ -255,13 +260,13 @@ String getSystemStatusJSON() {
     "\"flow\":%.1f,"
     "\"flow_conn\":0,"
     "\"lvl1\":%.1f,"
-    "\"lvl1_conn\":0,"
+    "\"lvl1_conn\":%d,"
     "\"lvl2\":%.1f,"
-    "\"lvl2_conn\":0,"
+    "\"lvl2_conn\":%d,"
     "\"lvl3\":%.1f,"
-    "\"lvl3_conn\":0,"
+    "\"lvl3_conn\":%d,"
     "\"lvl4\":%.1f,"
-    "\"lvl4_conn\":0,"
+    "\"lvl4_conn\":%d,"
     "\"act_IN_RL1\":%d,"
     "\"act_IN_RL2\":%d,"
     "\"act_DEN1\":%d,"
@@ -304,10 +309,14 @@ String getSystemStatusJSON() {
     720.0,
     6.0,
     1.5,
-    80.0,
-    50.0,
-    45.0,
-    90.0,
+    cached_lvl1,
+    cached_lvl_connected ? 1 : 0,
+    cached_lvl2,
+    cached_lvl_connected ? 1 : 0,
+    cached_lvl3,
+    cached_lvl_connected ? 1 : 0,
+    cached_lvl4,
+    cached_lvl_connected ? 1 : 0,
     actuator_get_state(IN_RL1),
     actuator_get_state(IN_RL2),
     actuator_get_state(DEN1),
@@ -542,6 +551,11 @@ void ota_init() {
   // Cập nhật giá trị cảm biến ban đầu vào cache
   cached_lux = sensors_read_light();
   cached_bh1750_connected = sensors_is_bh1750_connected();
+  cached_lvl1 = sensors_read_level1();
+  cached_lvl2 = sensors_read_level2();
+  cached_lvl3 = sensors_read_level3();
+  cached_lvl4 = sensors_read_level4();
+  cached_lvl_connected = true;
 }
 
 // --- Hàm xử lý liên tục trong vòng lặp loop() ---
@@ -615,13 +629,18 @@ void ota_handle() {
   // Xử lý WebSocket
   webSocket.loop();
 
-  // Phát quảng bá trạng thái định kỳ 5 giây
+  // Phát quảng bá trạng thái định kỳ 1 giây
   static unsigned long lastWsBroadcast = 0;
-  if (now - lastWsBroadcast >= 5000) {
+  if (now - lastWsBroadcast >= 1000) {
     lastWsBroadcast = now;
     // Cập nhật bộ đệm cảm biến định kỳ
     cached_lux = sensors_read_light();
     cached_bh1750_connected = sensors_is_bh1750_connected();
+    cached_lvl1 = sensors_read_level1();
+    cached_lvl2 = sensors_read_level2();
+    cached_lvl3 = sensors_read_level3();
+    cached_lvl4 = sensors_read_level4();
+    cached_lvl_connected = true;
     
     String statusJson = getSystemStatusJSON();
     webSocket.broadcastTXT(statusJson);

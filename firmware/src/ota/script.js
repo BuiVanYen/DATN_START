@@ -412,8 +412,13 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
             card.classList.remove("disconnected");
             if (valElem) {
-                if (id === "lux" || id === "tds") valElem.textContent = Math.round(val);
-                else valElem.textContent = val.toFixed(1);
+                if (id.startsWith("lvl")) {
+                    valElem.textContent = (val > 0.5) ? "Còn nước" : "Hết nước";
+                } else if (id === "lux" || id === "tds") {
+                    valElem.textContent = Math.round(val);
+                } else {
+                    valElem.textContent = val.toFixed(1);
+                }
             }
             if (statusElem && statusFn) {
                 const info = statusFn(val);
@@ -505,14 +510,13 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         const levelStatusFn = (val) => {
-            if (val < 20) return { text: "Trạng thái: Cạn nước", cl: "status-danger" };
-            if (val < 45) return { text: "Trạng thái: Thấp", cl: "status-warning" };
-            return { text: "Trạng thái: Đầy đủ", cl: "status-normal" };
+            if (val > 0.5) return { text: "Trạng thái: Bình thường", cl: "status-normal" };
+            return { text: "Trạng thái: Cạn nước", cl: "status-danger" };
         };
-        updateSensorCard("lvl1", data.lvl1, data.lvl1_conn, "%", levelStatusFn);
-        updateSensorCard("lvl2", data.lvl2, data.lvl2_conn, "%", levelStatusFn);
-        updateSensorCard("lvl3", data.lvl3, data.lvl3_conn, "%", levelStatusFn);
-        updateSensorCard("lvl4", data.lvl4, data.lvl4_conn, "%", levelStatusFn);
+        updateSensorCard("lvl1", data.lvl1, data.lvl1_conn, "", levelStatusFn);
+        updateSensorCard("lvl2", data.lvl2, data.lvl2_conn, "", levelStatusFn);
+        updateSensorCard("lvl3", data.lvl3, data.lvl3_conn, "", levelStatusFn);
+        updateSensorCard("lvl4", data.lvl4, data.lvl4_conn, "", levelStatusFn);
 
         // 2. Lưu lịch sử đồ thị cảm biến (chỉ khi kết nối tốt, ngược lại đẩy null)
         const now = new Date();

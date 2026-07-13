@@ -69,3 +69,10 @@ float sensors_read_light();
 
 // Kiểm tra kết nối BH1750
 bool sensors_is_bh1750_connected();
+
+// Đọc trạng thái các cảm biến mức nước (1.0 = Còn nước, 0.0 = Hết nước)
+float sensors_read_level1();
+float sensors_read_level2();
+float sensors_read_level3();
+float sensors_read_level4();
+

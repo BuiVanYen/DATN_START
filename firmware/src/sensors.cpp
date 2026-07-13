@@ -44,6 +44,12 @@ void sensors_recover_i2c() {
 
 void sensors_init() {
     Serial.println("[SENSOR] Dang khoi tao giao tiep I2C...");
+
+    // Khoi tao cac chan cam bien muc nuoc
+    pinMode(PIN_LEVEL1, INPUT);
+    pinMode(PIN_LEVEL2, INPUT);
+    pinMode(PIN_LEVEL3, INPUT);
+    pinMode(PIN_LEVEL4, INPUT);
     
     // Khởi tạo I2C trực tiếp với các chân custom
     Wire.begin(PIN_SDA, PIN_SCL);
@@ -186,4 +192,20 @@ float sensors_read_light() {
 
 bool sensors_is_bh1750_connected() {
     return bh1750_connected;
+}
+
+float sensors_read_level1() {
+    return (digitalRead(PIN_LEVEL1) == LOW) ? 1.0 : 0.0;
+}
+
+float sensors_read_level2() {
+    return (digitalRead(PIN_LEVEL2) == LOW) ? 1.0 : 0.0;
+}
+
+float sensors_read_level3() {
+    return (digitalRead(PIN_LEVEL3) == LOW) ? 1.0 : 0.0;
+}
+
+float sensors_read_level4() {
+    return (digitalRead(PIN_LEVEL4) == LOW) ? 1.0 : 0.0;
 }
