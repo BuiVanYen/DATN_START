@@ -379,19 +379,26 @@ GĐ 4: TÍCH HỢP (1 tuần)
   - Mực nước: Y26 digital → 4 mức hiển thị
   - Sensor: hiển thị giá trị realtime trên mô hình 3D
 
-#### Kết nối OPC UA (Thuần phần mềm — 0 đồng phần cứng)
+#### Kết nối OPC UA (Giao tiếp phần mềm & phần cứng linh hoạt)
 
+**1. Giai đoạn Test Mô phỏng (Offline - Chạy trên PC):**
 ```
-ESP32 → MQTT → Raspberry Pi → Python OPC UA Server → NX MCD
-                                 (asyncua)            (OPC UA Client)
+[Script test_fans.py] ──► [OPC UA Server Giả Lập (opcua_simulator.py) trên PC] ──► [NX MCD (OPC UA Client)]
 ```
+*Mục đích:* Kiểm tra chuyển động cơ khí cơ điện tử của mô hình 3D trên NX trước khi kết nối phần cứng thực tế.
+
+**2. Giai đoạn Triển khai thật (Live Commissioning - Kết nối Pi & ESP32):**
+```
+[Cảm biến & Cơ cấu thực] ◄─► [ESP32-S3] ◄─► [Pi 4 (MQTT Broker ◄─► OPC UA Server thật)] ◄─► [NX MCD trên PC]
+```
+*Mục đích:* Đồng bộ trạng thái thực tế ngoài đời của giàn cây thủy canh lên mô hình 3D trên PC thời gian thực.
 
 | Thành phần | Chi tiết |
 |---|---|
-| **Pi (Server)** | Python `asyncua` — tạo OPC UA Server tại `opc.tcp://[IP]:4840` |
-| **NX MCD (Client)** | External Signal Configuration → OPC UA → nhập endpoint URL |
-| **Signal Mapping** | Map OPC UA nodes → Signal Adapter trên mô hình 3D |
-| **Dữ liệu** | Sensor values + PWM duties + Relay states (realtime) |
+| **Pi / VM (Server)** | Python `asyncua` chạy service thật tại `opc.tcp://[IP_cua_Pi_hoac_VM]:4840` |
+| **NX MCD (Client)** | Thiết lập External Signal Connection kết nối trực tiếp đến IP của Pi/VM |
+| **Signal Mapping** | Ánh xạ (Map) các node tín hiệu OPC UA vào các Joint/Speed Control trên mô hình 3D |
+| **Dữ liệu truyền nhận** | Cập nhật trực tiếp Sensor values + PWM duties + Relay states thực tế của ESP32 |
 
 **OPC UA Nodes:**
 

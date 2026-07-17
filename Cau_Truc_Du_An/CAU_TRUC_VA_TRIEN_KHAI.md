@@ -119,11 +119,9 @@ DATN_START/
 │       └── saved_models/
 │           └── disease_mobilenetv2.tflite  ← Model → copy sang Pi backend
 │
-│── 📂 digital_twin/                      ← MÔ PHỎNG DIGITAL TWIN 3D (PC)
-│   ├── opcua_simulator.py              ← (có sẵn) OPC UA Server giả lập
-│   ├── test_fans.py                    ← (có sẵn) Script test quạt
-│   ├── nx_mcd_digital_twin_guide.md    ← (có sẵn) Hướng dẫn NX MCD
-│   └── nx_mcd_step_by_step.md          ← (có sẵn) Hướng dẫn từng bước
+│── 📂 digital_twin/                      ← DỰ ÁN 3D DIGITAL TWIN TRÊN PC (SIEMENS NX)
+│   ├── NX_MCD_Project/                 ← Thư mục chứa file lắp ráp và cấu hình động học 3D (.prt)
+│   └── nx_mcd_real_connection.md       ← Hướng dẫn ánh xạ (map) tín hiệu thật từ OPC UA Server của Pi sang NX MCD
 │
 │── 📂 learning/                          ← TỰ HỌC (KHÔNG DEPLOY LÊN PI)
 │   ├── Hoc_FastAPI/                    ← (có sẵn) Bài học FastAPI
@@ -172,8 +170,11 @@ Chia rõ 2 mô hình:
 - **xgboost/** — Train trên PC, xuất `.pkl`
 - **cnn/** — Train trên Google Colab (vì cần GPU), xuất `.tflite` cho Pi
 
-### `digital_twin/` — Mô phỏng trên PC
-Gom code giả lập OPC UA + hướng dẫn NX MCD. Thư mục này chỉ chạy trên PC.
+### `digital_twin/` — Dự án 3D Digital Twin trên PC (Siemens NX)
+Chứa các file dự án 3D chính thức của mô hình giàn cây và hướng dẫn đồng bộ:
+* **`NX_MCD_Project/`**: Nơi lưu các file vẽ 3D lắp ráp hoàn thiện (.prt) và các file cấu hình khớp động học, bộ điều khiển tốc độ trong Siemens NX MCD.
+* **`nx_mcd_real_connection.md`**: Hướng dẫn kết nối trực tiếp Siemens NX MCD từ Laptop tới địa chỉ IP mạng LAN của Raspberry Pi 4 / VM Ubuntu qua cổng `4840` để đồng bộ chuyển động 3D theo đúng dữ liệu thực tế từ cảm biến và lệnh điều khiển của ESP32.
+* **Lưu ý:** Các file chạy thử giả lập offline (`opcua_simulator.py`, `test_fans.py`...) đã được chuyển sang thư mục thử nghiệm độc lập (`Test_Linh_Tinh/`) để giữ cho thư mục Digital Twin này sạch sẽ, chuyên nghiệp.
 
 ### `learning/` — Tự học
 Tất cả file hướng dẫn, bài tập thực hành. **Không deploy** lên Pi.

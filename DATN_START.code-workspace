@@ -1,8 +1,13 @@
 {
   "folders": [
     {
+      "name": "DATN_START (Laptop)",
       "path": "."
+    },
+    {
+      "name": "DATN_START (Pi4)",
+      "path": "\\\\pi.local\\DATN_START"
     }
   ],
-  "settings": {},
+  "settings": {}
 }
