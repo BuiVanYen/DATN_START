@@ -4,11 +4,11 @@ import gzip
 Import("env")
 
 # Paths
-source_dir = os.path.join(env.get("PROJECT_DIR"), "src", "ota")
+source_dir = os.path.join(env.get("PROJECT_DIR"), "web")
 html_path = os.path.join(source_dir, "index.html")
 css_path = os.path.join(source_dir, "style.css")
 js_path = os.path.join(source_dir, "script.js")
-output_path = os.path.join(source_dir, "web_assets.h")
+output_path = os.path.join(env.get("PROJECT_DIR"), "include", "web_assets.h")
 
 def to_hex_array(data):
     # Convert bytes into a comma-separated hex values, split into lines for readability

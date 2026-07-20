@@ -56,19 +56,25 @@ DATN_START/
 │       ├── quattannhiet.prt             ← Quạt tản nhiệt
 │       └── ... (các chi tiết khác)
 │
-│── 📂 firmware/                          ← CODE ESP32-S3 (MỚI)
-│   ├── src/
-│   │   ├── main.cpp                     ← Vòng lặp chính
-│   │   ├── sensors.cpp                  ← Đọc SHT31, DS18B20, TDS, pH, BH1750, Y26
-│   │   ├── actuators.cpp               ← PWM MOSFET + Relay control
-│   │   ├── mqtt_handler.cpp            ← Pub/Sub MQTT topics
-│   │   ├── ota_handler.cpp             ← Xử lý cập nhật OTA qua Wifi/HTTP (MỚI)
-│   │   └── failsafe.cpp               ← Logic tự động khi mất kết nối Pi
-│   ├── include/
-│   │   ├── config.h                    ← WiFi SSID, MQTT host, GPIO pins
-│   │   ├── ota_handler.h               ← Khai báo hàm cập nhật OTA (MỚI)
-│   │   └── thresholds.h               ← Ngưỡng TDS, pH, nhiệt độ
-│   └── platformio.ini
+│── 📂 firmware/                          ← CODE ESP32-S3 (Tối ưu hóa & Làm sạch)
+│   ├── include/                          ← Thư mục Header C++
+│   │   ├── config.h                      ← Cấu hình WiFi, MQTT, GPIO pins
+│   │   ├── ota_handler.h                 ← Khai báo hàm OTA & Web Server
+│   │   ├── thresholds.h                  ← Ngưỡng cảm biến (EC, pH, nhiệt độ)
+│   │   └── web_assets.h                  ← File nén Web UI tự động sinh ra từ thư mục web/
+│   ├── src/                              ← Thư mục Source C++
+│   │   ├── main.cpp                      ← Điểm khởi đầu & Khởi tạo nhiệm vụ FreeRTOS
+│   │   ├── sensors.cpp                   ← Driver đọc các cảm biến (I2C, OneWire, ADC)
+│   │   ├── actuator.cpp                  ← Lớp điều khiển an toàn Relay & PWM MOSFET
+│   │   ├── ota_handler.cpp               ← Web Server local, Captive Portal, WebSocket
+│   │   ├── mqtt_handler.cpp              ← Lớp truyền thông MQTT kết nối Raspberry Pi 4
+│   │   └── failsafe.cpp                  ← Logic bảo vệ & tự động khi offline
+│   ├── web/                              ← GIAO DIỆN WEB LOCAL CỦA ESP32 (DEV PHẦN WEB RIÊNG)
+│   │   ├── index.html                    ← Trang dashboard giám sát & cấu hình local
+│   │   ├── style.css                     ← CSS định dạng giao diện hiện đại
+│   │   └── script.js                     ← Logic JS kết nối WebSocket điều khiển & hiển thị
+│   ├── platformio.ini                    ← Tệp cấu hình dự án PlatformIO
+│   └── generate_web_assets.py            ← Script Python tự động nén web sang web_assets.h khi build
 │
 │── 📂 backend/                           ← FASTAPI CHẠY TRÊN RASPBERRY PI
 │   ├── main.py                          ← Khởi tạo FastAPI app
@@ -147,11 +153,10 @@ Gom **tất cả** file báo cáo, PowerPoint, PDF, tài liệu tham khảo vào
 ### `hardware/` — Phần cứng
 Gom PCB + bản vẽ cơ khí. Hai thứ này liên quan chặt (bản vẽ cơ khí quyết định vị trí đặt PCB, quạt, cảm biến).
 
-### `firmware/` — Code ESP32 (MỚI TẠO)
-Hiện tại bạn chưa viết firmware ESP32. Thư mục này sẽ chứa code C++ (Arduino/PlatformIO) để:
-- Đọc 6 loại cảm biến
-- Điều khiển 8 PWM + 6 Relay
-- Gửi/nhận MQTT với Pi
+### `firmware/` — Code ESP32 (Tối ưu hóa & Làm sạch)
+Thư mục chứa mã nguồn C++ (PlatformIO) và giao diện Web cấu hình local trực tiếp trên ESP32:
+- **web/**: Chứa các tệp giao diện Web nguồn (`index.html`, `style.css`, `script.js`) phục vụ phát triển, lập trình và kiểm thử giao diện điều khiển local trước khi kết nối Pi.
+- **src/ & include/**: Chứa mã nguồn C++ đọc cảm biến, quản lý rơ-le, FreeRTOS và script `generate_web_assets.py` giúp nén toàn bộ thư mục `web/` thành byte-code trong `include/web_assets.h`.
 
 ### `backend/` — Trái tim của hệ thống
 Đây là thư mục **quan trọng nhất**, chạy trên Raspberry Pi, bao gồm:

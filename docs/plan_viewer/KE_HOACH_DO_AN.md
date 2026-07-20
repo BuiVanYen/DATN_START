@@ -319,17 +319,23 @@ GĐ 4: TÍCH HỢP (1 tuần)
 
 ## PHẦN 3: PHẦN MỀM
 
-### 3.1 ESP32 Firmware (Arduino)
+### 3.1 ESP32 Firmware (Arduino + FreeRTOS Dual-Core)
+
+**Kiến trúc xử lý:**
+* **Core 0 (TaskNetwork):** Xử lý WiFi, OTA WebServer, WebSocket Server và giao tiếp MQTT gửi/nhận dữ liệu.
+* **Core 1 (TaskSensors & TaskControl):** Xử lý đọc cảm biến, bộ lọc nhiễu và chạy logic tự động (Failsafe).
 
 **Chức năng chính:**
-1. Đọc sensor mỗi 30s → publish JSON MQTT
-2. Subscribe lệnh PWM + relay từ Pi
-3. **Logic tự động (failsafe khi mất MQTT):**
-   - TDS < ngưỡng → bơm DD (PWM điều chỉnh lưu lượng)
-   - pH lệch → bơm pH correction
-   - Nhiệt độ > ngưỡng → quạt PWM tăng
-   - Ánh sáng < ngưỡng → relay đèn ON
-   - Mực nước thấp → bơm 220V ON
+1. **Đo cảm biến thông minh (Quiet Window):** Đồng bộ vào thời gian nghỉ 15 phút của bơm tuần hoàn. Khi đến lượt đo, tạm tắt máy sục khí, chờ 15 giây cho nước lắng hoàn toàn rồi mới tiến hành đọc TDS (đọc xong tắt nguồn TDS ngay) và đo pH để tránh triệt để nhiễu dòng rò và bọt khí.
+2. **Lọc nhiễu:** Sử dụng Median Filter (lấy 30 mẫu bỏ 20% biên) và EMA filter làm mượt số liệu đo pH/TDS.
+3. **Hiệu chỉnh châm dinh dưỡng:** Bơm nhu động được cấu hình thời gian chạy cộng thêm thời gian mồi ống thực tế để đảm bảo lượng châm ổn định.
+4. **Logic tự động độc lập (Failsafe):**
+   - TDS < ngưỡng → châm dung dịch A & B (Tối đa 5 lần/chu kỳ, chờ trộn 2 phút).
+   - pH > ngưỡng → châm pH Down (Tối đa 3 lần/chu kỳ, chờ trộn 3 phút).
+   - Nhiệt độ > ngưỡng → điều khiển quạt thông gió chạy PWM tỷ lệ.
+   - Ánh sáng < ngưỡng → bật đèn LED Grow bổ sung (áp dụng khoảng trễ Hysteresis tránh chớp tắt).
+   - Mực nước thấp → kích hoạt bơm chìm 12V bổ sung nước.
+   - Nhiệt độ nước > 28°C → Bật sục khí oxy 220V liên tục để chống thối rễ.
 
 ```json
 {
