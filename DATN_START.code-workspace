@@ -7,7 +7,10 @@
     {
       "name": "DATN_START (Pi4)",
       "path": "\\\\pi.local\\DATN_START"
+    },
+    {
+      "path": "../Web_DATN/firmware_Thinh"
     }
   ],
-  "settings": {}
+  "settings": {},
 }

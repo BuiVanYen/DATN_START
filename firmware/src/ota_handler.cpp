@@ -39,11 +39,23 @@ bool wifiLostFlag = false;
 // Bộ đệm lưu trữ giá trị cảm biến (tránh đọc I2C trực tiếp gây treo/lag khi tắt/bật relay)
 float cached_lux = -1.0;
 bool cached_bh1750_connected = false;
+float cached_temp_air = -1.0;
+bool cached_sht31_connected = false;
+float cached_humidity = -1.0;
+float cached_temp_water = -1.0;
+bool cached_ds18b20_connected = false;
+float cached_tds = -1.0;
+bool cached_tds_connected = false;
+float cached_ph = -1.0;
+bool cached_ph_connected = false;
+float cached_flow = 0.0;
+bool cached_flow_connected = false;
 float cached_lvl1 = 0.0;
 float cached_lvl2 = 0.0;
 float cached_lvl3 = 0.0;
 float cached_lvl4 = 0.0;
 bool cached_lvl_connected = false;
+
 
 // Hàm escape ký tự đặc biệt trong JSON
 String escapeJson(String input) {
@@ -248,17 +260,17 @@ String getSystemStatusJSON() {
     "\"lux\":%.1f,"
     "\"lux_conn\":%d,"
     "\"temp\":%.1f,"
-    "\"temp_conn\":0,"
+    "\"temp_conn\":%d,"
     "\"humi\":%.1f,"
-    "\"humi_conn\":0,"
+    "\"humi_conn\":%d,"
     "\"temp_w\":%.1f,"
-    "\"temp_w_conn\":0,"
+    "\"temp_w_conn\":%d,"
     "\"tds\":%.1f,"
-    "\"tds_conn\":0,"
+    "\"tds_conn\":%d,"
     "\"ph\":%.1f,"
-    "\"ph_conn\":0,"
+    "\"ph_conn\":%d,"
     "\"flow\":%.1f,"
-    "\"flow_conn\":0,"
+    "\"flow_conn\":%d,"
     "\"lvl1\":%.1f,"
     "\"lvl1_conn\":%d,"
     "\"lvl2\":%.1f,"
@@ -303,12 +315,18 @@ String getSystemStatusJSON() {
     ESP.getFreeSketchSpace(),
     cached_lux,
     cached_bh1750_connected ? 1 : 0,
-    30.9,
-    68.0,
-    25.5,
-    720.0,
-    6.0,
-    1.5,
+    cached_temp_air,
+    cached_sht31_connected ? 1 : 0,
+    cached_humidity,
+    cached_sht31_connected ? 1 : 0,
+    cached_temp_water,
+    cached_ds18b20_connected ? 1 : 0,
+    cached_tds,
+    cached_tds_connected ? 1 : 0,
+    cached_ph,
+    cached_ph_connected ? 1 : 0,
+    cached_flow,
+    cached_flow_connected ? 1 : 0,
     cached_lvl1,
     cached_lvl_connected ? 1 : 0,
     cached_lvl2,
@@ -551,6 +569,17 @@ void ota_init() {
   // Cập nhật giá trị cảm biến ban đầu vào cache
   cached_lux = sensors_read_light();
   cached_bh1750_connected = sensors_is_bh1750_connected();
+  cached_temp_air = sensors_read_temp_air();
+  cached_sht31_connected = sensors_is_sht31_connected();
+  cached_humidity = sensors_read_humidity();
+  cached_temp_water = sensors_read_temp_water();
+  cached_ds18b20_connected = sensors_is_ds18b20_connected();
+  cached_tds = sensors_read_tds(cached_temp_water);
+  cached_tds_connected = sensors_is_tds_connected();
+  cached_ph = sensors_read_ph();
+  cached_ph_connected = sensors_is_ph_connected();
+  cached_flow = sensors_read_flow();
+  cached_flow_connected = sensors_is_flow_connected();
   cached_lvl1 = sensors_read_level1();
   cached_lvl2 = sensors_read_level2();
   cached_lvl3 = sensors_read_level3();
@@ -636,6 +665,17 @@ void ota_handle() {
     // Cập nhật bộ đệm cảm biến định kỳ
     cached_lux = sensors_read_light();
     cached_bh1750_connected = sensors_is_bh1750_connected();
+    cached_temp_air = sensors_read_temp_air();
+    cached_sht31_connected = sensors_is_sht31_connected();
+    cached_humidity = sensors_read_humidity();
+    cached_temp_water = sensors_read_temp_water();
+    cached_ds18b20_connected = sensors_is_ds18b20_connected();
+    cached_tds = sensors_read_tds(cached_temp_water);
+    cached_tds_connected = sensors_is_tds_connected();
+    cached_ph = sensors_read_ph();
+    cached_ph_connected = sensors_is_ph_connected();
+    cached_flow = sensors_read_flow();
+    cached_flow_connected = sensors_is_flow_connected();
     cached_lvl1 = sensors_read_level1();
     cached_lvl2 = sensors_read_level2();
     cached_lvl3 = sensors_read_level3();

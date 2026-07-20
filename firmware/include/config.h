@@ -76,3 +76,21 @@ float sensors_read_level2();
 float sensors_read_level3();
 float sensors_read_level4();
 
+// Các hàm đọc cảm biến mới (SHT31, DS18B20, TDS, pH, Flow)
+float sensors_read_temp_air();
+float sensors_read_humidity();
+bool sensors_is_sht31_connected();
+
+float sensors_read_temp_water();
+bool sensors_is_ds18b20_connected();
+
+float sensors_read_tds(float water_temp);
+bool sensors_is_tds_connected();
+
+float sensors_read_ph();
+bool sensors_is_ph_connected();
+
+float sensors_read_flow();
+bool sensors_is_flow_connected();
+
+
