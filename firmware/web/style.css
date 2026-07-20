@@ -766,7 +766,7 @@ input[type="text"]:focus, input[type="password"]:focus {
     color: #ef4444;
 }
 
-/* Bố cục dòng dưới: Đồ thị & Bảng điều khiển */
+/* Bố cục bảng điều khiển */
 .dashboard-bottom-row {
     display: flex;
     flex-direction: column;
@@ -775,96 +775,12 @@ input[type="text"]:focus, input[type="password"]:focus {
     margin-top: 16px;
 }
 
-.chart-card, .control-card {
+.control-card {
     background-color: var(--card-bg);
     border-radius: 16px;
     border: 1px solid var(--border-color);
     box-shadow: var(--shadow);
     padding: 24px;
-}
-
-.chart-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 16px;
-    margin-bottom: 20px;
-}
-
-.chart-header h2 {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: var(--primary);
-}
-
-.chart-tabs {
-    display: flex;
-    gap: 4px;
-    background-color: #f3f4f6;
-    padding: 4px;
-    border-radius: 8px;
-}
-
-.chart-tab {
-    padding: 6px 12px;
-    border: none;
-    background: none;
-    border-radius: 6px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.chart-tab.active {
-    background-color: #ffffff;
-    color: var(--primary);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-/* Chart Legend Styling matching the reference image */
-.chart-legend-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 12px;
-    width: 100%;
-}
-
-.chart-legend {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.legend-color-box {
-    width: 32px;
-    height: 14px;
-    border-radius: 3px;
-    border: 2px solid var(--primary);
-    background-color: var(--primary-light);
-    display: inline-block;
-    transition: all 0.3s ease;
-}
-
-.legend-text {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-    transition: all 0.3s ease;
-}
-
-.chart-body {
-    width: 100%;
-    position: relative;
-}
-
-#realtimeChart {
-    width: 100%;
-    height: 280px;
-    display: block;
 }
 
 /* Control Panel List */
@@ -1047,5 +963,4 @@ input:checked + .slider-switch:before {
         grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
     }
 }
-
 
