@@ -160,6 +160,8 @@ String web_api_build_status_json() {
       "\"ph_quality\":\"%s\","
       "\"ph_age\":%lu,"
       "\"flow\":%.2f,"
+      "\"flow_raw\":%u,"
+      "\"flow_gpio\":%d,"
       "\"flow_conn\":%d,"
       "\"flow_quality\":\"%s\","
       "\"flow_age\":%lu,"
@@ -221,8 +223,10 @@ String web_api_build_status_json() {
       static_cast<unsigned>(tds.raw_value), tds.connected ? 1 : 0,
       qualityToText(tds.quality), readingAge(tds.sampled_at_ms), ph.value,
       ph.connected ? 1 : 0, qualityToText(ph.quality),
-      readingAge(ph.sampled_at_ms), flow.value, flow.connected ? 1 : 0,
-      qualityToText(flow.quality), readingAge(flow.sampled_at_ms), lvl1.value,
+      readingAge(ph.sampled_at_ms), flow.value,
+      static_cast<unsigned>(flow.raw_value), digitalRead(PIN_FLOW),
+      flow.connected ? 1 : 0, qualityToText(flow.quality),
+      readingAge(flow.sampled_at_ms), lvl1.value,
       lvl1.connected ? 1 : 0, qualityToText(lvl1.quality),
       readingAge(lvl1.sampled_at_ms), lvl2.value, lvl2.connected ? 1 : 0,
       qualityToText(lvl2.quality), readingAge(lvl2.sampled_at_ms), lvl3.value,

@@ -5,7 +5,7 @@
 // ============================================================================
 // 1. THÔNG TIN PHIÊN BẢN FIRMWARE VÀ MẠNG MẶC ĐỊNH
 // ============================================================================
-#define FW_VERSION "2.0.1-manual-rtos" // Chuỗi hiển thị phiên bản firmware hiện tại
+#define FW_VERSION "2.0.2-manual-rtos" // Chuỗi hiển thị phiên bản firmware hiện tại
 #define AP_SSID "DATN_AIOT_LETTUCE"    // Tên Wi-Fi Access Point do ESP32 tự phát ra khi chưa nối Wi-Fi nhà
 #define OTA_PORT 80                    // Cổng Cổng HTTP tiêu chuẩn phục vụ Web Dashboard và nạp OTA
 #define WS_PORT 81                     // Cổng WebSocket tiêu chuẩn phục vụ truyền dữ liệu Real-time

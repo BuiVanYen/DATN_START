@@ -25,7 +25,6 @@ constexpr uint16_t ADC_RAW_VALID_MAX = 4050;    // Ngưỡng bão hòa cao của
 constexpr float FLOW_PULSE_FACTOR = 7.5F;        // [Hz / (L/min)] Tỉ lệ đếm xung ngắt sang lưu lượng lít/phút (YF-S201 spec)
 constexpr float FLOW_MIN_LPM = 1.0F;             // [L/min] Ngưỡng đo tối thiểu theo datasheet YF-S201 (1 L/phút)
 constexpr float FLOW_MAX_LPM = 30.0F;            // [L/min] Ngưỡng đo tối đa theo datasheet YF-S201 (30 L/phút)
-constexpr float FLOW_NOISE_CUTOFF_LPM = 0.2F;    // [L/min] Ngưỡng lọc nhiễu xung rác khi bơm tắt (< 0.2 L/min ép về 0.0)
 
 // Cảm biến pH (Module PH0-14 + Cầu phân áp PCB)
 constexpr float PH_PCB_DIVIDER_RATIO = 1.6667F;  // Tỉ lệ cầu phân áp trên PCB
@@ -163,6 +162,8 @@ void initSensorsHardware() {
   pinMode(PIN_LEVEL3, INPUT);
   pinMode(PIN_LEVEL4, INPUT);
 
+  // Cảm biến lưu lượng YF-S201 dùng Cổng NPN Open-Collector (kéo về GND khi có xung).
+  // Cần bật INPUT_PULLUP để kéo mức HIGH khi transistor ngắt và bắt cạnh xuống FALLING.
   pinMode(PIN_FLOW, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(PIN_FLOW), flowPulseCounter, FALLING);
 
@@ -237,11 +238,10 @@ void sampleFlow(uint32_t now, uint32_t &last_flow_ms) {
     const float hz = static_cast<float>(pulses) / (duration_ms / 1000.0F);
     liters_per_minute = hz / SensorConstants::FLOW_PULSE_FACTOR; // Công thức YF-S201: L/min = Hz / 7.5
 
-    // Lọc nhiễu xung rác khi bơm không chạy (dưới 0.2 L/min đưa về 0.0 L/min)
-    if (liters_per_minute < SensorConstants::FLOW_NOISE_CUTOFF_LPM) {
-      liters_per_minute = 0.0F;
-    } else if (liters_per_minute > SensorConstants::FLOW_MAX_LPM) {
-      // Vượt quá dải đo tối đa 30 L/phút của cảm biến YF-S201 -> Báo UNSTABLE
+    // Không xóa xung thật. Ngoài dải 1-30 L/phút vẫn giữ giá trị để chẩn đoán,
+    // nhưng đánh dấu UNSTABLE vì nằm ngoài dải đo được nhà sản xuất bảo đảm.
+    if (liters_per_minute < SensorConstants::FLOW_MIN_LPM ||
+        liters_per_minute > SensorConstants::FLOW_MAX_LPM) {
       quality = SensorQuality::UNSTABLE;
     }
   }

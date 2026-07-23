@@ -185,9 +185,26 @@ document.addEventListener("DOMContentLoaded", () => {
             return { text: "Trạng thái: Cần điều chỉnh", cl: "status-warning" };
         });
 
-        updateSensorCard("flow", data.flow, data.flow_conn, (val) => {
-            if (val < 0.5) return { text: "Trạng thái: Ngắt nước", cl: "status-danger" };
-            return { text: "Trạng thái: Lưu thông", cl: "status-normal" };
+        const flowRaw = Number(data.flow_raw ?? 0);
+        const flowGpio = Number(data.flow_gpio ?? 0);
+        const flowQuality = data.flow_quality || "ERROR";
+        updateSensorCard("flow", data.flow, data.flow_conn, () => {
+            if (flowRaw <= 0) {
+                return {
+                    text: `Trạng thái: Không nhận xung (raw 0, GPIO41=${flowGpio})`,
+                    cl: "status-danger"
+                };
+            }
+            if (flowQuality === "UNSTABLE") {
+                return {
+                    text: `Trạng thái: Có ${flowRaw} xung/cửa sổ nhưng ngoài dải 1–30 L/phút`,
+                    cl: "status-warning"
+                };
+            }
+            return {
+                text: `Trạng thái: Lưu thông (${flowRaw} xung/cửa sổ, GPIO41=${flowGpio})`,
+                cl: "status-normal"
+            };
         });
 
         const levelStatusFn = (val) => {
