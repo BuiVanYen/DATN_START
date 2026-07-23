@@ -51,9 +51,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- WebSocket / Polling Real-time logic ---
     let ws = null;
     let pollInterval = null;
+    let manualHeartbeatInterval = null;
     const lastUserInteraction = {}; // Chặn đè trạng thái từ server khi vừa tương tác cơ học
 
-    function updateSensorCard(id, val, conn, unit, statusFn) {
+    function updateSensorCard(id, val, conn, statusFn, disconnectedText) {
         const card = document.getElementById(`card-${id}`);
         const valElem = document.getElementById(`dash-${id}`);
         const statusElem = document.getElementById(`dash-${id}-status`);
@@ -64,7 +65,7 @@ document.addEventListener("DOMContentLoaded", () => {
             card.classList.add("disconnected");
             if (valElem) valElem.textContent = "--";
             if (statusElem) {
-                statusElem.textContent = "Trạng thái: Mất kết nối";
+                statusElem.textContent = disconnectedText || "Trạng thái: Mất kết nối";
                 statusElem.className = "sensor-status status-danger";
             }
         } else {
@@ -95,6 +96,13 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("info-rssi").textContent = data.rssi ? data.rssi + " dBm" : "-";
         document.getElementById("info-wifimode").textContent = data.wifimode;
         document.getElementById("info-partition").textContent = data.partition;
+
+        const modeElem = document.getElementById("info-system-mode");
+        const coreElem = document.getElementById("info-task-cores");
+        const reasonElem = document.getElementById("info-safe-reason");
+        if (modeElem) modeElem.textContent = data.mode || "MANUAL";
+        if (coreElem) coreElem.textContent = `Network ${data.net_core} / Sensors ${data.sensor_core} / Control ${data.control_core}`;
+        if (reasonElem) reasonElem.textContent = data.last_reason || "-";
         
         if (document.getElementById("info-flash-size")) {
             document.getElementById("info-flash-size").textContent = formatSize(data.flash_size);
@@ -116,7 +124,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // 1. Cập nhật 11 thẻ cảm biến dựa trên cờ kết nối _conn từ ESP32 và ngưỡng động từ thresholds.h
         const th_tempa_l = data.th_tempa_l !== undefined ? data.th_tempa_l : 20.0;
         const th_tempa_h = data.th_tempa_h !== undefined ? data.th_tempa_h : 30.0;
-        updateSensorCard("temp", data.temp, data.temp_conn, "°C", (val) => {
+        updateSensorCard("temp", data.temp, data.temp_conn, (val) => {
             if (val < th_tempa_l - 2 || val > th_tempa_h + 2) return { text: "Trạng thái: Khẩn cấp", cl: "status-danger" };
             if (val >= th_tempa_l && val <= th_tempa_h) return { text: "Trạng thái: Ổn định", cl: "status-normal" };
             return { text: "Trạng thái: Lưu ý", cl: "status-warning" };
@@ -124,7 +132,7 @@ document.addEventListener("DOMContentLoaded", () => {
         
         const th_humi_l = data.th_humi_l !== undefined ? data.th_humi_l : 50.0;
         const th_humi_h = data.th_humi_h !== undefined ? data.th_humi_h : 85.0;
-        updateSensorCard("humi", data.humi, data.humi_conn, "%", (val) => {
+        updateSensorCard("humi", data.humi, data.humi_conn, (val) => {
             if (val < th_humi_l - 10 || val > th_humi_h + 10) return { text: "Trạng thái: Cảnh báo", cl: "status-danger" };
             if (val >= th_humi_l && val <= th_humi_h) return { text: "Trạng thái: Tốt", cl: "status-normal" };
             return { text: "Trạng thái: Hơi ẩm/khô", cl: "status-warning" };
@@ -132,7 +140,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const th_light_l = data.th_light_l !== undefined ? data.th_light_l : 1000.0;
         const th_light_h = data.th_light_h !== undefined ? data.th_light_h : 25000.0;
-        updateSensorCard("lux", data.lux, data.lux_conn, "Lux", (val) => {
+        updateSensorCard("lux", data.lux, data.lux_conn, (val) => {
             if (val < 100) return { text: "Trạng thái: Quá tối", cl: "status-danger" };
             if (val >= th_light_l && val <= th_light_h) return { text: "Trạng thái: Đủ sáng", cl: "status-normal" };
             return { text: "Trạng thái: Ánh sáng lệch", cl: "status-warning" };
@@ -140,7 +148,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const th_tempw_l = data.th_tempw_l !== undefined ? data.th_tempw_l : 18.0;
         const th_tempw_h = data.th_tempw_h !== undefined ? data.th_tempw_h : 26.0;
-        updateSensorCard("tempw", data.temp_w, data.temp_w_conn, "°C", (val) => {
+        updateSensorCard("tempw", data.temp_w, data.temp_w_conn, (val) => {
             if (val < th_tempw_l - 2 || val > th_tempw_h + 2) return { text: "Trạng thái: Nguy hiểm", cl: "status-danger" };
             if (val >= th_tempw_l && val <= th_tempw_h) return { text: "Trạng thái: Đạt chuẩn", cl: "status-normal" };
             return { text: "Trạng thái: Cần lưu ý", cl: "status-warning" };
@@ -148,21 +156,36 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const th_tds_l = data.th_tds_l !== undefined ? data.th_tds_l : 600.0;
         const th_tds_h = data.th_tds_h !== undefined ? data.th_tds_h : 900.0;
-        updateSensorCard("tds", data.tds, data.tds_conn, "ppm", (val) => {
-            if (val < th_tds_l - 100 || val > th_tds_h + 100) return { text: "Trạng thái: Thiếu DD", cl: "status-danger" };
+        const tdsRaw = Number(data.tds_raw || 0);
+        const tdsQuality = data.tds_quality || "ERROR";
+        updateSensorCard("tds", data.tds, data.tds_conn, (val) => {
+            if (tdsQuality === "ERROR") {
+                return { text: `Trạng thái: Lỗi tín hiệu ADC (raw ${tdsRaw})`, cl: "status-danger" };
+            }
+            if (tdsQuality === "UNSTABLE") {
+                return { text: `Trạng thái: Tín hiệu dao động (raw ${tdsRaw})`, cl: "status-warning" };
+            }
+            if (tdsRaw <= 50) {
+                return { text: `Trạng thái: ADC rất thấp (raw ${tdsRaw}), kiểm tra đầu dò`, cl: "status-warning" };
+            }
+            if (tdsQuality === "STALE") {
+                return { text: "Trạng thái: Đang bù nhiệt mặc định 25°C", cl: "status-warning" };
+            }
+            if (val < th_tds_l - 100) return { text: "Trạng thái: Thiếu dinh dưỡng", cl: "status-danger" };
+            if (val > th_tds_h + 100) return { text: "Trạng thái: Dung dịch quá đậm", cl: "status-danger" };
             if (val >= th_tds_l && val <= th_tds_h) return { text: "Trạng thái: Đạt chuẩn", cl: "status-normal" };
-            return { text: "Trạng thái: Hơi lệch", cl: "status-warning" };
-        });
+            return { text: val < th_tds_l ? "Trạng thái: Hơi thấp" : "Trạng thái: Hơi cao", cl: "status-warning" };
+        }, `Trạng thái: ADC bão hòa (raw ${tdsRaw}), kiểm tra mạch`);
 
         const th_ph_l = data.th_ph_l !== undefined ? data.th_ph_l : 5.5;
         const th_ph_h = data.th_ph_h !== undefined ? data.th_ph_h : 6.5;
-        updateSensorCard("ph", data.ph, data.ph_conn, "pH", (val) => {
+        updateSensorCard("ph", data.ph, data.ph_conn, (val) => {
             if (val < th_ph_l - 0.5 || val > th_ph_h + 0.5) return { text: "Trạng thái: Nguy hiểm", cl: "status-danger" };
             if (val >= th_ph_l && val <= th_ph_h) return { text: "Trạng thái: Ổn định", cl: "status-normal" };
             return { text: "Trạng thái: Cần điều chỉnh", cl: "status-warning" };
         });
 
-        updateSensorCard("flow", data.flow, data.flow_conn, "L/m", (val) => {
+        updateSensorCard("flow", data.flow, data.flow_conn, (val) => {
             if (val < 0.5) return { text: "Trạng thái: Ngắt nước", cl: "status-danger" };
             return { text: "Trạng thái: Lưu thông", cl: "status-normal" };
         });
@@ -171,23 +194,23 @@ document.addEventListener("DOMContentLoaded", () => {
             if (val > 0.5) return { text: "Trạng thái: Bình thường", cl: "status-normal" };
             return { text: "Trạng thái: Cạn nước", cl: "status-danger" };
         };
-        updateSensorCard("lvl1", data.lvl1, data.lvl1_conn, "", levelStatusFn);
-        updateSensorCard("lvl2", data.lvl2, data.lvl2_conn, "", levelStatusFn);
-        updateSensorCard("lvl3", data.lvl3, data.lvl3_conn, "", levelStatusFn);
-        updateSensorCard("lvl4", data.lvl4, data.lvl4_conn, "", levelStatusFn);
+        updateSensorCard("lvl1", data.lvl1, data.lvl1_conn, levelStatusFn);
+        updateSensorCard("lvl2", data.lvl2, data.lvl2_conn, levelStatusFn);
+        updateSensorCard("lvl3", data.lvl3, data.lvl3_conn, levelStatusFn);
+        updateSensorCard("lvl4", data.lvl4, data.lvl4_conn, levelStatusFn);
 
         // 2. Cập nhật trạng thái 10 thiết bị ngoại vi lên UI (nút gạt, thanh trượt)
         const actuators = [
-            { id: "den1", pin: 17, key: "act_DEN1", isPwm: true },
-            { id: "den2", pin: 18, key: "act_DEN2", isPwm: true },
-            { id: "bomll3", pin: 8, key: "act_BOMLL3", isPwm: true },
-            { id: "bom12v", pin: 9, key: "act_BOM12V", isPwm: true },
-            { id: "quat2", pin: 10, key: "act_QUAT2", isPwm: true },
-            { id: "quat1", pin: 11, key: "act_QUAT1", isPwm: true },
-            { id: "bomll2", pin: 12, key: "act_BOMLL2", isPwm: true },
-            { id: "bomll1", pin: 13, key: "act_BOMLL1", isPwm: true },
-            { id: "rl2", pin: 6, key: "act_IN_RL2", isPwm: false },
-            { id: "rl1", pin: 7, key: "act_IN_RL1", isPwm: false }
+            { id: "den1", actuator: "DEN1", key: "act_DEN1", isPwm: true },
+            { id: "den2", actuator: "DEN2", key: "act_DEN2", isPwm: true },
+            { id: "bomll3", actuator: "BOMLL3", key: "act_BOMLL3", isPwm: true },
+            { id: "bom12v", actuator: "BOM12V", key: "act_BOM12V", isPwm: true },
+            { id: "quat2", actuator: "QUAT2", key: "act_QUAT2", isPwm: true },
+            { id: "quat1", actuator: "QUAT1", key: "act_QUAT1", isPwm: true },
+            { id: "bomll2", actuator: "BOMLL2", key: "act_BOMLL2", isPwm: true },
+            { id: "bomll1", actuator: "BOMLL1", key: "act_BOMLL1", isPwm: true },
+            { id: "rl2", actuator: "IN_RL2", key: "act_IN_RL2", isPwm: false },
+            { id: "rl1", actuator: "IN_RL1", key: "act_IN_RL1", isPwm: false }
         ];
 
         actuators.forEach(act => {
@@ -239,7 +262,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- Đăng ký sự kiện điều khiển thiết bị (Toggle & Sliders) ---
     document.querySelectorAll(".actuator-toggle").forEach(toggle => {
         toggle.addEventListener("change", () => {
-            const pin = parseInt(toggle.getAttribute("data-pin"));
+            const actuator = toggle.getAttribute("data-actuator");
             const isPwm = toggle.closest(".pwm-item") !== null;
             const id = toggle.id.replace("ctrl-", "");
             
@@ -262,14 +285,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 sendVal = 0;
             }
             
-            sendControlCommand(pin, sendVal);
+            sendControlCommand(actuator, sendVal);
         });
     });
 
     document.querySelectorAll(".pwm-slider").forEach(slider => {
         const id = slider.id.replace("slider-", "");
         const valLabel = document.getElementById(`val-${id}`);
-        const pin = parseInt(slider.getAttribute("data-pin"));
+        const actuator = slider.getAttribute("data-actuator");
         
         slider.addEventListener("input", () => {
             if (valLabel) {
@@ -282,28 +305,24 @@ document.addEventListener("DOMContentLoaded", () => {
             if (toggle && toggle.checked) {
                 lastUserInteraction[id] = Date.now(); // Ghi nhận thời gian tương tác người dùng
                 const sendVal = Math.round((slider.value * 255) / 100);
-                sendControlCommand(pin, sendVal);
+                sendControlCommand(actuator, sendVal);
             }
         });
     });
 
-    function sendControlCommand(pin, state) {
-        const payload = JSON.stringify({ pin: pin, state: state });
+    function sendControlCommand(actuator, state) {
+        const payload = JSON.stringify({ actuator: actuator, state: state });
         console.log("Gửi lệnh điều khiển:", payload);
         if (ws && ws.readyState === WebSocket.OPEN) {
             ws.send(payload);
         } else {
             console.warn("WebSocket chưa kết nối. Thử gửi qua HTTP...");
-            const formData = new URLSearchParams();
-            formData.append("pin", pin);
-            formData.append("state", state);
-            
             fetch("/api/control", {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/x-www-form-urlencoded"
+                    "Content-Type": "application/json"
                 },
-                body: formData
+                body: payload
             })
             .then(res => {
                 if (res.ok) {
@@ -318,8 +337,25 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    function sendManualHeartbeat() {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ type: "heartbeat" }));
+            return;
+        }
+
+        fetch("/api/heartbeat", { method: "POST" }).catch(() => {
+            // Neu HTTP cung mat, lease tren ESP32 se tu tat moi tai.
+        });
+    }
+
+    function startManualHeartbeat() {
+        if (manualHeartbeatInterval) clearInterval(manualHeartbeatInterval);
+        sendManualHeartbeat();
+        manualHeartbeatInterval = setInterval(sendManualHeartbeat, 2000);
+    }
+
     function updateSystemStatusPolling() {
-        fetch("/api/system/status")
+        fetch("/api/status")
             .then(res => res.json())
             .then(data => {
                 renderSystemStatus(data);
@@ -340,6 +376,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         ws.onopen = () => {
             console.log("Đã kết nối WebSocket thành công!");
+            startManualHeartbeat();
             wsReconnectDelay = 2000;
             if (pollInterval) {
                 clearInterval(pollInterval);
@@ -379,9 +416,11 @@ document.addEventListener("DOMContentLoaded", () => {
         };
     }
 
-    // Khởi tạo lấy dữ liệu ngay lập tức và bắt đầu WebSocket
+    // Khởi tạo lấy dữ liệu ngay lập tức, bắt đầu WebSocket và duy trì heartbeat MANUAL.
+    // Nếu WebSocket chưa mở được, heartbeat sẽ tự rơi về HTTP POST.
     updateSystemStatusPolling();
     startWebSocket();
+    startManualHeartbeat();
 
     // --- WiFi Scan ---
     function pollWifiScanResults() {
@@ -479,7 +518,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnForget = document.getElementById("btn-forget-wifi");
     if (btnForget) {
         btnForget.addEventListener("click", () => {
-            if (confirm("Bạn có chắc chắn muốn quên WiFi đã lưu và khởi động lại ESP32 về chế độ phát AP (DATN_AIOT_LETTUCE) không?")) {
+            if (confirm("Bạn có chắc chắn muốn quên WiFi đã lưu và khởi động lại ESP32 về chế độ phát AP không?")) {
                 btnForget.disabled = true;
                 btnForget.textContent = "Đang xóa...";
                 
@@ -488,7 +527,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 })
                 .then(res => {
                     if (res.ok) {
-                        alert("Đã xóa cấu hình WiFi! ESP32 đang khởi động lại phát mạng 'DATN_AIOT_LETTUCE'. Hãy kết nối lại.");
+                        alert("Đã xóa cấu hình WiFi! ESP32 đang khởi động lại. Hãy kết nối lại.");
                         location.reload();
                     } else {
                         throw new Error("Lỗi khi xóa cấu hình");
@@ -613,7 +652,7 @@ document.addEventListener("DOMContentLoaded", () => {
             resizer.classList.add("dragging");
             document.addEventListener("mousemove", resizeSidebar);
             document.addEventListener("mouseup", stopResize);
-            e.preventDefault(); // Ngăn chọn văn bản khi kéo
+            e.preventDefault();
         });
 
         resizer.addEventListener("touchstart", (e) => {
@@ -626,7 +665,6 @@ document.addEventListener("DOMContentLoaded", () => {
         function resizeSidebar(e) {
             if (!isDragging) return;
             let newWidth = e.clientX;
-            // Giới hạn chiều rộng từ 185px đến 400px
             if (newWidth < 185) newWidth = 185;
             if (newWidth > 400) newWidth = 400;
             sidebar.style.width = newWidth + "px";
@@ -661,7 +699,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
 
-        // Khôi phục chiều rộng sidebar đã lưu trước đó
         const savedWidth = localStorage.getItem("sidebar-width");
         if (savedWidth) {
             sidebar.style.width = savedWidth;

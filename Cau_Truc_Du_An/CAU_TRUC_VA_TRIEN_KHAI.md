@@ -56,25 +56,39 @@ DATN_START/
 │       ├── quattannhiet.prt             ← Quạt tản nhiệt
 │       └── ... (các chi tiết khác)
 │
-│── 📂 firmware/                          ← CODE ESP32-S3 (Tối ưu hóa & Làm sạch)
-│   ├── include/                          ← Thư mục Header C++
-│   │   ├── config.h                      ← Cấu hình WiFi, MQTT, GPIO pins
-│   │   ├── ota_handler.h                 ← Khai báo hàm OTA & Web Server
-│   │   ├── thresholds.h                  ← Ngưỡng cảm biến (EC, pH, nhiệt độ)
-│   │   └── web_assets.h                  ← File nén Web UI tự động sinh ra từ thư mục web/
-│   ├── src/                              ← Thư mục Source C++
-│   │   ├── main.cpp                      ← Điểm khởi đầu & Khởi tạo nhiệm vụ FreeRTOS
-│   │   ├── sensors.cpp                   ← Driver đọc các cảm biến (I2C, OneWire, ADC)
-│   │   ├── actuator.cpp                  ← Lớp điều khiển an toàn Relay & PWM MOSFET
-│   │   ├── ota_handler.cpp               ← Web Server local, Captive Portal, WebSocket
-│   │   ├── mqtt_handler.cpp              ← Lớp truyền thông MQTT kết nối Raspberry Pi 4
-│   │   └── failsafe.cpp                  ← Logic bảo vệ & tự động khi offline
-│   ├── web/                              ← GIAO DIỆN WEB LOCAL CỦA ESP32 (DEV PHẦN WEB RIÊNG)
-│   │   ├── index.html                    ← Trang dashboard giám sát & cấu hình local
-│   │   ├── style.css                     ← CSS định dạng giao diện hiện đại
-│   │   └── script.js                     ← Logic JS kết nối WebSocket điều khiển & hiển thị
-│   ├── platformio.ini                    ← Tệp cấu hình dự án PlatformIO
-│   └── generate_web_assets.py            ← Script Python tự động nén web sang web_assets.h khi build
+│── 📂 firmware/                          ← MÃ NGUỒN FIRMWARE ESP32-S3 (PLATFORMIO FREERTOS)
+│   ├── include/                          ← THƯ MỤC CHỨA CÁC FILE HEADER C++ (.h)
+│   │   ├── config.h                      ← Cấu hình chân GPIO, tần số PWM, chu kỳ đọc cảm biến & timeout lease
+│   │   ├── system_types.h                ← Định nghĩa các Enum Class (SystemMode, SensorId, ActuatorId) & Struct dữ liệu
+│   │   ├── rtos_app.h                    ← Giao diện bộ nhớ an toàn RAM: Queue, Mutex, Snapshots & Task Health
+│   │   ├── sensors.h                     ← Header nhiệm vụ đọc cảm biến (Khai báo taskSensors)
+│   │   ├── actuator.h                    ← Header điều khiển phần cứng (Khai báo ghi GPIO/PWM, actuator_name_to_id)
+│   │   ├── failsafe.h                    ← Header kiểm soát an toàn & MANUAL mode (Khai báo taskSafetyControl)
+│   │   ├── wifi_manager.h                ← Header quản lý Wi-Fi AP/STA, NVS Preferences & Captive Portal
+│   │   ├── web_api.h                     ← Header REST API HTTP, WebSocket Server & tạo status JSON
+│   │   ├── ota_update.h                  ← Header nạp code từ xa qua Web OTA (Thư viện Arduino Update)
+│   │   ├── network_task.h                ← Header Task Mạng FreeRTOS chạy vòng lặp trên Core 0 (taskNetwork)
+│   │   ├── ota_handler.h                 ← Forwarder header giữ khả năng tương thích ngược
+│   │   ├── mqtt_handler.h                ← Header stub cho kết nối MQTT Cloud (Đã đánh dấu FUTURE - NOT USED)
+│   │   ├── thresholds.h                  ← Định nghĩa các ngưỡng cảnh báo an toàn cho nhiệt độ, độ ẩm, pH, TDS
+│   │   └── web_assets.h                  ← Header chứa mảng byte Gzip nén giao diện Web UI (Tự động sinh ra khi build)
+│   ├── src/                              ← THƯ MỤC CHỨA CÁC FILE SOURCE C++ (.cpp)
+│   │   ├── main.cpp                      ← Điểm khởi đầu chương trình: Khởi tạo phần cứng & tạo 3 Task FreeRTOS
+│   │   ├── rtos_app.cpp                  ← Triển khai Queue, Mutex, bảo vệ dữ liệu Snapshots & kiểm tra sức khỏe Task
+│   │   ├── sensors.cpp                   ← Driver đọc 11 cảm biến (I2C SHT31/BH1750, DS18B20, pH, TDS, Flow, 4 Phao)
+│   │   ├── actuator.cpp                  ← Ánh xạ bảng thiết bị, chuyển đổi tên mã "DEN1"/"IN_RL1" & ghi xung PWM/Relay
+│   │   ├── failsafe.cpp                  ← TaskSafetyControl: Tiếp nhận lệnh MANUAL, giải phóng SensorQueue & ngắt an toàn
+│   │   ├── wifi_manager.cpp              ← Quản lý Wi-Fi AP/STA, tự kết nối Wi-Fi nhà hoặc phát SoftAP 192.168.4.1
+│   │   ├── web_api.cpp                   ← Triển khai HTTP Endpoints, gửi/nhận tin nhắn JSON WebSocket real-time
+│   │   ├── ota_update.cpp                ← Xử lý upload nhận file firmware .bin qua HTTP và ghi trực tiếp vào Flash
+│   │   ├── network_task.cpp              ← Task Mạng chính trên Core 0: Lắng nghe client, tự nối lại Wi-Fi & nháy LED
+│   │   └── mqtt_handler.cpp              ← Triển khai stub MQTT: Mã nguồn chờ sẵn cho phiên bản Cloud IoT
+│   ├── web/                              ← GIAO DIỆN WEB LOCAL NGUYÊN BẢN (PHỤC VỤ PHÁT TRIỂN & KIỂM THỬ)
+│   │   ├── index.html                    ← Mã nguồn HTML Dashboard: Thẻ cảm biến, nút gạt điều khiển, tab Wi-Fi & OTA
+│   │   ├── style.css                     ← Mã nguồn CSS: Định dạng giao diện hiện đại, responsive máy tính & điện thoại
+│   │   └── script.js                     ← Mã nguồn JavaScript: Kết nối WebSocket real-time, gửi lệnh HTTP REST API
+│   ├── platformio.ini                    ← File cấu hình PlatformIO (Board ESP32-S3, 16MB Flash, Partitions, Thư viện)
+│   └── generate_web_assets.py            ← Script Python nén Gzip web/ thành web_assets.h tự động & deterministic
 │
 │── 📂 backend/                           ← FASTAPI CHẠY TRÊN RASPBERRY PI
 │   ├── main.py                          ← Khởi tạo FastAPI app
