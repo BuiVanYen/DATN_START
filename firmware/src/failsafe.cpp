@@ -103,10 +103,11 @@ void taskSafetyControl(void *parameter) {
 
     const uint32_t now = millis();
 
-    // Kiểm tra Web Lease Timeout: Nếu quá 10 giây (`MANUAL_WEB_LEASE_MS`) không có heartbeat, TỰ TẮT TOÀN BỘ TẢI
+    // Kiểm tra Web Lease Timeout: Đánh dấu hết hiệu lực lease nhưng giữ nguyên trạng thái bật/tắt của thiết bị
     if (web_lease_active && now - last_web_activity_ms > MANUAL_WEB_LEASE_MS) {
+      web_lease_active = false;
       strlcpy(reason, "WEB_LEASE_EXPIRED", sizeof(reason));
-      switchAllOff(output_values, web_lease_active, reason);
+      publishOutputs(output_values, web_lease_active, reason);
     } else {
       publishOutputs(output_values, web_lease_active, reason);
     }

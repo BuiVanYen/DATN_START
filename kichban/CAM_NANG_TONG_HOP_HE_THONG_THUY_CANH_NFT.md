@@ -193,6 +193,34 @@ Không gom tất cả cảm biến vào một chu kỳ 30 giây duy nhất vì p
 
 Toàn bộ cấu hình phải có version, CRC và giới hạn hợp lệ. Cấu hình lỗi đưa hệ thống về `SAFE_BOOT`, không tự thay bằng giá trị ngẫu nhiên.
 
+### 4.1. Thông số thực nghiệm bơm & dung dịch đã hiệu chuẩn
+
+#### a) Tốc độ lưu lượng bơm định lượng 12V thực tế
+- **Kết quả đo thực tế:** 200 mL trong 130 giây.
+- **Tốc độ bơm thực tế (Flow Rate):** $1.538 \text{ mL/giây}$ (tương đương $0.65 \text{ giây/mL}$).
+
+#### b) Thông số dung dịch dinh dưỡng Hydro Umat V (Group A & B)
+- **Tỷ lệ pha chuẩn nhà sản xuất:** 50 mL dung dịch A + 50 mL dung dịch B cho 20 Lít nước sạch (tương đương $2.5 \text{ mL/Lít}$).
+- **Áp dụng cho bể 40 Lít (bể làm việc):**
+  - **Pha bể mới từ 0 PPM lên 600 - 700 PPM:** Cần 100 mL dung dịch A và 100 mL dung dịch B.
+    - *Thời gian bơm A:* $100 / 1.538 = \mathbf{65.0 \text{ giây}}$ (1 phút 5 giây).
+    - *Thời gian bơm B:* $100 / 1.538 = \mathbf{65.0 \text{ giây}}$ (1 phút 5 giây).
+  - **Vi liều châm bù định kỳ khi sụt 100 PPM:** Cần 20 mL dung dịch A và 20 mL dung dịch B.
+    - *Thời gian bơm A:* $20 / 1.538 = \mathbf{13.0 \text{ giây}}$.
+    - *Thời gian bơm B:* $20 / 1.538 = \mathbf{13.0 \text{ giây}}$.
+- **Ngưỡng PPM khuyến nghị theo giai đoạn rau ăn lá (Xà lách):**
+  - Cây con (3 - 12 ngày tuổi): 300 - 400 PPM (~0.6 - 0.8 EC)
+  - Tăng trưởng (12 - 20 ngày tuổi): 600 - 750 PPM (~1.2 - 1.5 EC)
+  - Trưởng thành (20 - 37 ngày tuổi): 800 - 1000 PPM (~1.6 - 2.0 EC)
+  - Thu hoạch (37+ ngày): 700 - 800 PPM (~1.4 - 1.6 EC)
+
+#### c) Thông số dung dịch hạ pH (General Hydroponics pH Down)
+- **Liều lượng vi liều an toàn cho bể 40 Lít:** Châm từng micro-dose từ 2 mL đến 5 mL mỗi lần.
+- **Thời gian chạy bơm pH Down:**
+  - *Vi liều 2 mL (hạ ~0.2 pH):* $2 / 1.538 = \mathbf{1.3 \text{ giây}}$.
+  - *Vi liều 5 mL (hạ ~0.4 pH):* $5 / 1.538 = \mathbf{3.25 \text{ giây}}$.
+  - *Vi liều 10 mL (hạ ~0.8 pH):* $10 / 1.538 = \mathbf{6.5 \text{ giây}}$.
+
 ---
 
 ## 5. Máy trạng thái tổng

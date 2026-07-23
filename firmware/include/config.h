@@ -73,8 +73,8 @@ constexpr uint32_t ENVIRONMENT_SAMPLE_MS = 2000;// Chu kỳ đọc cảm biến 
 constexpr uint32_t PH_SAMPLE_MS = 2000;         // Chu kỳ đọc cảm biến pH: 2 giây
 constexpr uint32_t WATER_SAMPLE_MS = 5000;      // Chu kỳ đọc cảm biến nhiệt nước DS18B20 & TDS: 5 giây
 
-// Trình duyệt Web gửi tín hiệu Heartbeat mỗi 2 giây. Nếu quá 10 giây không nhận được tín hiệu, ngắt tất cả tải.
-constexpr uint32_t MANUAL_WEB_LEASE_MS = 10000;       // Thời gian giữ Lease an toàn Web: 10,000 ms (10 giây)
+// Trình duyệt Web gửi tín hiệu Heartbeat mỗi 2 giây để gia hạn phiên làm việc. Sau 10 giây không có heartbeat, chuyển cờ lease về false (không tắt phần cứng).
+constexpr uint32_t MANUAL_WEB_LEASE_MS = 10000;       // Thời gian hết hạn cờ phiên làm việc Web: 10,000 ms (10 giây)
 constexpr uint32_t CONTROL_COMMAND_TTL_MS = 5000;     // Thời gian sống tối đa của 1 lệnh điều khiển trong Queue: 5 giây
 constexpr uint32_t WIFI_RECONNECT_TIMEOUT_MS = 15000; // Timeout chờ nối lại STA Wi-Fi trước khi bật SoftAP: 15 giây
 constexpr uint32_t STA_RETRY_INTERVAL_MS = 30000;     // Chu kỳ thử kết nối lại Wi-Fi nhà khi đang ở AP Mode: 30 giây

@@ -399,7 +399,7 @@ void web_api_init(WebServer &server, WebSocketsServer &web_socket) {
       break;
     }
     case WStype_DISCONNECTED:
-      queueAllOff("WS_DISCONNECTED"); // Rớt kết nối WebSocket -> Phát lệnh ngắt tất cả tải
+      // Giữ nguyên trạng thái thiết bị ngoại vi khi trình duyệt ngắt kết nối
       break;
     case WStype_TEXT: {
       const String message = reinterpret_cast<char *>(payload);
